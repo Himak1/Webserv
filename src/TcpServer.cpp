@@ -89,7 +89,7 @@ namespace http
 		logStartupMessage(_socketAddress);
 
 		while (true) {
-			log("====== Waiting for a new connection ======\n\n\n");
+			log("====== Waiting for a new connection ======\n");
 
 			acceptConnection(_new_socket);
 			receiveRequest();
@@ -138,7 +138,7 @@ namespace http
 		long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
 
 		if (bytesSent == (long)_serverMessage.size())
-			log("------ Server Response sent to client ------\n\n");
+			log("Served html response\n");
 		else
 			log("Error sending response to client");
 	}
