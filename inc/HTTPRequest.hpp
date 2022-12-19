@@ -12,6 +12,7 @@ class HTTPRequest
 		~HTTPRequest();
 
 		void				init(std::string request);
+		bool				isValidMethod() const;
 		const std::string	getMethod() const;
 		const std::string	getURI() const;
 		const std::string	getHTTPVersion() const;
@@ -20,6 +21,9 @@ class HTTPRequest
 		std::string			_method;
 		std::string 		_uri;
 		std::string			_http_version;
+		bool				_validity;
+
+		void				checkValidity();
 };
 
 #endif

@@ -1,8 +1,10 @@
 #include <TCPServer.hpp>
+#include <BuildResponse.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <fstream>
 
 namespace
 {
@@ -36,8 +38,7 @@ namespace http
 	// CONSTRUCTOR
 	TcpServer::TcpServer(std::string ip_address, int port)
 		: _ip_address(ip_address), _port(port), _socket(), _new_socket(),
-		_socketAddress(), _socketAddress_len(sizeof(_socketAddress)),
-		_serverMessage(buildResponse())
+		_socketAddress(), _socketAddress_len(sizeof(_socketAddress))
 	{
 		_socketAddress.sin_family = AF_INET;
 		_socketAddress.sin_port = htons(_port);
@@ -119,6 +120,9 @@ namespace http
 
 		_request.init(std::string(buffer));
 
+		if (!_request.isValidMethod())
+			exitWithError("Invalid method");
+
 		std::ostringstream ss;
 		ss	<< "Received request: Method = " << _request.getMethod()
 			<< "\tURI = " 					 << _request.getURI()
@@ -126,20 +130,11 @@ namespace http
 		log(ss.str());
 	}
 
-	std::string TcpServer::buildResponse()
-	{
-		std::string htmlFile = "<!DOCTYPE html><html lang=\"en\"><body><h1> HOME </h1><p> Hello from your Server :) </p></body></html>";
-		std::ostringstream ss;
-
-		ss	<< "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " 
-			<< htmlFile.size() << "\n\n"
-		   	<< htmlFile;
-
-		return ss.str();
-	}
-
 	void TcpServer::sendResponse()
 	{
+		class BuildResponse respons(_request.getURI());
+		_serverMessage = respons.getMessage();
+
 		long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
 
 		if (bytesSent == (long)_serverMessage.size())

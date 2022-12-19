@@ -34,6 +34,8 @@ namespace http
 		void                closeServer();
 		void                acceptConnection(int &new_socket);
 		void				receiveRequest();
+		int 				getFileSize(std::string filename);
+		std::string 		fileNotFound();
 		std::string         buildResponse();
 		void                sendResponse();
 	};

@@ -1,7 +1,7 @@
 # VARIABLES
 NAME			:=	webserv
 CFLAGS			:=	-Iinc -Wall -Wextra -Werror -std=c++98 -pedantic
-SANIT			:=	-g #-fsanitize=address
+SANIT			:=	-g -fsanitize=address
 CC				:=	@c++
 
 # STATIC
@@ -12,7 +12,8 @@ SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
 SRC				:=	main \
 					TCPServer \
-					HTTPRequest
+					HTTPRequest \
+					BuildResponse
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)
