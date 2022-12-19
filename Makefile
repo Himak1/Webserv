@@ -2,16 +2,17 @@
 NAME			:=	webserv
 CFLAGS			:=	-Iinc #-Wall -Wextra -Werror -std=c++98
 SANIT			:=	-g #-fsanitize=address
-CC				:=	@c++
+CC				:=	c++
 
 # STATIC
-RM				:=	@rm
-MKDIR_P			:=	@mkdir -p
+RM				:=	rm
+MKDIR_P			:=	mkdir -p
 INC_DIR			:=	./inc
 SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
 SRC				:=	main \
 					TcpServer
+					
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)

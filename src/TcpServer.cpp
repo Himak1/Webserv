@@ -1,5 +1,6 @@
 # include <TcpServer.hpp>
 
+#include <fcntl.h>
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -30,7 +31,7 @@ namespace http
 	{
 		_socketAddress.sin_family = AF_INET;
 		_socketAddress.sin_port = htons(_port);
-		_socketAddress.sin_addr.s_addr = inet_addr(_ip_address.c_str());
+		_socketAddress.sin_addr.s_addr = inet_addr(_ip_address.c_str());		// forbidden function
 
 		if (startServer() != 0)
 		{
@@ -48,6 +49,12 @@ namespace http
 	int TcpServer::startServer()
 	{
 		_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+		// This command makes sure the socket is in non_blocking mode (required by subject)
+		// Blocking means that stuff will 'sleep' or 'wait' untill it receives data
+		fcntl(_socket, F_SETFL, O_NONBLOCK); 			
+		
+		
 		if (_socket < 0)
 		{
 			exitWithError("Cannot create socket");
@@ -91,6 +98,10 @@ namespace http
 			acceptConnection(_new_socket);
 
 			char buffer[BUFFER_SIZE] = {0};
+			
+			// use recv instaed of read. Recv can return 0, it will mean that the remote side 
+			// has closed the connection 
+
 			bytesReceived = read(_new_socket, buffer, BUFFER_SIZE);
 			if (bytesReceived < 0)
 				exitWithError("Failed to read bytes from client socket connection");
@@ -112,7 +123,7 @@ namespace http
 		{
 			std::ostringstream ss;
 			ss	<< "Server failed to accept incoming connection from ADDRESS: "
-				<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 
+				<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 	// forbidden function?
 				<< ntohs(_socketAddress.sin_port);
 			exitWithError(ss.str());
 		}
@@ -134,6 +145,12 @@ namespace http
 	{
 		long bytesSent;
 
+		// use send so we can use FLAGS?
+		// 	ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+		// write(1, "lala", 4) == send(1, "lala", 4, 0)
+
+		// also send will return the number of bytes is has sended, so we can check if it
+		// sends everything (and send missing bytes if it doesnt)
 		bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
 
 		if (bytesSent == _serverMessage.size())
