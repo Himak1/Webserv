@@ -1,4 +1,4 @@
-# include <TcpServer.hpp>
+#include <TCPServer.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -11,6 +11,17 @@ namespace
 	void log(const std::string &message)
 	{
 		std::cout << message << std::endl;
+	}
+
+	void logStartupMessage(struct sockaddr_in _socketAddress)
+	{
+		std::ostringstream ss;
+		ss	<< "\n*** Listening on ADDRESS: "
+			<< inet_ntoa(_socketAddress.sin_addr) 
+			<< " PORT: "
+			<< ntohs(_socketAddress.sin_port) 
+			<< " ***\n\n";
+		log(ss.str());
 	}
 
 	void exitWithError(const std::string &errorMessage)
@@ -74,13 +85,7 @@ namespace http
 		if (listen(_socket, 20) < 0)
 			exitWithError("Socket listen failed");
 
-		std::ostringstream ss;
-		ss	<< "\n*** Listening on ADDRESS: "
-			<< inet_ntoa(_socketAddress.sin_addr) 
-			<< " PORT: "
-			<< ntohs(_socketAddress.sin_port) 
-			<< " ***\n\n";
-		log(ss.str());
+		logStartupMessage(_socketAddress);
 
 		while (true) {
 			log("====== Waiting for a new connection ======\n\n\n");
@@ -106,16 +111,18 @@ namespace http
 
 	void TcpServer::receiveRequest()
 	{
-		char buffer[BUFFER_SIZE] = {0};
+		char 	buffer[BUFFER_SIZE] = {0};
 
 		int bytesReceived = read(_new_socket, buffer, BUFFER_SIZE);
 		if (bytesReceived < 0)
 			exitWithError("Failed to read bytes from client socket connection");
-		else
-			log(buffer);
+
+		_request.init(std::string(buffer));
 
 		std::ostringstream ss;
-		ss << "------ Received Request from client ------\n\n";
+		ss	<< "Received request: Method = " << _request.getMethod()
+			<< "\tURI = " 					 << _request.getURI()
+			<< "\tHTTP Version = " 			 << _request.getHTTPVersion();
 		log(ss.str());
 	}
 
