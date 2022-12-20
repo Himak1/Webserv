@@ -37,12 +37,12 @@ namespace http
 {
 	// CONSTRUCTOR
 	TcpServer::TcpServer(class Configuration configuration)
-		: _configuration(configuration), _socket(), _new_socket(),
+		: _config(configuration), _socket(), _new_socket(),
 		_socketAddress(), _socketAddress_len(sizeof(_socketAddress))
 	{
 		_socketAddress.sin_family = AF_INET;
-		_socketAddress.sin_port = htons(_configuration.getPort());
-		_socketAddress.sin_addr.s_addr = inet_addr(_configuration.getIP().c_str());
+		_socketAddress.sin_port = htons(_config.getPort());
+		_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 
 		if (startServer() != 0) {
 			std::ostringstream ss;
@@ -89,7 +89,7 @@ namespace http
 		logStartupMessage(_socketAddress);
 
 		while (true) {
-			log("====== Waiting for a new connection ======\n");
+			log("\n====== Waiting for a new connection ======\n");
 
 			acceptConnection(_new_socket);
 			receiveRequest();
@@ -125,20 +125,21 @@ namespace http
 
 		std::ostringstream ss;
 		ss	<< "Received request: Method = " << _request.getMethod()
-			<< "\tURI = " 					 << _request.getURI()
-			<< "\tHTTP Version = " 			 << _request.getHTTPVersion();
+			<< " URI = " 					 << _request.getURI()
+			<< " HTTP Version = " 			 << _request.getHTTPVersion();
 		log(ss.str());
 	}
 
 	void TcpServer::sendResponse()
 	{
-		class BuildResponse respons(_request.getURI(), _configuration.getPathWebsite());
-		_serverMessage = respons.getMessage();
+		class BuildResponse respons(_request, _config);
+		_serverMessage = respons.getMessage("200 OK");
 
 		long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
 
 		if (bytesSent == (long)_serverMessage.size())
-			log("Served html response\n");
+			log(_serverMessage.substr(0, _serverMessage.find('\n')));
+			// log("\n");
 		else
 			log("Error sending response to client");
 	}

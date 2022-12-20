@@ -21,7 +21,7 @@ namespace http
 		void				startListen();
 
 	private:
-		class Configuration	_configuration;
+		class Configuration	_config;
 		class HTTPRequest	_request;
 		int					_socket;
 		int					_new_socket;

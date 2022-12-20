@@ -9,7 +9,9 @@ class HTTPRequest
 {
 	public:
 		HTTPRequest();
+		HTTPRequest(const HTTPRequest &src);
 		~HTTPRequest();
+		HTTPRequest &operator = (const HTTPRequest &src);
 
 		void				initHTTPRequest(std::string request);
 		bool				isValidMethod() const;
@@ -24,6 +26,7 @@ class HTTPRequest
 		bool				_validity;
 
 		void				checkValidity();
+		void 				handleFileUpload(std::string request);
 };
 
 #endif

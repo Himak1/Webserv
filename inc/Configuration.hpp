@@ -15,11 +15,13 @@ class Configuration
 		std::string			getPathWebsite() const;
 		std::string			getIP() const;
 		unsigned int		getPort() const;
+		std::string			get404() const;
 
 	private:
 		std::string			_pathWebsite;
 		std::string			_ipAddress;
 		unsigned int		_port;
+		std::string			_errorPage404;
 };
 
 #endif
