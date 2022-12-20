@@ -5,13 +5,13 @@
 #include <fstream>
 
 // CONSTRUCTOR
-BuildResponse::BuildResponse(std::string uri) : _uri(uri) {
+BuildResponse::BuildResponse(std::string uri, std::string pathWebsite) : _uri(uri) {
 	if (_uri == "/")
-		_filename = "www/index.html";
+		_filename = pathWebsite +  "/index.html";
 	else if (_uri.find(".html", _uri.length() - 5) != std::string::npos)
-		_filename =  "www" + _uri;
+		_filename = pathWebsite + _uri;
 	else
-		_filename =  "www" + _uri + ".html";
+		_filename = pathWebsite + _uri + ".html";
 }
 
 // DESTRUCTOR
@@ -23,8 +23,8 @@ std::string BuildResponse::getMessage()
 	if (_uri == "/favicon.ico")
 		return "favicon";
 
-	std::ifstream htmlFile(_filename);
-	if (!htmlFile.is_open())
+	std::basic_ifstream<char> input_stream(_filename);
+	if (!input_stream.is_open())
 		return (fileNotFound());
 
 	std::ostringstream ss;
@@ -32,10 +32,10 @@ std::string BuildResponse::getMessage()
 		<< getFileSize(_filename) << "\n\n";
 
 	std::string line;
-	while (std::getline(htmlFile, line))
+	while (std::getline(input_stream, line))
 		ss << line << std::endl;
 
-	htmlFile.close();
+	input_stream.close();
 	return ss.str();
 }
 

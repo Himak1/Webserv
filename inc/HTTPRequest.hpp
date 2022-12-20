@@ -11,7 +11,7 @@ class HTTPRequest
 		HTTPRequest();
 		~HTTPRequest();
 
-		void				init(std::string request);
+		void				initHTTPRequest(std::string request);
 		bool				isValidMethod() const;
 		const std::string	getMethod() const;
 		const std::string	getURI() const;

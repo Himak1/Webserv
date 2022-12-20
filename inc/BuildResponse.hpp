@@ -5,17 +5,17 @@
 
 class BuildResponse
 {
-public:
-	BuildResponse(std::string uri);
-	~BuildResponse();
-	std::string         getMessage();
+	public:
+		BuildResponse(std::string uri, std::string pathWebsite);
+		~BuildResponse();
+		std::string         getMessage();
 
-private:
-	std::string         _uri;
-	std::string			_filename;
+	private:
+		std::string         _uri;
+		std::string			_filename;
 
-	int 				getFileSize(std::string filename);
-	std::string 		fileNotFound();
+		int 				getFileSize(std::string filename);
+		std::string 		fileNotFound();
 };
 
 #endif

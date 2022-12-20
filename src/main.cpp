@@ -1,11 +1,16 @@
-# include <TCPServer.hpp>
-# include <main.hpp>
+#include <TCPServer.hpp>
+#include <Configuration.hpp>
+#include <main.hpp>
 
-int main()
+int main(int argc, char **argv)
 {
 	using namespace http;
 
-	TcpServer server = TcpServer("0.0.0.0", 8080);
+	class Configuration configuration;
+	if (argc == 2)
+		configuration.parseConfiguration(argv[1]);
+
+	TcpServer server = TcpServer(configuration);
 	server.startListen();
 
 	return 0;

@@ -2,6 +2,7 @@
 # define TCP_SERVER_HPP
 
 # include <HTTPRequest.hpp>
+# include <Configuration.hpp>
 
 # include <stdio.h>
 # include <sys/socket.h>
@@ -15,29 +16,23 @@ namespace http
 	class TcpServer
 	{
 	public:
-		TcpServer(std::string ip_address, int port);
+		TcpServer(class Configuration configuration);
 		~TcpServer();
-		void                startListen();
+		void				startListen();
 
 	private:
-		std::string         _ip_address;
-		int                 _port;
-		int                 _socket;
-		int                 _new_socket;
-		
-		// long                _incomingMessage;
-		struct sockaddr_in  _socketAddress;
-		unsigned int        _socketAddress_len;
-		std::string         _serverMessage;
+		class Configuration	_configuration;
 		class HTTPRequest	_request;
-		int                 startServer();
-		void                closeServer();
-		void                acceptConnection(int &new_socket);
+		int					_socket;
+		int					_new_socket;
+		struct sockaddr_in	_socketAddress;
+		unsigned int		_socketAddress_len;
+		std::string			_serverMessage;
+		int 				startServer();
+		void				closeServer();
+		void				acceptConnection(int &new_socket);
 		void				receiveRequest();
-		int 				getFileSize(std::string filename);
-		std::string 		fileNotFound();
-		std::string         buildResponse();
-		void                sendResponse();
+		void				sendResponse();
 	};
 
 } // namespace http

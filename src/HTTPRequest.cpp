@@ -13,18 +13,16 @@ HTTPRequest::~HTTPRequest()
 }
 
 // PUBLIC FUNCTIONS
-void HTTPRequest::init(std::string request)
+void HTTPRequest::initHTTPRequest(std::string request)
 {
 	std::vector<std::string> strings;
 	std::stringstream ss(request);
 	std::string token;
 
-	while (std::getline(ss, token))
-	{
+	while (std::getline(ss, token)) {
 		std::stringstream token_ss(token);
 		std::string sub_token;
-		while (std::getline(token_ss, sub_token, ' '))
-		{
+		while (std::getline(token_ss, sub_token, ' ')) {
 			strings.push_back(sub_token);
 		}
 	}

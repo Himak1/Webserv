@@ -36,13 +36,13 @@ namespace
 namespace http
 {
 	// CONSTRUCTOR
-	TcpServer::TcpServer(std::string ip_address, int port)
-		: _ip_address(ip_address), _port(port), _socket(), _new_socket(),
+	TcpServer::TcpServer(class Configuration configuration)
+		: _configuration(configuration), _socket(), _new_socket(),
 		_socketAddress(), _socketAddress_len(sizeof(_socketAddress))
 	{
 		_socketAddress.sin_family = AF_INET;
-		_socketAddress.sin_port = htons(_port);
-		_socketAddress.sin_addr.s_addr = inet_addr(_ip_address.c_str());
+		_socketAddress.sin_port = htons(_configuration.getPort());
+		_socketAddress.sin_addr.s_addr = inet_addr(_configuration.getIP().c_str());
 
 		if (startServer() != 0) {
 			std::ostringstream ss;
@@ -118,10 +118,10 @@ namespace http
 		if (bytesReceived < 0)
 			exitWithError("Failed to read bytes from client socket connection");
 
-		_request.init(std::string(buffer));
+		_request.initHTTPRequest(std::string(buffer));
 
 		if (!_request.isValidMethod())
-			exitWithError("Invalid method");
+			exitWithError("Invalid method, only GET, POST and DELETED are supported");
 
 		std::ostringstream ss;
 		ss	<< "Received request: Method = " << _request.getMethod()
@@ -132,7 +132,7 @@ namespace http
 
 	void TcpServer::sendResponse()
 	{
-		class BuildResponse respons(_request.getURI());
+		class BuildResponse respons(_request.getURI(), _configuration.getPathWebsite());
 		_serverMessage = respons.getMessage();
 
 		long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
