@@ -8,10 +8,14 @@
 BuildResponse::BuildResponse(std::string uri, std::string pathWebsite) : _uri(uri) {
 	if (_uri == "/")
 		_filename = pathWebsite +  "/index.html";
+	else if (_uri == "/favicon.ico")
+		_filename = pathWebsite + _uri;
 	else if (_uri.find(".html", _uri.length() - 5) != std::string::npos)
 		_filename = pathWebsite + _uri;
 	else
 		_filename = pathWebsite + _uri + ".html";
+	
+	std::cout << _filename << std::endl;
 }
 
 // DESTRUCTOR
@@ -20,9 +24,6 @@ BuildResponse::~BuildResponse() { }
 // PUBLIC FUNTIONS
 std::string BuildResponse::getMessage()
 {
-	if (_uri == "/favicon.ico")
-		return "favicon";
-
 	std::basic_ifstream<char> input_stream(_filename);
 	if (!input_stream.is_open())
 		return (fileNotFound());
