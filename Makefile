@@ -1,6 +1,6 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Iinc -Wall -Wextra -Werror #-std=c++98 -pedantic
+CFLAGS			:=	-Iinc #-Wall -Wextra -Werror #-std=c++98 -pedantic
 SANIT			:=	-g -fsanitize=address
 CC				:=	c++
 
@@ -14,7 +14,8 @@ SRC				:=	main \
 					TcpServer \
 					HTTPRequest \
 					BuildResponse \
-					Configuration
+					Configuration 
+					
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)
@@ -22,11 +23,14 @@ $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp
 					$(MKDIR_P) $(dir $@)
 					$(CC) $(CFLAGS) -c $< -o $@
 
+client			:	src/client/Client.cpp
+					$(CC) $^ -o $@ $(SANIT)
+
 .PHONY			:	all bonus clean fclean re
 all				:	$(NAME)
 bonus			:	$(NAME)
 clean			:
-					$(RM) -rf $(OBJ_DIR) 
+					$(RM) -rf $(OBJ_DIR) client
 fclean			:	clean
 					$(RM) -f $(NAME)
 re				: 	fclean all

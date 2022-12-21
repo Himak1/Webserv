@@ -10,6 +10,9 @@
 # include <stdlib.h>
 # include <string>
 
+
+#include <poll.h>
+
 namespace http
 {
 
@@ -23,16 +26,24 @@ namespace http
 	private:
 		class Configuration	_config;
 		class HTTPRequest	_request;
-		int					_socket;
-		int					_new_socket;
+		int					_listening_socket;
+		// int					_new_socket;
 		struct sockaddr_in	_socketAddress;
 		unsigned int		_socketAddress_len;
 		std::string			_serverMessage;
 		int 				startServer();
 		void				closeServer();
-		void				acceptConnection(int &new_socket);
+		void				acceptConnection();
 		void				receiveRequest();
 		void				sendResponse();
+
+
+		// TOEGEVOEGD DOOR JONATHAN
+
+		std::vector<pollfd>	_socket_fds;
+    	nfds_t				_number_of_socket_fds;
+
+
 	};
 
 } // namespace http
