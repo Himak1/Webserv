@@ -1,8 +1,8 @@
 #ifndef BUILDRESPONSE_HPP
 # define BUILDRESPONSE_HPP
 
-# include <Configuration.hpp>
-# include <HTTPRequest.hpp>
+# include "Configuration.hpp"
+# include "HTTPRequest.hpp"
 
 # include <string>
 

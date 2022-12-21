@@ -1,6 +1,7 @@
-#include <HTTPRequest.hpp>
+#include "HTTPRequest.hpp"
 
-# include <fstream>
+#include <iostream>
+#include <fstream>
 
 // CONSTRUCTOR
 HTTPRequest::HTTPRequest()
@@ -46,8 +47,8 @@ void HTTPRequest::initHTTPRequest(std::string request)
 
 	checkValidity();
 
-	// if (_method == "POST" && _uri == "/upload")
-		// handleFileUpload(request);
+	if (_method == "POST" && _uri == "/upload")
+		handleFileUpload(request);
 }
 
 bool 			  HTTPRequest::isValidMethod() const { return _validity; }
@@ -61,124 +62,47 @@ void HTTPRequest::checkValidity()
 	if (_method == "GET" || _method == "POST" || _method == "DELETE")
 		_validity = true;
 }
-#include <iostream>
-// void HTTPRequest::handleFileUpload(std::string request)
-// {
-//  	// Parse the form data to find the file
-// 	std::istringstream dataStream(request);
-// 	std::string boundary;
-// 	std::string line;
-// 	while (std::getline(dataStream, line))
-// 	{
-// 			std::cout << "line :" << line << std::endl;
-// 		// Look for the boundary line
-// 		if (line.substr(0, 2) == "--")
-// 		{
-// 			boundary = line;
-// 			break;
-// 		}
-// 	}
 
-// 	if (boundary.empty())
-// 	{
-// 		// No boundary line was found, return an error
-// 		std::cout << "No boundary line was found\n" << std::endl;
-// 		return;
-// 	}
+// TO DO: not working without CGI?
+void HTTPRequest::handleFileUpload(std::string request)
+{
+ 	// Parse the form data to find the file
+	std::istringstream dataStream(request);
+	std::string boundary;
+	std::string line;
 
-// 	// Read the file data
-// 	std::string fileData;
-// 	while (std::getline(dataStream, line))
-// 	{
-// 		// Stop reading when we reach the end boundary
-// 		if (line == boundary + "--")
-// 		{
-// 			std::cout << "BOUNDARY " << line << std::endl;
-// 			break;
-// 		}
+	while (std::getline(dataStream, line)) {
+		std::cout << "line :" << line << std::endl;
 
-// 		fileData += line;
-// 	}
+		// Look for the boundary line
+		if (line.substr(0, 2) == "--") {
+			boundary = line;
+			break;
+		}
+	}
 
-// 	// Save the file to a location on the server
-// 	std::ofstream file("/path/to/uploaded/file.txt", std::ios::binary);
-// 	file << fileData;
-// 	file.close();
+	// No boundary line was found, return an error
+	if (boundary.empty()) {
+		// TO DO: return error
+		return;
+	}
 
-// 	// Send a success response
-// 	std::cout << "HTTP/1.1 200 OK\r\n\r\n";
-// }
+	// Read the file data
+	std::string fileData;
+	while (std::getline(dataStream, line)) {
+		// Stop reading when we reach the end boundary
+		if (line == boundary + "--") {
+			break;
+		}
+		fileData += line;
+	}
 
-// void HTTPRequest::handleFileUpload(std::string request)
-// {
-//     // Parse the request to get the content type and boundary string
-//     std::string contentType;
-//     std::string boundary;
-//     std::string line;
-// 	std::stringstream ss(request);
-//     while (std::getline(ss, line)) {
-// 		std::cout << line << std::endl;
-//         if (line.find("Content-Type: ") == 0) {
-//             contentType = line.substr(15);
-// 			std::cout << "CONTENTTYPE = " << contentType << std::endl;
-//         }
-//         else if (line.find("Content-Disposition: ") == 0) {
-//             std::string disposition = line.substr(21);
-//             std::size_t pos = disposition.find("boundary=");
-//             if (pos != std::string::npos) {
-//                 boundary = disposition.substr(pos + 9);
-// 				std::cout << "BOUNDARY = " << boundary << std::endl;
-//                 // Remove leading and trailing quotes from the boundary string
-//                 if (boundary[0] == '"') {
-//                     boundary = boundary.substr(1, boundary.size() - 2);
-// 					std::cout << "BOUNDARY = " << boundary << std::endl;
-//                 }
-//             }
-//         }
-//         else if (line == "\r") {
-//             // End of the headers
-//             break;
-//         }
-//     }
+	// Save the file to a location on the server
+	std::ofstream file("/path/to/uploaded/file.txt", std::ios::binary);
+	file << fileData;
+	file.close();
 
-//     // Check that we found the content type and boundary string
-//     if (contentType.empty() || boundary.empty()) {
-//         // std::cerr << "Error: Invalid request format" << std::endl;
-//         return;
-//     }
-
-//     // Read the contents of the file being uploaded
-//     std::stringstream fileStream;
-//     bool foundFile = false;
-//     while (std::getline(ss, line)) {
-//         if (line == "--" + boundary) {
-//             // Start of a new part
-//             foundFile = false;
-//         }
-//         else if (line == "--" + boundary + "--") {
-//             // End of the request
-//             break;
-//         }
-//         else if (line.find("Content-Disposition: ") == 0) {
-//             std::string disposition = line.substr(21);
-//             if (disposition.find("form-data; name=\"uploaded_file\"; filename=") == 0) {
-// 				std::cout << "FILE " << line << std::endl;
-//                 // This is the file we're looking for
-//                 foundFile = true;
-//             }
-//         }
-//         else if (line == "\r") {
-//             // End of the headers for this part
-//         }
-//         else if (foundFile) {
-//             // Append the line to the file stream
-//             fileStream << line << std::endl;
-// 			std::cout << "FILE " << line << std::endl;
-//         }
-//     }
-
-//     // Save the contents of the file stream to a file
-//     std::ofstream outputFile("/path/to/save/uploaded_file", std::ios::binary);
-//     outputFile << fileStream.rdbuf();
-//     outputFile.close();
-// }
+	// Send a success response
+	// TO DO:
+	std::cout << "HTTP/1.1 200 OK\r\n\r\n";
+}
