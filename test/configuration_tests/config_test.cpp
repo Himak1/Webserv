@@ -1,16 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   config.cpp                                         :+:    :+:            */
+/*   config_test.cpp                                    :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: jhille <jhille@student.codam.nl>             +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2022/12/21 16:21:20 by jhille        #+#    #+#                 */
-/*   Updated: 2022/12/21 17:16:14 by jhille        ########   odam.nl         */
+/*   Created: 2022/12/21 17:14:08 by jhille        #+#    #+#                 */
+/*   Updated: 2022/12/21 17:43:06 by jhille        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-int exampleFunc(int number)
+#include "gtest/gtest.h"
+#include "Configuration.hpp"
+
+TEST(exampleTest, test1)
 {
-    return (number * 2);
+    EXPECT_EQ(exampleFunc(2), 4);
 }

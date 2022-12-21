@@ -24,4 +24,6 @@ class Configuration
 		std::string			_errorPage404;
 };
 
+int	exampleFunc(int number);
+
 #endif

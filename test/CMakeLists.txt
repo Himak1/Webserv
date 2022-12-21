@@ -1,27 +1,27 @@
 include_directories(
-	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}/inc
 )
 
 list(REMOVE_ITEM ${SRC_FILES} ${PROJECT_SOURCE_DIR}/src/main.c)
 
 ### CPP Test Files ###
 set(TEST_FILES
-			# ${PROJECT_SOURCE_DIR}/test_files/
+	${CMAKE_CURRENT_LIST_DIR}/configuration_tests/config_test.cpp
 )
 
-list(REMOVE_ITEM ${TEST_FILES} "${PROJECT_SOURCE_DIR}/tests/main.cpp")
+list(REMOVE_ITEM ${TEST_FILES} ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 ### Create Test Executables ###
-foreach(file ${TEST_FILE})
+foreach(file ${TEST_FILES})
 	set(name)
 	get_filename_component(name ${file} NAME_WE)
 	add_executable(
-		${name}_tests
-		${SRC_FILES}
+		${name}
+		${HPP_FILES}
 		${file}
-		${PROJECT_SOURCE_DIR}/test_files/main.cpp
+		${CMAKE_CURRENT_LIST_DIR}/main.cpp
 	)
-	target_link_libraries(${name}_tests ${CMAKE_SOURCE_DIR}/webserv_lib.a gtest_main)
-	target_compile_options(${name}_tests PRIVATE "-Wextra -Wall -g")
-	add_test(NAME ${name} COMMAND ${name}_tests)
+	target_link_libraries(${name} ${CMAKE_SOURCE_DIR}/build/src/libwebserv_lib.a gtest_main)
+	target_compile_options(${name} PRIVATE -Wextra -Wall -g)
+	add_test(NAME ${name} COMMAND ${name})
 endforeach()
