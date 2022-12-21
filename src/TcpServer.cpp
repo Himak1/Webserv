@@ -1,5 +1,5 @@
-#include <TCPServer.hpp>
-#include <BuildResponse.hpp>
+#include "TcpServer.hpp"
+#include "BuildResponse.hpp"
 
 #include <iostream>
 #include <sstream>
