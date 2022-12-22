@@ -1,13 +1,13 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Iinc -Wall -Wextra -Werror #-std=c++98 -pedantic
+CFLAGS			:=	-Isrc -Wall -Wextra -Werror #-std=c++98 -pedantic
 SANIT			:=	-g -fsanitize=address
 CC				:=	@c++
 
 # STATIC
 RM				:=	@rm
 MKDIR_P			:=	@mkdir -p
-INC_DIR			:=	./inc
+INC_DIR			:=	./src
 SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
 SRC				:=	main \
