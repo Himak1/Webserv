@@ -11,13 +11,13 @@ class CGI
 	public:
 		CGI(class HTTPRequest request, class Configuration config);
 		~CGI();
-		void				ExecuteCGI();
-		// std::string         ExecuteCGI();
+		std::string         ExecuteCGI();
 
 	private:
 		class HTTPRequest	_request;
 		class Configuration	_config;
-		std::string			_pathSscript;
+		char*				_pathSscript;
+		char*				_path[2];
 };
 
 #endif

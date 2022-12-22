@@ -26,10 +26,20 @@ BuildResponse::~BuildResponse() { }
 // PUBLIC FUNTIONS
 std::string BuildResponse::getMessage(std::string status)
 {
+	if (_request.getMethod() == "POST") {
+		class CGI CGI(_request, _config);
+		std::string cgi = CGI.ExecuteCGI();
+		std::ostringstream ss;
+		ss	<< streamStatus(status)
+			<< cgi.size() << "\n\n"
+			<< cgi;
+		return ss.str();
+	}
+
 	std::basic_ifstream<char> input_stream(_filename);
 	if (!input_stream.is_open()) {
 		input_stream.close();
-		return (fileNotFound());
+		return fileNotFound();
 	}
 
 	input_stream.seekg(0, std::ios::end);
@@ -46,8 +56,8 @@ std::string BuildResponse::getMessage(std::string status)
 
 	input_stream.close();
 
-	class CGI CGI(_request, _config);
-	CGI.ExecuteCGI();
+	// class CGI CGI(_request, _config);
+	// CGI.ExecuteCGI();
 
 	return ss.str();
 }
