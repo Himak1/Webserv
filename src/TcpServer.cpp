@@ -1,5 +1,5 @@
-#include <TcpServer.hpp>
-#include <BuildResponse.hpp>
+#include "TcpServer.hpp"
+#include "BuildResponse.hpp"
 
 #include <errno.h>
 #include <poll.h>
@@ -109,7 +109,8 @@ namespace http
 		while (true) {
 			log("\n====== Waiting for a new connection ======\n");
 
-			// Poll checkt elke socket of er iets gebeurt (read / write request) en houdt dit bij in de array van structs _socket_fds
+			// 	Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
+			//	dit bij in de array van structs _socket_fds
 			int	poll_count;
 			poll_count = poll (&_socket_fds[0], _number_of_socket_fds, -1);
 			if (poll_count == -1) {
@@ -118,16 +119,45 @@ namespace http
 
 			// Dan moeten we kijken op welke socket poll iets heeft gedetecteerd
 			for (int i = 0; i < _number_of_socket_fds; i++) {
-				if (_socket_fds[i].revents & POLLIN) {
+				if (_socket_fds[i].revents & POLLIN) {					// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
 					if (_socket_fds[i].fd == _listening_socket) {		// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
 						acceptConnection();
-					} else { 												// anders is het een client die iets wilt
+					} else { 											// anders is het een client die iets wilt
+						char	buff[256];
+						size_t	bytes_received;
+						int		sender_fd;
+
+						bytes_received = recv(_socket_fds[i].fd, buff, sizeof(buff), NULL);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
+																								// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
+						sender_fd = _socket_fds[i].fd;
+
+						if (bytes_received <= 0) {
+							if (bytes_received == 0)
+								std::cout << "Socket fd " << _socket_fds[i].fd << " closed their connection." << std::endl;
+							else
+								std::cout << "Recv() error on socket fd " << _socket_fds[i].fd << " in TcpServer::startListen()" << std::endl;
+
+							close (_socket_fds[i].fd);
+							_socket_fds.erase(_socket_fds.begin() + i);  // needs testing
+							_number_of_socket_fds--;
+						} else {					// we received data 
+							for (int j = 0; j < _number_of_socket_fds; j++) {
+								int	destination_fd;
+
+								destination_fd = _socket_fds[j].fd;
+								if (destination_fd != _listening_socket && destination_fd != sender_fd)
+									if (send(destination_fd, buff, bytes_received, NULL) == -1)
+										std::cout << "send error in tcpserver::start listen" << std::endl;
+
+							}
+
+						}
 
 						/////////////////// 
 
 						 //  HIER BEN IK 
 
-						//////////////////////////////////////////
+					}	//////////////////////////////////////////
 
 				}  													 		
 
