@@ -93,62 +93,27 @@ void TcpServer::closeServer()
 // _socket_fds[0] holds listening socket
 void TcpServer::startListen()
 {
+	int	poll_count;
+	
 	if (listen(_socket_fds[0].fd, 20) < 0)
 		exitWithError("Socket listen failed");
 	logStartupMessage(_socketAddress);
 	while (true) {
 		log("\n====== Waiting for a new connection ======\n");
+		
 		// 	Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
-		//	dit bij in de array van structs _socket_fds
-		int	poll_count;
+		//	dit bij in de array van structs _socket_fds (door .events aan te passen)
 		poll_count = poll (&_socket_fds[0], _number_of_socket_fds, -1);
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
-		// Dan moeten we kijken op welke socket poll iets heeft gedetecteerd
-		for (int i = 0; i < _number_of_socket_fds; i++) {
-			if (_socket_fds[i].revents & POLLIN) {					// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
-				if (_socket_fds[i].fd == _socket_fds[0].fd) {		// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
-					acceptConnection();
-				} else { 											// anders is het een client die iets wilt
-					char	buff[256];
-					size_t	bytes_received;
-					int		sender_fd;
-					bytes_received = recv(_socket_fds[i].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
-																							// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
-					sender_fd = _socket_fds[i].fd;
-					if (bytes_received <= 0) {
-						if (bytes_received == 0)
-							std::cout << "Socket fd " << _socket_fds[i].fd << " closed their connection." << std::endl;
-						else
-							std::cout << "Recv() error on socket fd " << _socket_fds[i].fd << " in TcpServer::startListen()" << std::endl;
-						close (_socket_fds[i].fd);
-						_socket_fds.erase(_socket_fds.begin() + i);  // needs testing
-						_number_of_socket_fds--;
-					} else {					// we received data 
-						// for (int j = 0; j < _number_of_socket_fds; j++) {
-							// int	destination_fd;
-							std::cout << "Receveived from socket " << _socket_fds[i].fd << ": " << buff << std::endl;
-							// destination_fd = _socket_fds[j].fd;
-							// if (destination_fd != _listening_socket && destination_fd != sender_fd)			// chat server
-							// 	if (send(destination_fd, buff, bytes_received, 0) == -1)
-							// 		std::cout << "send error in tcpserver::start listen" << std::endl;
-						}
-					}
-					/////////////////// 
-					 //  HIER BEN IK 
-				}	//////////////////////////////////////////
-			}  													 		
-		}
-	// 	acceptConnection();
+		lookupActiveSocket();			// vervolgens kunnen we kijken op welke socket er iets is gebeurd
+	}	
 	// 	receiveRequest();
 	// 	sendResponse();
 	
-	// print fds
-	// for (int i = 0; i < 15; i++) {	
-	// 	std::cout << "pollfd# = " << _socket_fds[i].fd << "\n events = " << _socket_fds[i].events << "\n revents = " << _socket_fds[i].revents << std::endl;
-	// }	
 }
+
 void TcpServer::acceptConnection() 
 {
 	struct pollfd	add_to_socket_fd;
@@ -157,34 +122,50 @@ void TcpServer::acceptConnection()
 	if (add_to_socket_fd.fd == -1)
 		exitWithError("ERROR: accept() (TcpServer::acceptConnection");
 
+	fcntl(add_to_socket_fd.fd, F_SETFL, O_NONBLOCK);			// nodig om elke socket op non blocking te zetten?
+
+
 	//// set events for added socket?
 	/*
 	add_to_socket.events = POLLIN | POLLOUT
-	
+
+	hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
+
 	*/
+
+	add_to_socket_fd.events = POLLIN;	
+	_socket_fds.push_back(add_to_socket_fd);
+	_number_of_socket_fds++;
 	std::cout << "Server accepted incoming connection from ADDRESS: "
 			<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 
 			<< ntohs(_socketAddress.sin_port) << std::endl;
-	
-	_number_of_socket_fds++;
-	_socket_fds.push_back(add_to_socket_fd);
 }
 
-void TcpServer::receiveRequest()
+void TcpServer::receiveRequest(int idx)
 {
-	// char 	buffer[BUFFER_SIZE] = {0};
-	// // MOET NIEUWE SOCKET KRIJGEN OM OP TE READEN
-	// // int bytesReceived = read(_new_socket, buffer, BUFFER_SIZE); //
-	// if (bytesReceived < 0)
-	// 	exitWithError("Failed to read bytes from client socket connection");
-	// _request.initHTTPRequest(std::string(buffer));
-	// if (!_request.isValidMethod())
-	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
-	// std::ostringstream ss;
-	// ss	<< "Received request: Method = " << _request.getMethod()
-	// 	<< " URI = " 					 << _request.getURI()
-	// 	<< " HTTP Version = " 			 << _request.getHTTPVersion();
-	// log(ss.str());
+	char	buff[BUFFER_SIZE];
+	size_t	bytes_received;
+
+	bytes_received = recv(_socket_fds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
+																			// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
+	if (bytes_received <= 0) {
+		if (bytes_received == 0)
+			std::cout << "Socket fd " << _socket_fds[idx].fd << " closed their connection." << std::endl;
+		else
+			std::cout << "Recv() error on socket fd " << _socket_fds[idx].fd << " in TcpServer::startListen()" << std::endl;		
+		close (_socket_fds[idx].fd);
+		_socket_fds.erase(_socket_fds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
+		_number_of_socket_fds--;
+	} 
+
+	_request.initHTTPRequest(std::string(buff));
+	if (!_request.isValidMethod())
+		exitWithError("Invalid method, only GET, POST and DELETED are supported");
+	std::ostringstream ss;
+	ss	<< "Received request: Method = " << _request.getMethod()
+		<< " URI = " 					 << _request.getURI()
+		<< " HTTP Version = " 			 << _request.getHTTPVersion();
+	log(ss.str());
 }
 
 void TcpServer::sendResponse()
@@ -198,5 +179,30 @@ void TcpServer::sendResponse()
 	// else
 	// 	log("Error sending response to client");
 }
+
+// Finds the socket where poll() found activity 
+int	TcpServer::lookupActiveSocket()
+{
+	for (int i = 0; i < _number_of_socket_fds; i++) {
+		if (_socket_fds[i].revents & POLLIN) {					// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
+			if (_socket_fds[i].fd == _socket_fds[0].fd) 		// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
+				acceptConnection();
+			else 
+				receiveRequest(i);
+		} else if (_socket_fds[i].revents & POLLOUT) {
+			size_t	bytes_send;
+
+			bytes_send = send(_socket_fds[i].fd, &_serverMessage, _serverMessage.size(), 0);
+			if (bytes_send < 0)
+				std::cout << "Send error in TcpServer::lookupActiveSocket()" << std::endl;
+			if (bytes_send < _serverMessage.size())
+				std::cout << "Not all bytes send!" << std::endl;
+
+		}
+
+	}  													 		
+}
+
+
 
 } // namespace http
