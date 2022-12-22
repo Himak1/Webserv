@@ -8,6 +8,7 @@ set(SRC_FILES
     HTTPRequest.cpp
     main.cpp
     TcpServer.cpp
+    # !Add new src files here! #
     CACHE INTERNAL ""
 )
 
