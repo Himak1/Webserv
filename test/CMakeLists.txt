@@ -2,8 +2,6 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/inc
 )
 
-list(REMOVE_ITEM ${SRC_FILES} ${PROJECT_SOURCE_DIR}/src/main.c)
-
 ### CPP Test Files ###
 set(TEST_FILES
 	${CMAKE_CURRENT_LIST_DIR}/configuration_tests/config_test.cpp
@@ -21,7 +19,7 @@ foreach(file ${TEST_FILES})
 		${file}
 		${CMAKE_CURRENT_LIST_DIR}/main.cpp
 	)
-	target_link_libraries(${name} ${CMAKE_SOURCE_DIR}/build/src/libwebserv_lib.a gtest_main)
+	target_link_libraries(${name} ${CMAKE_SOURCE_DIR}/build/lib/lib_unit.a gtest_main)
 	target_compile_options(${name} PRIVATE -Wextra -Wall -g)
 	add_test(NAME ${name} COMMAND ${name})
 endforeach()

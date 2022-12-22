@@ -2,11 +2,12 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 ### Setting Source Files & Header Files ###
 set(SRC_FILES
-    ${PROJECT_SOURCE_DIR}/src/BuildResponse.cpp
-    ${PROJECT_SOURCE_DIR}/src/configuration/Configuration.cpp
-    ${PROJECT_SOURCE_DIR}/src/HTTPRequest.cpp
-    ${PROJECT_SOURCE_DIR}/src/main.cpp
-    ${PROJECT_SOURCE_DIR}/src/TcpServer.cpp
+    configuration/Configuration.cpp
+    configuration/config.cpp
+    BuildResponse.cpp
+    HTTPRequest.cpp
+    main.cpp
+    TcpServer.cpp
     CACHE INTERNAL ""
 )
 
@@ -19,10 +20,16 @@ set(HPP_FILES
     CACHE INTERNAL ""
 )
 
-### Compiling Executable & Static Library ###
-add_library(${BINARY}_lib STATIC ${SRC_FILES} ${HPP_FILES})
-target_include_directories(${BINARY}_lib PRIVATE ${PROJECT_SOURCE_DIR}/inc)
-set_target_properties(${BINARY}_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib/)
+### Compiling Static Library ###
+set(LIB_NAME _unit)
+set(UNIT_SRC ${SRC_FILES})
+list(REMOVE_ITEM UNIT_SRC main.cpp)
 
+add_library(${LIB_NAME} STATIC ${UNIT_SRC} ${HPP_FILES})
+target_include_directories(${LIB_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
+set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib/)
+
+### Compiling Executable ###
 add_executable(${BINARY} ${SRC_FILES} ${HPP_FILES})
 target_include_directories(${BINARY} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
+set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/bin/)
