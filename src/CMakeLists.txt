@@ -27,9 +27,9 @@ list(REMOVE_ITEM UNIT_SRC main.cpp)
 
 add_library(${LIB_NAME} STATIC ${UNIT_SRC} ${HPP_FILES})
 target_include_directories(${LIB_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
-set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib/)
+set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 ### Compiling Executable ###
 add_executable(${BINARY} ${SRC_FILES} ${HPP_FILES})
 target_include_directories(${BINARY} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
-set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/bin/)
+set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
