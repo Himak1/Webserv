@@ -1,4 +1,5 @@
-#include <BuildResponse.hpp>
+#include "BuildResponse.hpp"
+#include "CGI.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -44,6 +45,10 @@ std::string BuildResponse::getMessage(std::string status)
 		ss << line << std::endl;
 
 	input_stream.close();
+
+	class CGI CGI(_request, _config);
+	CGI.ExecuteCGI();
+
 	return ss.str();
 }
 

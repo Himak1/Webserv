@@ -1,5 +1,5 @@
-#include <TCPServer.hpp>
-#include <BuildResponse.hpp>
+#include "TCPServer.hpp"
+#include "BuildResponse.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -122,6 +122,8 @@ namespace http
 
 		if (!_request.isValidMethod())
 			exitWithError("Invalid method, only GET, POST and DELETED are supported");
+
+		// log(buffer);
 
 		std::ostringstream ss;
 		ss	<< "Received request: Method = " << _request.getMethod()
