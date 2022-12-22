@@ -23,7 +23,7 @@ $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp
 					$(MKDIR_P) $(dir $@)
 					$(CC) $(CFLAGS) -c $< -o $@
 
-client			:	src/client/Client.cpp
+client			:	Client.cpp
 					$(CC) $^ -o $@ $(SANIT)
 
 .PHONY			:	all bonus clean fclean re

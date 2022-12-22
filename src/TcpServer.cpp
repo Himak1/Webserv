@@ -127,7 +127,7 @@ namespace http
 						size_t	bytes_received;
 						int		sender_fd;
 
-						bytes_received = recv(_socket_fds[i].fd, buff, sizeof(buff), NULL);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
+						bytes_received = recv(_socket_fds[i].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																								// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
 						sender_fd = _socket_fds[i].fd;
 
@@ -141,13 +141,15 @@ namespace http
 							_socket_fds.erase(_socket_fds.begin() + i);  // needs testing
 							_number_of_socket_fds--;
 						} else {					// we received data 
-							for (int j = 0; j < _number_of_socket_fds; j++) {
-								int	destination_fd;
+							// for (int j = 0; j < _number_of_socket_fds; j++) {
+								// int	destination_fd;
 
-								destination_fd = _socket_fds[j].fd;
-								if (destination_fd != _listening_socket && destination_fd != sender_fd)
-									if (send(destination_fd, buff, bytes_received, NULL) == -1)
-										std::cout << "send error in tcpserver::start listen" << std::endl;
+								std::cout << "Receveived from socket " << _socket_fds[i].fd << ": " << buff << std::endl;
+
+								// destination_fd = _socket_fds[j].fd;
+								// if (destination_fd != _listening_socket && destination_fd != sender_fd)			// chat server
+								// 	if (send(destination_fd, buff, bytes_received, 0) == -1)
+								// 		std::cout << "send error in tcpserver::start listen" << std::endl;
 
 							}
 
@@ -168,7 +170,7 @@ namespace http
 		// 	acceptConnection();
 		// 	receiveRequest();
 		// 	sendResponse();
-		}
+		
 
 		// print fds
 		// for (int i = 0; i < 15; i++) {	
@@ -185,6 +187,13 @@ namespace http
 		if (add_to_socket_fd.fd == -1)
 			exitWithError("ERROR: accept() (TcpServer::acceptConnection");
 		
+
+		//// set events for added socket?
+		/*
+		add_to_socket.events = POLLIN | POLLOUT
+		
+		*/
+
 		std::cout << "Server accepted incoming connection from ADDRESS: "
 				<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 
 				<< ntohs(_socketAddress.sin_port) << std::endl;
