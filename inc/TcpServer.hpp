@@ -2,7 +2,7 @@
 # define TCP_SERVER_HPP
 
 # include "HTTPRequest.hpp"
-# include "Configuration.hpp"
+# include "configuration/Configuration.hpp"
 
 # include <stdio.h>
 # include <sys/socket.h>
@@ -26,16 +26,17 @@ namespace http
 	private:
 		class Configuration	_config;
 		class HTTPRequest	_request;
-		int					_listening_socket;
+		// int					_listening_socket;
 		// int					_new_socket;
 		struct sockaddr_in	_socketAddress;
 		unsigned int		_socketAddress_len;
 		std::string			_serverMessage;
-		int 				startServer();
-		void				closeServer();
+
 		void				acceptConnection();
+		void				closeServer();
 		void				receiveRequest();
 		void				sendResponse();
+		int 				startServer();
 
 
 		// TOEGEVOEGD DOOR JONATHAN

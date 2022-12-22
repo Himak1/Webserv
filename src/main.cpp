@@ -1,5 +1,5 @@
 #include <TcpServer.hpp>
-#include <Configuration.hpp>
+#include "configuration/Configuration.hpp"
 #include <main.hpp>
 
 int main(int argc, char **argv)

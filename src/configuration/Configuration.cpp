@@ -1,4 +1,4 @@
-#include <Configuration.hpp>
+#include "configuration/Configuration.hpp"
 
 #include <iostream>
 

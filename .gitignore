@@ -1,0 +1,6 @@
+build
+obj
+.DS_Store
+.vscode
+webserv
+client.dSYM

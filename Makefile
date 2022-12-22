@@ -14,7 +14,7 @@ SRC				:=	main \
 					TcpServer \
 					HTTPRequest \
 					BuildResponse \
-					Configuration 
+					configuration/Configuration
 					
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
