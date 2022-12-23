@@ -8,7 +8,7 @@ Token::Token()
 {
 }
 
-Token::Token( const Token & src )
+Token::Token( const Token& src )
 {
 }
 
@@ -26,7 +26,7 @@ Token::~Token()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Token &				Token::operator=( Token const & rhs )
+Token&	Token::operator=( Token const& rhs )
 {
 	//if ( this != &rhs )
 	//{
@@ -35,7 +35,7 @@ Token &				Token::operator=( Token const & rhs )
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, Token const & i )
+std::ostream&	operator<<( std::ostream& o, Token const& i )
 {
 	//o << "Value = " << i.getValue();
 	return o;
@@ -51,5 +51,3 @@ std::ostream &			operator<<( std::ostream & o, Token const & i )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-
-/* ************************************************************************** */

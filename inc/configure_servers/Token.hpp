@@ -4,21 +4,30 @@
 # include <iostream>
 # include <string>
 
+enum TokenTypes
+{
+	INVALID_TOKEN = 0,
+	BRACKET
+};
+
 class Token
 {
-
 	public:
-
 		Token();
-		Token( Token const & src );
+		Token( Token const& src );
 		~Token();
 
-		Token &		operator=( Token const & rhs );
+		Token&		operator=( Token const& rhs );
 
+		int&			getToken() const;
+		std::string&	getTokenType() const;
 	private:
+		int			_tokenType;
+		std::string	_token;
+
 
 };
 
-std::ostream &			operator<<( std::ostream & o, Token const & i );
+std::ostream&		operator<<( std::ostream& o, Token const& i );
 
-#endif /* *********************************************************** TOKEN_H */
+#endif

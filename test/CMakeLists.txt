@@ -1,6 +1,6 @@
 ### CPP Test Files ###
 set(TEST_FILES
-	configuration_tests/config_test.cpp
+	# configuration_tests/config_test.cpp
 	# !Add new test files here!
 )
 
