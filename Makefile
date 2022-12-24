@@ -15,7 +15,8 @@ SRC				:=	main \
 					HTTPRequest \
 					BuildResponse \
 					Configuration \
-					CGI
+					CGI \
+					utils
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)

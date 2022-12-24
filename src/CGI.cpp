@@ -11,12 +11,14 @@
 CGI::CGI(class HTTPRequest request, class Configuration config)
 	: _request(request), _config(config)
 {
-	std::string _path_from_request = "www/cgi-bin/script.cgi";
+	std::string _path_from_request = _config.getPathWebsite() + _request.getURI();
 	// mogen we realpath() gebruiken?
 	_pathSscript = realpath(&_path_from_request[0], NULL);
-
 	_path[0] = &_pathSscript[0];
 	_path[1] = NULL;
+
+	// char* data = getenv("QUERY_STRING");
+	// std::cout << "GETENV " << data << std::endl;
 }
 
 // DESTRUCTOR

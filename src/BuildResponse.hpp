@@ -18,8 +18,8 @@ class BuildResponse
 		class HTTPRequest	_request;
 		class Configuration	_config;
 
-		std::string 		fileNotFound();
-		std::string 		streamStatus(std::string status) const;
+		std::string 		fileNotFound() const;
+		std::string			createResponse(std::string status, std::string content, int size) const;
 };
 
 #endif

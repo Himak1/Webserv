@@ -1,5 +1,6 @@
 #include "BuildResponse.hpp"
 #include "CGI.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -29,63 +30,44 @@ std::string BuildResponse::getMessage(std::string status)
 	if (_request.getMethod() == "POST") {
 		class CGI CGI(_request, _config);
 		std::string cgi = CGI.ExecuteCGI();
-		std::ostringstream ss;
-		ss	<< streamStatus(status)
-			<< cgi.size() << "\n\n"
-			<< cgi;
-		return ss.str();
+		return (createResponse(status, cgi, cgi.size()));
 	}
 
-	std::basic_ifstream<char> input_stream(_filename);
-	if (!input_stream.is_open()) {
-		input_stream.close();
+	std::string content = readStream(_filename);
+	if (content == "fileNotFound")
 		return fileNotFound();
-	}
 
-	input_stream.seekg(0, std::ios::end);
-	std::streampos size = input_stream.tellg();
-	input_stream.seekg(0, std::ios::beg);
-
-	std::ostringstream ss;
-	ss	<< streamStatus(status)
-		<< size << "\n\n";
-
-	std::string line;
-	while (std::getline(input_stream, line))
-		ss << line << std::endl;
-
-	input_stream.close();
-
-	// class CGI CGI(_request, _config);
-	// CGI.ExecuteCGI();
-
-	return ss.str();
+	return createResponse(status, content, getStreamSize(_filename));
 }
 
 // PRIVATE FUNCTIONS
-std::string BuildResponse::fileNotFound()
+std::string BuildResponse::fileNotFound() const
 {
 	std::string status = "404 Not Found";
+	std::string content;
 	if (_config.get404() != "default") {
-		_filename = _config.getPathWebsite() + _config.get404();
-		return BuildResponse::getMessage(status);
+		std::string filename = _config.getPathWebsite() + _config.get404();
+		content = readStream(filename);
 	}
-
-	std::string htmlFile = "<!DOCTYPE html>" \
-							"<html lang=\"en\">" \
-							"<head><title>404 Not Found</title></head>" \
-							"<body><center><h1>404 Not Found</h1></center>" \
-							"</body></html>";
-	std::ostringstream ss;
-	ss	<< streamStatus(status)
-		<< htmlFile.size() << "\n\n"
-		<< htmlFile;
-
-	return ss.str();
+	else {
+		content = "<!DOCTYPE html>" \
+				  "<html lang=\"en\">" \
+				  "<head><title>404 Not Found</title></head>" \
+				  "<body><center><h1>404 Not Found</h1></center>" \
+				  "</body></html>";
+	}
+	return createResponse(status, content, content.size());
 }
 
-std::string BuildResponse::streamStatus(std::string status) const
+std::string BuildResponse::createResponse(
+	std::string status, std::string content, int size) const
 {
-	return _request.getHTTPVersion() + " " + status \
-			+ "\nContent-Type: text/html\nContent-Length: ";
+	std::string content_type = "\nContent-Type: text/html\nContent-Length: ";
+	std::ostringstream ss;
+	ss	<<  _request.getHTTPVersion() << " "
+		<< status
+		<< content_type
+		<< size << "\n\n"
+		<< content;
+	return ss.str();
 }

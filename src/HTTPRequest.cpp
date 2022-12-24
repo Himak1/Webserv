@@ -34,6 +34,7 @@ void HTTPRequest::initHTTPRequest(std::string request)
 	std::string token;
 
 	while (std::getline(ss, token)) {
+		// std::cout << "line: " << token << std::endl;
 		std::stringstream token_ss(token);
 		std::string sub_token;
 		while (std::getline(token_ss, sub_token, ' ')) {
@@ -43,7 +44,7 @@ void HTTPRequest::initHTTPRequest(std::string request)
 
 	if (strings.size() > 0) _method = strings[0];
 	if (strings.size() > 1) _uri = strings[1];
-	if (strings.size() > 2) _http_version = strings[2];
+	if (strings.size() > 2) _http_version = strings[2].substr(0, 8);
 
 	checkValidity();
 
@@ -59,7 +60,8 @@ const std::string HTTPRequest::getHTTPVersion() const { return _http_version; }
 // PRIVATE FUNCTIONS
 void HTTPRequest::checkValidity()
 {
-	if (_method == "GET" || _method == "POST" || _method == "DELETE")
+	if (_http_version == "HTTP/1.1"
+		&& (_method == "GET" || _method == "POST" || _method == "DELETE"))
 		_validity = true;
 }
 

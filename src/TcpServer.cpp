@@ -1,5 +1,6 @@
 #include "TCPServer.hpp"
 #include "BuildResponse.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -10,19 +11,14 @@ namespace
 {
 	const int BUFFER_SIZE = 30720;
 
-	void log(const std::string &message)
-	{
-		std::cout << message << std::endl;
-	}
-
 	void logStartupMessage(struct sockaddr_in _socketAddress)
 	{
 		std::ostringstream ss;
-		ss	<< "\n*** Listening on ADDRESS: "
+		ss	<< "Listening on ADDRESS: "
 			<< inet_ntoa(_socketAddress.sin_addr) 
-			<< " PORT: "
+			<< "  PORT: "
 			<< ntohs(_socketAddress.sin_port) 
-			<< " ***\n\n";
+			<< "\n";
 		log(ss.str());
 	}
 
@@ -89,8 +85,6 @@ namespace http
 		logStartupMessage(_socketAddress);
 
 		while (true) {
-			log("\n====== Waiting for a new connection ======\n");
-
 			acceptConnection(_new_socket);
 			receiveRequest();
 			sendResponse();
@@ -121,14 +115,14 @@ namespace http
 		_request.initHTTPRequest(std::string(buffer));
 
 		if (!_request.isValidMethod())
-			exitWithError("Invalid method, only GET, POST and DELETED are supported");
+			exitWithError("Invalid HTTP version (only HTTP/1.1 is supported) " \
+				"or invalid method (only GET, POST and DELETED are supported)");
 
 		// log(buffer);
 
 		std::ostringstream ss;
-		ss	<< "Received request: Method = " << _request.getMethod()
-			<< " URI = " 					 << _request.getURI()
-			<< " HTTP Version = " 			 << _request.getHTTPVersion();
+		ss	<< _request.getMethod() << " "
+			<< _request.getURI();
 		log(ss.str());
 	}
 
@@ -141,7 +135,6 @@ namespace http
 
 		if (bytesSent == (long)_serverMessage.size())
 			log(_serverMessage.substr(0, _serverMessage.find('\n')));
-			// log("\n");
 		else
 			log("Error sending response to client");
 	}
