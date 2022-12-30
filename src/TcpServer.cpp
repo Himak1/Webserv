@@ -38,15 +38,11 @@ namespace
 
 namespace http
 {;
-// CONSTRUCTOR
+			// CONSTRUCTOR
 TcpServer::TcpServer(class Configuration configuration)
 	: _config(configuration), _socketAddress(), 
 	_socketAddress_len(sizeof(_socketAddress)),
-	
-	
-	//// toegevoegd door Jonathan
-	 _socket_fds() 
-	////
+	_socket_fds() 
 {
 	_socketAddress.sin_family = AF_INET;
 	_socketAddress.sin_port = htons(_config.getPort());
@@ -57,13 +53,16 @@ TcpServer::TcpServer(class Configuration configuration)
 		ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
 		log(ss.str());
 	}
+	_serverRunning = true;
 }
-// DESTRUCTOR
+
+			// DESTRUCTOR
 TcpServer::~TcpServer()
 {
 	closeServer();
 }
-// PRIVATE FUNCTIONS
+
+			// PRIVATE FUNCTIONS
 int TcpServer::startServer()
 {
 	struct pollfd	listener;
@@ -84,10 +83,17 @@ int TcpServer::startServer()
 	}
 	return 0;
 }
+
 void TcpServer::closeServer()
 {
-	close(_socket_fds[0].fd); // exit closes all fds(?)
-	exit(0);
+	close(_socket_fds[0].fd); 	// exit closes all fds(?)
+	exit(0);					
+								/*
+									Als we threads gaan gebruiken geen exit() meer.
+									Exit() sluit dan automatisch alle threads, maar dat is
+									c++11 functionaliteit. Dus in dat geval zouden we zelf 
+									threads moeten sluiten en dan exit oproepen
+								*/
 }
 
 // _socket_fds[0] holds listening socket
@@ -98,20 +104,23 @@ void TcpServer::startListen()
 	if (listen(_socket_fds[0].fd, 20) < 0)
 		exitWithError("Socket listen failed");
 	logStartupMessage(_socketAddress);
-	while (true) {
+	while (_serverRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 		
-		// 	Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
-		//	dit bij in de array van structs _socket_fds (door .events aan te passen)
-		poll_count = poll (&_socket_fds[0], _number_of_socket_fds, -1);
+
+		sleep(1);
+
+								/*
+									Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
+									dit bij in de array van structs _socket_fds (door .events aan te passen)
+									De -1 geeft aan dat hij oneindig lang wacht op read/write requests)
+								*/ 
+		poll_count = poll (&_socket_fds[0], _number_of_socket_fds, -1);		
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
 		lookupActiveSocket();			// vervolgens kunnen we kijken op welke socket er iets is gebeurd
 	}	
-	// 	receiveRequest();
-	// 	sendResponse();
-	
 }
 
 void TcpServer::acceptConnection() 
@@ -125,22 +134,33 @@ void TcpServer::acceptConnection()
 	fcntl(add_to_socket_fd.fd, F_SETFL, O_NONBLOCK);			// nodig om elke socket op non blocking te zetten?
 
 
-	//// set events for added socket?
-	/*
-	add_to_socket.events = POLLIN | POLLOUT
+								/*
+									set events for added socket?
 
-	hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
+									add_to_socket.events = POLLIN | POLLOUT
+									hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
 
-	*/
+									huidige vorm = 
+									- nieuwe connectie dan gaat socket op POLLIN
+									- een read op een socket ontvangen dan gaat hij op POLLIN | POLLOUT
+
+									Op deze manier zou een connectie dus nooit iets ontvangen voordat hij zelf iets stuurt,
+									maar is ook logisch want een connectie moet altijd eerst iets sturen (request) voordat hij kan ontvangen
+							
+									evt toevoegen : 
+									socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
+									
+								*/
 
 	add_to_socket_fd.events = POLLIN;	
 	_socket_fds.push_back(add_to_socket_fd);
 	_number_of_socket_fds++;
 	std::cout << "Server accepted incoming connection from ADDRESS: "
 			<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 
-			<< ntohs(_socketAddress.sin_port) << std::endl;
+			<< ntohs(_socketAddress.sin_port) << "; Socket fd: " << _socket_fds.back().fd << std::endl;
 }
 
+// idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
 void TcpServer::receiveRequest(int idx)
 {
 	char	buff[BUFFER_SIZE];
@@ -157,6 +177,8 @@ void TcpServer::receiveRequest(int idx)
 		_socket_fds.erase(_socket_fds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
 		_number_of_socket_fds--;
 	} 
+		
+	_socket_fds[idx].events = POLLIN | POLLOUT;			// Socket heeft data gestuurd en kan dus nu op POLLIN | POLLOUT zodat hij data kan ontvangen
 
 	_request.initHTTPRequest(std::string(buff));
 	if (!_request.isValidMethod())
@@ -168,20 +190,31 @@ void TcpServer::receiveRequest(int idx)
 	log(ss.str());
 }
 
-void TcpServer::sendResponse()
+// idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
+void TcpServer::sendResponse(int idx)
 {
-	// class BuildResponse respons(_request, _config);
-	// _serverMessage = respons.getMessage("200 OK");
-	// long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
-	// if (bytesSent == (long)_serverMessage.size())
-	// 	log(_serverMessage.substr(0, _serverMessage.find('\n')));
-	// 	// log("\n");
-	// else
-	// 	log("Error sending response to client");
+	size_t	bytes_send;
+	class	BuildResponse respons(_request, _config);
+
+	_serverMessage = respons.getMessage("200 OK");
+
+	// _serverMessage = "Test\n";
+	if (_serverMessage.empty())							// Deze check doen waar de _serverMessage wordt gemaakt?
+		std::cout << "No server message! Client won't receive anything!" << std::endl;
+
+	_unsendServerMessage = _serverMessage;
+
+	while (!_unsendServerMessage.empty())
+	{
+		bytes_send = send(_socket_fds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
+		if (bytes_send < 0)
+			std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
+		_unsendServerMessage.erase(0, bytes_send);
+	}
 }
 
 // Finds the socket where poll() found activity 
-int	TcpServer::lookupActiveSocket()
+void	TcpServer::lookupActiveSocket()
 {
 	for (int i = 0; i < _number_of_socket_fds; i++) {
 		if (_socket_fds[i].revents & POLLIN) {					// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
@@ -190,14 +223,7 @@ int	TcpServer::lookupActiveSocket()
 			else 
 				receiveRequest(i);
 		} else if (_socket_fds[i].revents & POLLOUT) {
-			size_t	bytes_send;
-
-			bytes_send = send(_socket_fds[i].fd, &_serverMessage, _serverMessage.size(), 0);
-			if (bytes_send < 0)
-				std::cout << "Send error in TcpServer::lookupActiveSocket()" << std::endl;
-			if (bytes_send < _serverMessage.size())
-				std::cout << "Not all bytes send!" << std::endl;
-
+			sendResponse(i);
 		}
 
 	}  													 		

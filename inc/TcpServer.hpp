@@ -30,17 +30,17 @@ private:
 	struct sockaddr_in	_socketAddress;
 	unsigned int		_socketAddress_len;
 	std::string			_serverMessage;
+	std::string			_unsendServerMessage;
 	void				acceptConnection();
 	void				closeServer();
 	void				receiveRequest(int);
-	void				sendResponse();
+	void				sendResponse(int);
 	int 				startServer();
-	// TOEGEVOEGD DOOR JONATHAN
 	std::vector<pollfd>	_socket_fds;
    	nfds_t				_number_of_socket_fds;
 
-	int					lookupActiveSocket();
-
+	bool				_serverRunning;
+	void				lookupActiveSocket();
 };
 
 } // namespace http

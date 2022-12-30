@@ -27,7 +27,7 @@ $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp
 client			:	Client.cpp
 					$(CC) $^ -o $@ $(SANIT)
 
-.PHONY			:	all bonus clean fclean re
+.PHONY			:	all bonus clean fclean re test
 all				:	$(NAME)
 bonus			:	$(NAME)
 clean			:
@@ -35,3 +35,8 @@ clean			:
 fclean			:	clean
 					$(RM) -f $(NAME)
 re				: 	fclean all
+
+
+
+test			:	all
+					./webserv
