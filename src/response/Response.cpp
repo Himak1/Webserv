@@ -13,6 +13,8 @@ Response::Response(class Request request, class Configuration config)
 
 	if (_request.getURI() == "/")
 		_filename = _config.getPathWebsite() +  "/index.html";
+	else if (_request.getURI().find(".css", _request.getURI().length() - 4) != std::string::npos)
+		_filename = _config.getPathWebsite() + _request.getURI();
 	else if (_request.getURI() == "/favicon.ico")
 		_filename = _config.getPathWebsite() + _request.getURI();
 	else if (_request.getURI().find(".html", _request.getURI().length() - 5) != std::string::npos)
@@ -65,7 +67,11 @@ std::string Response::fileNotFound()
 
 std::string Response::createResponse() const
 {
-	std::string content_type = "\nContent-Type: text/html\nContent-Length: ";
+	std::string content_type;
+	if (_filename.find(".css", _filename.length() - 4) != std::string::npos)
+		content_type = "Content-Type: text/css; charset=utf-8\nContent-Length: ";
+
+	content_type = "\nContent-Type: text/html\nContent-Length: ";
 	std::ostringstream ss;
 	ss	<<  _request.getHTTPVersion() << " "
 		<< _status
