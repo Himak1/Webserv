@@ -18,22 +18,10 @@ Response::Response(class Request request, class Configuration config)
 	else
 		_filename = _config.getPathWebsite() + _request.getURI();
 
-	_content_types = {
-		{ "text",	"Content-Type: text/plain\n" },
-		{ ".txt",	"Content-Type: text/plain; charset=utf-8\n" },
-		{ ".html",	"Content-Type: text/html; charset=utf-8\n" },
-		{ ".css",	"Content-Type: text/css; charset=utf-8\n" },
-		{ ".jpg",	"Content-type: image/jpg\n" },
-		{ ".jpeg",	"Content-type: image/jpeg\n" },
-		{ ".png",	"Content-type: image/png\n" },
-		{ ".mp4",	"Content-type: video/mp4\n" },
-		{ ".ico",	"Content-type: image/vnd.microsoft.icon\n" },
-		{ ".php",	"Content-Type: text/plain; charset=utf-8\n" },
-		{ ".js",	"Content-Type: application/javascript\n" },
-		{ ".gif",	"Content-Type: image/gif\n" }
-	};
-
 	// std::cout << _filename << std::endl;
+
+	initStatusCodes();
+	initContentTypes();
 }
 
 // DESTRUCTOR
@@ -58,6 +46,48 @@ std::string Response::getMessage()
 }
 
 // PRIVATE FUNCTIONS
+void	Response::initStatusCodes()
+{
+	_status_codes = {
+		{ 200, "OK\n" },
+		{ 201, "Created\n" },
+		{ 202, "Accepted\n" },
+		{ 204, "No Content\n" },
+		{ 300, "Multiple Choice\n" },
+		{ 301, "Moved Permanently\n" },
+		{ 302, "Found\n" },
+		{ 400, "Bad Request\n" },
+		{ 401, "Unauthorized\n" },
+		{ 403, "Forbidden\n" },
+		{ 404, "Not Found\n" },
+		{ 405, "Method Not Allowed\n" },
+		{ 413, "Request Entity Too Large\n" },
+		{ 415, "Unsupported Media Type\n" },
+		{ 500, "Internal Server Error\n" },
+		{ 502, "Bad Gateway\n" },
+		{ 504, "Gateway Timeout\n" },
+		{ 505, "HTTP Version Not Supported\n" }
+	};
+}
+
+void	Response::initContentTypes() 
+{
+	_content_types = {
+		{ "text",	"Content-Type: text/plain\n" },
+		{ ".txt",	"Content-Type: text/plain; charset=utf-8\n" },
+		{ ".html",	"Content-Type: text/html; charset=utf-8\n" },
+		{ ".css",	"Content-Type: text/css; charset=utf-8\n" },
+		{ ".jpg",	"Content-type: image/jpg\n" },
+		{ ".jpeg",	"Content-type: image/jpeg\n" },
+		{ ".png",	"Content-type: image/png\n" },
+		{ ".mp4",	"Content-type: video/mp4\n" },
+		{ ".ico",	"Content-type: image/vnd.microsoft.icon\n" },
+		{ ".php",	"Content-Type: text/plain; charset=utf-8\n" },
+		{ ".js",	"Content-Type: application/javascript\n" },
+		{ ".gif",	"Content-Type: image/gif\n" }
+	};
+}
+
 std::string Response::fileNotFound()
 {
 	_status = "404 Not Found";
@@ -85,6 +115,7 @@ std::string Response::createResponse()
 
 	std::ostringstream ss;
 	ss	<<  _request.getHTTPVersion() << " "
+	// TO DO: clean up status codes with map
 		<< _status
 		<< "\n"
 		<< _content_types[extension]

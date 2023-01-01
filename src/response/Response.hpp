@@ -21,8 +21,11 @@ class Response
 		std::string			_content;
 		class Request		_request;
 		class Configuration	_config;
+		std::map<int, std::string>_status_codes;
 		std::map<std::string, std::string>_content_types;
 
+		void				initStatusCodes();
+		void				initContentTypes();
 		std::string 		fileNotFound();
 		std::string			createResponse();
 };
