@@ -7,20 +7,19 @@ CC				:=	@c++
 # STATIC
 RM				:=	@rm
 MKDIR_P			:=	@mkdir -p
-INC_DIR			:=	./src
 SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
 SRC				:=	main \
-					TCPServer \
-					HTTPRequest \
-					BuildResponse \
-					Configuration \
-					CGI \
-					utils
+					server/TCPServer \
+					server/Configuration \
+					request/Request \
+					response/Response \
+					response/CGI \
+					utils/utils
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)
-$(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(INC_DIR)/%.hpp
+$(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 					$(MKDIR_P) $(dir $@)
 					$(CC) $(CFLAGS) -c $< -o $@
 

@@ -1,5 +1,5 @@
-#include "TCPServer.hpp"
-#include "Configuration.hpp"
+#include "server/TCPServer.hpp"
+#include "server/Configuration.hpp"
 #include "main.hpp"
 
 int main(int argc, char **argv)
@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	if (argc == 2)
 		configuration.parseConfiguration(argv[1]);
 
-	TcpServer server = TcpServer(configuration);
+	TCPServer server = TCPServer(configuration);
 	server.startListen();
 
 	return 0;

@@ -1,0 +1,65 @@
+Start testing: Jan 01 15:25 CET
+----------------------------------------------------------
+1/2 Testing: RequestTest
+1/2 Test: RequestTest
+Command: "/mnt/d/Coding/Codam/Projecten/webserv/build/test/RequestTest"
+Directory: /mnt/d/Coding/Codam/Projecten/webserv/build/test
+"RequestTest" start time: Jan 01 15:25 CET
+Output:
+----------------------------------------------------------
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from RequestTest
+[ RUN      ] RequestTest.GET
+[       OK ] RequestTest.GET (0 ms)
+[ RUN      ] RequestTest.POST
+[       OK ] RequestTest.POST (0 ms)
+[ RUN      ] RequestTest.DELETE
+[       OK ] RequestTest.DELETE (0 ms)
+[ RUN      ] RequestTest.invalid_method
+[       OK ] RequestTest.invalid_method (0 ms)
+[----------] 4 tests from RequestTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 4 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RequestTest" end time: Jan 01 15:25 CET
+"RequestTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: ResponseTest
+2/2 Test: ResponseTest
+Command: "/mnt/d/Coding/Codam/Projecten/webserv/build/test/ResponseTest"
+Directory: /mnt/d/Coding/Codam/Projecten/webserv/build/test
+"ResponseTest" start time: Jan 01 15:25 CET
+Output:
+----------------------------------------------------------
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from ResponseTest
+[ RUN      ] ResponseTest.testPath
+www/index.html
+www/favicon.ico
+www/test.html
+[       OK ] ResponseTest.testPath (0 ms)
+[ RUN      ] ResponseTest.fileNotFound_default
+www/non_existing_file.html
+[       OK ] ResponseTest.fileNotFound_default (0 ms)
+[----------] 2 tests from ResponseTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 2 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"ResponseTest" end time: Jan 01 15:25 CET
+"ResponseTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jan 01 15:25 CET

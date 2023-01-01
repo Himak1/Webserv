@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wextra -Wall -Werror CMakeFiles/webserv.dir/server/Configuration.cpp.o CMakeFiles/webserv.dir/server/TCPServer.cpp.o CMakeFiles/webserv.dir/request/Request.cpp.o CMakeFiles/webserv.dir/response/Response.cpp.o CMakeFiles/webserv.dir/response/CGI.cpp.o CMakeFiles/webserv.dir/utils/utils.cpp.o CMakeFiles/webserv.dir/main.cpp.o -o ../bin/webserv 

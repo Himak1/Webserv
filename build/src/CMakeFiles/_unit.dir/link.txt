@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/lib_unit.a CMakeFiles/_unit.dir/server/Configuration.cpp.o CMakeFiles/_unit.dir/server/TCPServer.cpp.o CMakeFiles/_unit.dir/request/Request.cpp.o CMakeFiles/_unit.dir/response/Response.cpp.o CMakeFiles/_unit.dir/response/CGI.cpp.o CMakeFiles/_unit.dir/utils/utils.cpp.o
+/usr/bin/ranlib ../lib/lib_unit.a
