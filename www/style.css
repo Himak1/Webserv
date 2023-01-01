@@ -5,7 +5,7 @@
 	--main_color_link:#9fb2c8;
 	--light_green:#9fbac4;
 	--grey:#f0f0f0;
-	--off_white: #768a9b;
+	--off_white: #bed7ed;
   }
   
  /* BODY */
@@ -18,7 +18,7 @@ body{
 	padding:0px;
 	display: flex;
 	justify-content: center;
-	background-image: url('img/bg.jpg');
+	background-image: url('inc/bg.jpg');
 	background-repeat: no-repeat;
 	background-attachment: fixed;
 	background-size: cover;
@@ -140,4 +140,9 @@ table {
 	align-items: center;
 	justify-content: center;
 	text-decoration: none;
+	border-radius: 5px;
+}
+
+.item:hover a{
+	background-color: var(--main_color);
 }

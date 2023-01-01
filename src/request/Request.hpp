@@ -18,6 +18,7 @@ class Request
 		const std::string			getMethod() const;
 		const std::string			getURI() const;
 		const std::string			getHTTPVersion() const;
+		const std::string			getExtension() const;
 
 	private:
 		std::string					_method;
@@ -25,8 +26,10 @@ class Request
 		std::string					_http_version;
 		// std::vector<std::string>	_headers;
 		bool						_validity;
+		std::string					_extension;
 
 		void						checkValidity();
+		void						checkExtension();
 		void 						handleFileUpload(std::string request);
 };
 

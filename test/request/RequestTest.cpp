@@ -71,3 +71,5 @@ TEST(RequestTest, invalid_method)
 
 	EXPECT_FALSE(request.isValidMethod());
 }
+
+// TO DO: test getExtrension();

@@ -13,16 +13,27 @@ Response::Response(class Request request, class Configuration config)
 
 	if (_request.getURI() == "/")
 		_filename = _config.getPathWebsite() +  "/index.html";
-	else if (_request.getURI().find(".css", _request.getURI().length() - 4) != std::string::npos)
-		_filename = _config.getPathWebsite() + _request.getURI();
-	else if (_request.getURI() == "/favicon.ico")
-		_filename = _config.getPathWebsite() + _request.getURI();
-	else if (_request.getURI().find(".html", _request.getURI().length() - 5) != std::string::npos)
-		_filename = _config.getPathWebsite() + _request.getURI();
-	else
+	else if (_request.getURI().rfind('.') == std::string::npos)
 		_filename = _config.getPathWebsite() + _request.getURI() + ".html";
+	else
+		_filename = _config.getPathWebsite() + _request.getURI();
 
-	std::cout << _filename << std::endl;
+	_content_types = {
+		{ "text",	"Content-Type: text/plain\n" },
+		{ ".txt",	"Content-Type: text/plain; charset=utf-8\n" },
+		{ ".html",	"Content-Type: text/html; charset=utf-8\n" },
+		{ ".css",	"Content-Type: text/css; charset=utf-8\n" },
+		{ ".jpg",	"Content-type: image/jpg\n" },
+		{ ".jpeg",	"Content-type: image/jpeg\n" },
+		{ ".png",	"Content-type: image/png\n" },
+		{ ".mp4",	"Content-type: video/mp4\n" },
+		{ ".ico",	"Content-type: image/vnd.microsoft.icon\n" },
+		{ ".php",	"Content-Type: text/plain; charset=utf-8\n" },
+		{ ".js",	"Content-Type: application/javascript\n" },
+		{ ".gif",	"Content-Type: image/gif\n" }
+	};
+
+	// std::cout << _filename << std::endl;
 }
 
 // DESTRUCTOR
@@ -65,17 +76,19 @@ std::string Response::fileNotFound()
 	return createResponse();
 }
 
-std::string Response::createResponse() const
+std::string Response::createResponse()
 {
-	std::string content_type;
-	if (_filename.find(".css", _filename.length() - 4) != std::string::npos)
-		content_type = "Content-Type: text/css; charset=utf-8\nContent-Length: ";
+	std::string extension = _request.getExtension();
 
-	content_type = "\nContent-Type: text/html\nContent-Length: ";
+	if(_content_types.find(extension) == _content_types.end())
+		return fileNotFound();
+
 	std::ostringstream ss;
 	ss	<<  _request.getHTTPVersion() << " "
 		<< _status
-		<< content_type
+		<< "\n"
+		<< _content_types[extension]
+		<< "Content-Length: "
 		<< _content.size() << "\n\n"
 		<< _content;
 	return ss.str();

@@ -8,6 +8,7 @@ Request::Request()
 {
 	_http_version = "HTTP/1.1";
 	_validity = false;
+	_extension = ".html";
 }
 
 Request::Request(const Request &src) { *this = src; }
@@ -22,6 +23,7 @@ Request &Request::operator = (const Request &src) {
 		this->_uri = src._uri;
 		this->_http_version = src._http_version;
 		this->_validity = src._validity;
+		this->_extension = src._extension;
 	}
 	return (*this);
 }
@@ -47,6 +49,7 @@ void Request::initRequest(std::string request)
 	if (strings.size() > 2) _http_version = strings[2].substr(0, 8);
 
 	checkValidity();
+	checkExtension();
 
 	if (_method == "POST" && _uri == "/upload")
 		handleFileUpload(request);
@@ -56,6 +59,7 @@ bool 			  Request::isValidMethod() const { return _validity; }
 const std::string Request::getMethod() const { return _method; }
 const std::string Request::getURI() const { return _uri; }
 const std::string Request::getHTTPVersion() const { return _http_version; }
+const std::string Request::getExtension() const { return _extension; }
 
 // PRIVATE FUNCTIONS
 void Request::checkValidity()
@@ -64,6 +68,15 @@ void Request::checkValidity()
 	if (_http_version == "HTTP/1.1"
 		&& (_method == "GET" || _method == "POST" || _method == "DELETE"))
 		_validity = true;
+}
+
+void Request::checkExtension()
+{
+	const size_t extension_start = _uri.rfind('.');
+	if (extension_start == std::string::npos)
+		_extension = ".html";
+	else
+		_extension = _uri.substr(extension_start, _uri.length());
 }
 
 // TO DO: not working without CGI?

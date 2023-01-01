@@ -5,6 +5,7 @@
 # include "../request/Request.hpp"
 
 # include <string>
+# include <map>
 
 class Response
 {
@@ -20,9 +21,10 @@ class Response
 		std::string			_content;
 		class Request		_request;
 		class Configuration	_config;
+		std::map<std::string, std::string>_content_types;
 
 		std::string 		fileNotFound();
-		std::string			createResponse() const;
+		std::string			createResponse();
 };
 
 #endif
