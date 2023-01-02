@@ -7,7 +7,13 @@
 enum TokenTypes
 {
 	INVALID_TOKEN = 0,
-	BRACKET
+	BRACKET_OPEN,
+	BRACKET_CLOSE,
+	FORWARD_SLASH,
+	BACKWARDS_SLASH,
+	SEMICOLON,
+	HASHTAG,
+	DOLLAR
 };
 
 class Token
@@ -24,8 +30,6 @@ class Token
 	private:
 		int			_tokenType;
 		std::string	_token;
-
-
 };
 
 std::ostream&		operator<<( std::ostream& o, Token const& i );

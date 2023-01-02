@@ -5,6 +5,7 @@
 */
 
 Token::Token()
+	: _tokenType(INVALID_TOKEN)
 {
 }
 
@@ -46,8 +47,18 @@ std::ostream&	operator<<( std::ostream& o, Token const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
+int&	Token::getToken() const
+{
+	return (_tokenType);
+}
+
+std::string&	Token::getToken() const
+{
+	return (_token);
+}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
+ 
