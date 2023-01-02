@@ -15,7 +15,7 @@ SRC				:=	main \
 					request/Request \
 					response/Response \
 					response/CGI \
-					utils/utils
+					utils/log
 OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)

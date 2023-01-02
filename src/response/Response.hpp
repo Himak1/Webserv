@@ -26,6 +26,7 @@ class Response
 
 		void				initStatusCodes();
 		void				initContentTypes();
+		std::string			readStream(std::string filename);
 		std::string 		fileNotFound();
 		std::string			createResponse();
 };

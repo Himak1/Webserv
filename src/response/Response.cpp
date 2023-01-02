@@ -1,6 +1,6 @@
 #include "Response.hpp"
 #include "CGI.hpp"
-#include "../utils/utils.hpp"
+#include "../utils/log.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -86,6 +86,20 @@ void	Response::initContentTypes()
 		{ ".js",	"Content-Type: application/javascript\n" },
 		{ ".gif",	"Content-Type: image/gif\n" }
 	};
+}
+
+std::string Response::readStream(std::string filename) {
+	std::basic_ifstream<char> input_stream(filename.c_str());
+	if (!input_stream.is_open()) {
+		input_stream.close();
+		return "fileNotFound";
+	}
+
+	std::ostringstream ss;
+	std::string line;
+	while (std::getline(input_stream, line))
+		ss << line << std::endl;
+	return ss.str();
 }
 
 std::string Response::fileNotFound()

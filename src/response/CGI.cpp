@@ -1,5 +1,5 @@
 #include "CGI.hpp"
-#include "../utils/utils.hpp"
+#include "../utils/log.hpp"
 
 #include <unistd.h>
 #include <iostream>

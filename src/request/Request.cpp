@@ -17,7 +17,8 @@ Request::Request(const Request &src) { *this = src; }
 Request::~Request() { }
 
 // Overload operator
-Request &Request::operator = (const Request &src) {
+Request &Request::operator = (const Request &src)
+{
 	if (this != &src) {
 		this->_method = src._method;
 		this->_uri = src._uri;
