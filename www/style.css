@@ -74,7 +74,7 @@ h1 {
 	font-size:10pt;
 	color: var(--main_color);
 	padding: 0px;
-	margin:50px 0 5px 0;
+	margin:20px 0 5px 0;
 	font-weight:bold;
 } p {
 	font-size: 10pt;
@@ -127,9 +127,9 @@ table {
 	/* var(--secundairy_color); */
 	border: none;
 	color:white;
-	width:100px;
+	width:120px;
 	height:50px;
-	margin:0 0 20px 0;
+	margin:0 0 30px 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -150,9 +150,9 @@ table {
 	border: none;
 	opacity: 0.6;
 	color:white;
-	width:100px;
+	width:120px;
 	height:50px;
-	margin:0 0 20px 0;
+	margin:0 0 30px 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -165,8 +165,8 @@ table {
 }
 
 .input_field {
-	width:143px;
-	margin-right: 10px;
+	width:110px;
+	margin-right: 34px;
 	height:18px;
 }
 
@@ -174,7 +174,7 @@ table {
 	background-color: var(--secundairy_color);
 	border: none;
 	color:var(--off_white);
-	width:100px;
+	width:120px;
 	height:25px;
 	float:right;
 	text-decoration: none;
