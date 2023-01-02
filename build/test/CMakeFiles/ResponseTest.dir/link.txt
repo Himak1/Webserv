@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wextra -Wall -Werror CMakeFiles/ResponseTest.dir/response/ResponseTest.cpp.o CMakeFiles/ResponseTest.dir/main_test.cpp.o -o ResponseTest  ../lib/lib_unit.a ../lib/libgtest_main.a ../lib/libgtest.a -lpthread 

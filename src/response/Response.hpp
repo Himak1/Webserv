@@ -13,21 +13,24 @@ class Response
 		Response(class Request request, class Configuration config);
 		~Response();
 		std::string         getMessage();
-		std::string			getFilename();
+		std::string			getFilepath();
 
 	private:
-		std::string			_filename;
-		std::string			_status;
+		std::string			_filepath;
+		int					_status;
 		std::string			_content;
-		class Request		_request;
-		class Configuration	_config;
+		const class Request		_request;
+		const class Configuration	_config;
 		std::map<int, std::string>_status_codes;
 		std::map<std::string, std::string>_content_types;
 
 		void				initStatusCodes();
 		void				initContentTypes();
-		std::string			readStream(std::string filename);
+		int					setStatus();
+		std::string 		redirect();
 		std::string 		fileNotFound();
+		std::string			createErrorHTML();
+		std::string			getFileContent();
 		std::string			createResponse();
 };
 

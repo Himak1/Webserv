@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wextra -Wall -Werror CMakeFiles/config_test.dir/configuration_tests/config_test.cpp.o CMakeFiles/config_test.dir/main_test.cpp.o -o config_test  ../lib/lib_unit.a ../lib/libgtest_main.a ../lib/libgtest.a -lpthread 

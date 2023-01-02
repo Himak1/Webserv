@@ -12,19 +12,19 @@ TEST(ResponseTest, testPath)
 	{
 		request.initRequest("GET / HTTP/1.1");
 		class Response respons(request, config);
-		EXPECT_EQ(respons.getFilename(), "www/index.html");
+		EXPECT_EQ(respons.getFilepath(), "www/index.html");
 	}
 
 	{
 		request.initRequest("GET /favicon.ico HTTP/1.1");
 		class Response respons(request, config);
-		EXPECT_EQ(respons.getFilename(), "www/favicon.ico");
+		EXPECT_EQ(respons.getFilepath(), "www/favicon.ico");
 	}
 
 	{
 		request.initRequest("GET /test HTTP/1.1");
 		class Response respons(request, config);
-		EXPECT_EQ(respons.getFilename(), "www/test.html");
+		EXPECT_EQ(respons.getFilepath(), "www/test.html");
 	}
 }
 
@@ -34,12 +34,12 @@ TEST(ResponseTest, fileNotFound_default)
 	request.initRequest("GET /non_existing_file HTTP/1.1");
 
 	std::string expected_respons = "HTTP/1.1 404 Not Found\n" \
-		"Content-Type: text/html\nContent-Length: " \
-		"131\n\n" \
+		"Content-Type: text/html; charset=utf-8\nContent-Length: " \
+		"133\n\n" \
 		"<!DOCTYPE html>" \
 		"<html lang=\"en\">" \
-		"<head><title>404 Not Found</title></head>" \
-		"<body><center><h1>404 Not Found</h1></center>" \
+		"<head><title>404 Not Found\n</title></head>" \
+		"<body><center><h1>404 Not Found\n</h1></center>" \
 		"</body></html>";
 
 	class Response respons(request, config);
