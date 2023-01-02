@@ -14,10 +14,10 @@ class CGI
 		std::string         ExecuteCGI();
 
 	private:
-		class Request		_request;
-		class Configuration	_config;
-		char*				_pathSscript;
-		char*				_path[2];
+		const class Request			_request;
+		const class Configuration	_config;
+		char*						_pathSscript;
+		char*						_path[2];
 };
 
 #endif

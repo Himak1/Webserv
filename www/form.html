@@ -1,5 +1,54 @@
-<form action = "/cgi-bin/post_data.cgi" method="POST" enctype="multipart/form-data">
-	First Name: <input type = "text" name = "first_name"><br />
-	Last Name: <input type = "text" name = "last_name" />
-   <input type = "submit" value = "Submit" />
-</form>
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>webserv</title>
+		<link rel='stylesheet' type='text/css' href='style.css'>
+	</head>
+<body>
+	<div id="content">
+		<a href="/"><h1>webserv</h1></a>
+		
+		<h3 class="">GET</h3>
+		<div class="column">
+			<a class="item" href="/index.php">index.php</a>
+			<a class="item" href="/index.py">index.py</a>
+			<a class="item" href="/directory">directory list</a>
+		</div>
+		<div class="column">
+			<a class="item" target="_blank" href="/inc/jpg.jpg">jpg</a>
+			<a class="item" target="_blank" href="/inc/gif.gif">gif</a>
+			<a class="item" target="_blank" href="/inc/text.txt">txt</a>
+		</div>
+		<div class="column">
+			<a class="item" target="_blank" href="/404">error 404</a>
+			<a class="item" href="/permanently_moved">redirect 301</a>
+			<a class="item" href="/inc/temporary_unavailable">redirect 302</a>
+		</div>
+
+		<h3 class="">FORM</h3>
+		<form class="form" action = "/cgi-bin/post_data.cgi" method="POST" enctype="multipart/form-data">
+			<input class="input_field" placeholder="First Name" type = "text" name = "first_name"/>
+			<input class="input_field" placeholder="Last Name" type = "text" name = "last_name"/>
+			<input class="submit_button" type = "submit" value = "Submit" />
+		</form>
+		<h3 class="">POST</h3>
+		<div class="column">
+			<div class="item_active">form</div>
+			<a class="item" href="/file_upload">file upload</a>
+		</div>
+		<div class="column">
+			<a class="item" href="/cookie">cookies</a>
+			<a class="item" href="/session">session</a>
+		</div>
+		
+		<h3>DELETE</h3>
+		<div class="column">
+			<a class="item" href="/delete/" >delete directory</a>
+		</div>
+
+	</div>
+</body>
+</html>
+
+

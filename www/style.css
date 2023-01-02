@@ -1,18 +1,16 @@
 /* VARIABLES */
 :root {
-	--main_color:#13488d;
-	--secundairy_color: #09477d;
+	--main_color:#09477d;
+	--secundairy_color: #194072;
 	--main_color_link:#9fb2c8;
-	--light_green:#9fbac4;
-	--grey:#f0f0f0;
 	--off_white: #bed7ed;
   }
   
  /* BODY */
 body{
 	text-align: left;
-	font-family: Roboto;
-	font-size: 10pt;
+	font-family: Verdana;
+	font-size: 9pt;
 	color: var(--main_color);
 	margin:0px;
 	padding:0px;
@@ -58,18 +56,14 @@ br {
 }
 
 h1 {
-	font-family:Roboto;
 	font-size:18pt;
 	letter-spacing: 2px;
 	color: var(--main_color_link);
 	padding: 0px;
 	margin:0px;
-	margin-top: -18px;
-	margin-bottom: 18px;
 	font-weight:normal;
 	text-align:center;
 } h2 {
-	font-family:Roboto;
 	font-size:10pt;
 	color: var(--secundairy_color);
 	padding: 0px;
@@ -77,14 +71,12 @@ h1 {
 	margin:0px;
 	font-weight:bold;
 } h3 {
-	font-family:Roboto;
 	font-size:10pt;
 	color: var(--main_color);
 	padding: 0px;
-	margin:50px 0 0 0;
+	margin:50px 0 5px 0;
 	font-weight:bold;
 } p {
-	font-family: Roboto;
 	font-size: 10pt;
 	font-weight:normal;
 	margin:0px;
@@ -131,8 +123,33 @@ table {
 }
 
 .item {
-	background-color: var(--off_white);
+	background-image: linear-gradient(var(--secundairy_color), var(--main_color)); 
+	/* var(--secundairy_color); */
 	border: none;
+	color:white;
+	width:100px;
+	height:50px;
+	margin:0 0 20px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	border-radius: 5px;
+	transition: 1s;
+}
+
+.item:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
+.item_active {
+	background-color: var(--secundairy_color);
+	border: none;
+	opacity: 0.6;
+	color:white;
 	width:100px;
 	height:50px;
 	margin:0 0 20px 0;
@@ -143,6 +160,44 @@ table {
 	border-radius: 5px;
 }
 
-.item:hover a{
-	background-color: var(--main_color);
+.form {
+	height:30px;
 }
+
+.input_field {
+	width:143px;
+	margin-right: 10px;
+	height:18px;
+}
+
+.submit_button {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:var(--off_white);
+	width:100px;
+	height:25px;
+	float:right;
+	text-decoration: none;
+	border-radius: 5px;
+	transition: 1s;
+}
+
+.submit_button:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
+.choose_file {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:white;
+	width:200px;
+	height:25px;
+	float:left;
+	text-decoration: none;
+	border-radius: 5px;
+	transition: 1s;
+}
+

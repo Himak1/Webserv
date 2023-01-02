@@ -18,21 +18,21 @@ namespace http
 	public:
 		TCPServer(class Configuration configuration);
 		~TCPServer();
-		void				startListen();
+		void						startListen();
 
 	private:
-		class Configuration	_config;
-		class Request		_request;
-		int					_socket;
-		int					_new_socket;
-		struct sockaddr_in	_socketAddress;
-		unsigned int		_socketAddress_len;
-		std::string			_serverMessage;
-		int 				startServer();
-		void				closeServer();
-		void				acceptConnection(int &new_socket);
-		void				receiveRequest();
-		void				sendResponse();
+		const class Configuration	_config;
+		class Request				_request;
+		int							_socket;
+		int							_new_socket;
+		struct sockaddr_in			_socketAddress;
+		unsigned int				_socketAddress_len;
+		std::string					_serverMessage;
+		int 						startServer();
+		void						closeServer();
+		void						acceptConnection(int &new_socket);
+		void						receiveRequest();
+		void						sendResponse();
 	};
 
 } // namespace http
