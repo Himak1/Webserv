@@ -23,9 +23,9 @@ void	connect_to_socket()
 	static int PORT = 8000;
 
 
-	pid = fork();
-	if (!pid)
-	{
+	// pid = fork();
+	// if (!pid)
+	// {
 		char buffer[1024] = {0};
 		if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
@@ -53,17 +53,17 @@ void	connect_to_socket()
 			// return -1;
 		}
 		
-		char *hello = "GET";
+		char *hello = "GET ";
 
 		send(sock , hello , strlen(hello) , 0 );
 		printf("Hello message sent to port %i\n", PORT);
 		valread = read( sock , buffer, 1024);
 		printf("%s\n",buffer );
 		exit(0);
-	}
-	wait(NULL);
+	// }
+	// wait(NULL);
 	
-	PORT++;	
+	// PORT++;	
 }
 
 int main(int argc, char const *argv[])

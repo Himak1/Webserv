@@ -11,9 +11,7 @@ int main(int argc, char **argv)
 		configuration.parseConfiguration(argv[1]);
 
 	TcpServer server8000 = TcpServer(configuration);
-	TcpServer server8001 = TcpServer(configuration);
-	server8000.startListen();
-	server8001.startListen();
+
 
 
 	return 0;

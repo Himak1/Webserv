@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <fstream>
 
+#define QUEU_LIMIT_LISTEN 20
+
 namespace
 {;
 	const int BUFFER_SIZE = 30720;
@@ -42,23 +44,26 @@ namespace http
 TcpServer::TcpServer(class Configuration configuration)
 	: _config(configuration), _socketAddress(), 
 	_socketAddress_len(sizeof(_socketAddress)),
-	_socket_fds() 
+	_socket_fds(), _number_of_socket_fds(0)
 {
 	_socketAddress.sin_family = AF_INET;
+	_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 	// _socketAddress.sin_port = htons(_config.getPort());
 
-	// voor testing purposes (luisteren naar multi ports)
-	static int port = 8000;
-	_socketAddress.sin_port = htons(port++); 
+	for (int i = 0; i < 1; i++)		// loop through ports (from config file)
+	{
+		static int port = 8000;
+		_socketAddress.sin_port = htons(port++); 
 
-	_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
-	_number_of_socket_fds = 0;
-	if (startServer() != 0) {
-		std::ostringstream ss;
-		ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
-		log(ss.str());
-	}
+
+		if (startServer() != 0) {
+			std::ostringstream ss;
+			ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
+			log(ss.str());
+		}
+	}	
 	_isServerRunning = true;
+	startListen();
 }
 
 			// DESTRUCTOR
@@ -89,31 +94,20 @@ int TcpServer::startServer()
 	return 0;
 }
 
-void TcpServer::closeServer()
-{
-	// close(_socket_fds[0].fd); 	// exit closes all fds(?)
-	exit(0);					
-								/*
-									Als we threads gaan gebruiken geen exit() meer.
-									Exit() sluit dan automatisch alle threads, maar dat is
-									c++11 functionaliteit. Dus in dat geval zouden we zelf 
-									threads moeten sluiten en dan exit oproepen
-								*/
-}
-
-// _socket_fds[0] holds listening socket
 void TcpServer::startListen()
 {
 	int	poll_count;
 	
-	if (listen(_socket_fds[0].fd, 20) < 0)
-		exitWithError("Socket listen failed");
+	for (int i = 0; i < _listening_socket.size(); i++) {
+		if (listen(_listening_socket[i], QUEU_LIMIT_LISTEN) < 0)
+			exitWithError("Socket listen failed");
+	}
 	logStartupMessage(_socketAddress);
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 		
 
-		// sleep(1);
+		sleep(1);
 
 								/*
 									Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
@@ -165,6 +159,25 @@ void TcpServer::acceptConnection(int idx)
 			<< ntohs(_socketAddress.sin_port) << "; Socket fd: " << _socket_fds.back().fd << std::endl;
 }
 
+// Finds the socket where poll() found activity 
+void	TcpServer::lookupActiveSocket()
+{
+	for (int i = 0; i < _number_of_socket_fds; i++) {
+		if (_socket_fds[i].revents & POLLIN) {
+																// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
+			for (int j = 0; i < _listening_socket.size(); i++)													
+				if (_socket_fds[i].fd == _listening_socket[j]) 			// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
+					acceptConnection(j);
+				else 
+					receiveRequest(i);
+		} else if (_socket_fds[i].revents & POLLOUT) {
+			sendResponse(i);
+		}
+
+	}  													 		
+}
+
+
 // idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
 void TcpServer::receiveRequest(int idx)
 {
@@ -186,8 +199,8 @@ void TcpServer::receiveRequest(int idx)
 	_socket_fds[idx].events = POLLIN | POLLOUT;			// Socket heeft data gestuurd en kan dus nu op POLLIN | POLLOUT zodat hij data kan ontvangen
 
 	_request.initHTTPRequest(std::string(buff));
-	if (!_request.isValidMethod())
-		exitWithError("Invalid method, only GET, POST and DELETED are supported");
+	// if (!_request.isValidMethod())
+	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
 	std::ostringstream ss;
 	ss	<< "Received request: Method = " << _request.getMethod()
 		<< " URI = " 					 << _request.getURI()
@@ -218,23 +231,20 @@ void TcpServer::sendResponse(int idx)
 	}
 }
 
-// Finds the socket where poll() found activity 
-void	TcpServer::lookupActiveSocket()
-{
-	for (int i = 0; i < _number_of_socket_fds; i++) {
-		if (_socket_fds[i].revents & POLLIN) {
-																// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
-			for (int j = 0; i < _listening_socket.size(); i++)													
-				if (_socket_fds[i].fd == _listening_socket[j]) 			// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
-					acceptConnection(j);
-				else 
-					receiveRequest(i);
-		} else if (_socket_fds[i].revents & POLLOUT) {
-			sendResponse(i);
-		}
 
-	}  													 		
+
+void TcpServer::closeServer()
+{
+	// close(_socket_fds[0].fd); 	// exit closes all fds(?)
+	exit(0);					
+								/*
+									Als we threads gaan gebruiken geen exit() meer.
+									Exit() sluit dan automatisch alle threads, maar dat is
+									c++11 functionaliteit. Dus in dat geval zouden we zelf 
+									threads moeten sluiten en dan exit oproepen
+								*/
 }
+
 
 
 
