@@ -45,7 +45,12 @@ TcpServer::TcpServer(class Configuration configuration)
 	_socket_fds() 
 {
 	_socketAddress.sin_family = AF_INET;
-	_socketAddress.sin_port = htons(_config.getPort());
+	// _socketAddress.sin_port = htons(_config.getPort());
+
+	// voor testing purposes (luisteren naar multi ports)
+	static int port = 8000;
+	_socketAddress.sin_port = htons(port++); 
+
 	_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 	_number_of_socket_fds = 0;
 	if (startServer() != 0) {
@@ -53,7 +58,7 @@ TcpServer::TcpServer(class Configuration configuration)
 		ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
 		log(ss.str());
 	}
-	_serverRunning = true;
+	_isServerRunning = true;
 }
 
 			// DESTRUCTOR
@@ -73,7 +78,7 @@ int TcpServer::startServer()
 		return 1;
 	}
 	fcntl(listener.fd, F_SETFL, O_NONBLOCK);
-	
+	_listening_socket.push_back(listener.fd);
 	listener.events = POLLIN;			// listener socket only reports when ready to read on inc connection
 	_socket_fds.push_back(listener);
 	_number_of_socket_fds++;
@@ -86,7 +91,7 @@ int TcpServer::startServer()
 
 void TcpServer::closeServer()
 {
-	close(_socket_fds[0].fd); 	// exit closes all fds(?)
+	// close(_socket_fds[0].fd); 	// exit closes all fds(?)
 	exit(0);					
 								/*
 									Als we threads gaan gebruiken geen exit() meer.
@@ -104,11 +109,11 @@ void TcpServer::startListen()
 	if (listen(_socket_fds[0].fd, 20) < 0)
 		exitWithError("Socket listen failed");
 	logStartupMessage(_socketAddress);
-	while (_serverRunning) {
+	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 		
 
-		sleep(1);
+		// sleep(1);
 
 								/*
 									Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
@@ -123,11 +128,11 @@ void TcpServer::startListen()
 	}	
 }
 
-void TcpServer::acceptConnection() 
+void TcpServer::acceptConnection(int idx) 
 {
 	struct pollfd	add_to_socket_fd;
 
-	add_to_socket_fd.fd = accept(_socket_fds[0].fd, (sockaddr *)&_socketAddress, &_socketAddress_len);
+	add_to_socket_fd.fd = accept(_listening_socket[idx], (sockaddr *)&_socketAddress, &_socketAddress_len);
 	if (add_to_socket_fd.fd == -1)
 		exitWithError("ERROR: accept() (TcpServer::acceptConnection");
 
@@ -217,11 +222,13 @@ void TcpServer::sendResponse(int idx)
 void	TcpServer::lookupActiveSocket()
 {
 	for (int i = 0; i < _number_of_socket_fds; i++) {
-		if (_socket_fds[i].revents & POLLIN) {					// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
-			if (_socket_fds[i].fd == _socket_fds[0].fd) 		// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
-				acceptConnection();
-			else 
-				receiveRequest(i);
+		if (_socket_fds[i].revents & POLLIN) {
+																// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
+			for (int j = 0; i < _listening_socket.size(); i++)													
+				if (_socket_fds[i].fd == _listening_socket[j]) 			// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
+					acceptConnection(j);
+				else 
+					receiveRequest(i);
 		} else if (_socket_fds[i].revents & POLLOUT) {
 			sendResponse(i);
 		}

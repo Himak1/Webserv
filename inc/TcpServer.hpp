@@ -25,13 +25,13 @@ public:
 private:
 	class Configuration	_config;
 	class HTTPRequest	_request;
-	// int					_listening_socket;
+	std::vector<int>	_listening_socket;
 	// int					_new_socket;
 	struct sockaddr_in	_socketAddress;
 	unsigned int		_socketAddress_len;
 	std::string			_serverMessage;
 	std::string			_unsendServerMessage;
-	void				acceptConnection();
+	void				acceptConnection(int);
 	void				closeServer();
 	void				receiveRequest(int);
 	void				sendResponse(int);
@@ -39,7 +39,7 @@ private:
 	std::vector<pollfd>	_socket_fds;
    	nfds_t				_number_of_socket_fds;
 
-	bool				_serverRunning;
+	bool				_isServerRunning;
 	void				lookupActiveSocket();
 };
 

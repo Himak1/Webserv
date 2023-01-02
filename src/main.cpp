@@ -10,8 +10,11 @@ int main(int argc, char **argv)
 	if (argc == 2)
 		configuration.parseConfiguration(argv[1]);
 
-	TcpServer server = TcpServer(configuration);
-	server.startListen();
+	TcpServer server8000 = TcpServer(configuration);
+	TcpServer server8001 = TcpServer(configuration);
+	server8000.startListen();
+	server8001.startListen();
+
 
 	return 0;
 }
