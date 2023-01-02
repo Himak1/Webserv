@@ -6,7 +6,7 @@ class Request request;
 
 TEST(RequestTest, GET)
 {
-	std::string test_string = "GET /hello.htm HTTP/1.1\n" \
+	std::string test_string = "GET /hello.html HTTP/1.1\n" \
 		"User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\n" \
 		"Host: www.tutorialspoint.com\n" \
 		"Accept-Language: en-us\n" \
@@ -17,8 +17,9 @@ TEST(RequestTest, GET)
 
 	EXPECT_TRUE(request.isValidMethod());
 	EXPECT_EQ(request.getMethod(), "GET");
-	EXPECT_EQ(request.getURI(), "/hello.htm");
+	EXPECT_EQ(request.getURI(), "/hello.html");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
+	EXPECT_EQ(request.getExtension(), ".html");
 }
 
 TEST(RequestTest, POST)
@@ -39,6 +40,7 @@ TEST(RequestTest, POST)
 	EXPECT_EQ(request.getMethod(), "POST");
 	EXPECT_EQ(request.getURI(), "/cgi-bin/process.cgi");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
+	EXPECT_EQ(request.getExtension(), ".cgi");
 }
 
 TEST(RequestTest, DELETE)
@@ -56,6 +58,7 @@ TEST(RequestTest, DELETE)
 	EXPECT_EQ(request.getMethod(), "DELETE");
 	EXPECT_EQ(request.getURI(), "/echo/delete/json");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
+	EXPECT_EQ(request.getExtension(), ".html");
 }
 
 TEST(RequestTest, invalid_method)
@@ -72,4 +75,3 @@ TEST(RequestTest, invalid_method)
 	EXPECT_FALSE(request.isValidMethod());
 }
 
-// TO DO: test getExtrension();

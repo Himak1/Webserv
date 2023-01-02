@@ -93,6 +93,8 @@ int		Response::setStatus()
 	}
 	if (_request.getURI() == "/permanently_moved")
 		return 301;
+	if (_request.getURI() == "/temporary_unavailable")
+		return 302;
 	if (_filepath.rfind('/') > _config.getPathWebsite().length()) {
 		const char * dir = _filepath.substr(0, _filepath.rfind('/')).c_str();
 		struct stat sb;
@@ -127,7 +129,7 @@ std::string Response::createErrorHTML()
 	if (_status == 301 || _status == 302)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
 
-	// std::cout <<  _status_codes[_status] << std::endl;
+	std::cout <<  _status_codes[_status] << std::endl;
 	std::ostringstream ss;
 	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
 		<< _status_codes[_status]

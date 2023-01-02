@@ -3,12 +3,12 @@
 #include "../../src/request/Request.hpp"
 #include "../../src/response/Response.hpp"
 
-class Request request;
 class Configuration config;
 
 // TO DO: test with costum _config path
 TEST(ResponseTest, testPath) 
 {
+	class Request request;
 	{
 		request.initRequest("GET / HTTP/1.1");
 		class Response respons(request, config);
@@ -31,7 +31,8 @@ TEST(ResponseTest, testPath)
 // TO DO: test for costum 404 error html
 TEST(ResponseTest, fileNotFound_default)
 {
-	request.initRequest("GET /non_existing_file HTTP/1.1");
+	class Request request;
+	request.initRequest("GET /non_existing_file HTTP/1.1\n");
 
 	std::string expected_respons = "HTTP/1.1 404 Not Found\n" \
 		"Content-Type: text/html; charset=utf-8\nContent-Length: " \
@@ -43,6 +44,34 @@ TEST(ResponseTest, fileNotFound_default)
 		"</body></html>";
 
 	class Response respons(request, config);
+	EXPECT_EQ(respons.getMessage(), expected_respons);
+}
+
+// TO DO: test for costum 301
+TEST(ResponseTest, redirect301)
+{
+	class Request request;
+	request.initRequest("GET /permanently_moved HTTP/1.1\n");
+
+	std::cout <<  request.getURI() << std::endl;
+	std::string expected_respons = "HTTP/1.1 301 Moved Permanently\nContent-Type: text/html; charset=utf-8\nContent-Length: 219\n\n<!DOCTYPE html><html lang=\"en\"><head><title>301 Moved Permanently\n</title><meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/></head><body><center><h1>301 Moved Permanently\n</h1></center></body></html>";
+
+	class Response respons(request, config);
+	std::cout <<  respons.getMessage() << std::endl;
+	EXPECT_EQ(respons.getMessage(), expected_respons);
+}
+
+// TO DO: test for costum 302
+TEST(ResponseTest, redirect302)
+{
+	class Request request;
+	request.initRequest("GET /temporary_unavailable HTTP/1.1\n");
+
+	std::cout <<  request.getURI() << std::endl;
+	std::string expected_respons = "HTTP/1.1 302 Found\nContent-Type: text/html; charset=utf-8\nContent-Length: 195\n\n<!DOCTYPE html><html lang=\"en\"><head><title>302 Found\n</title><meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/></head><body><center><h1>302 Found\n</h1></center></body></html>";
+
+	class Response respons(request, config);
+	std::cout <<  respons.getMessage() << std::endl;
 	EXPECT_EQ(respons.getMessage(), expected_respons);
 }
 
