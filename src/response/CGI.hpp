@@ -6,21 +6,24 @@
 
 # include <string>
 
+using namespace std;
+
 class CGI
 {
 	public:
 		CGI(class Request request, class Configuration config);
 		~CGI();
-		std::string         ExecuteCGI();
+		string						ExecuteCGI();
+		char** 						getFormEnv() const;
 
 	private:
 		const class Request			_request;
 		const class Configuration	_config;
-		char*						_pathSscript;
+		char*						_pathScript;
 		char*						_path[2];
 		char**						_env;
 
-		char**						createEnv(std::string query_string);
+		char**						createEnv(string query_string);
 		void						freeEnv();
 };
 

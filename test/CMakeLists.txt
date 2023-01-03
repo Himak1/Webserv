@@ -2,6 +2,7 @@
 set(TEST_FILES
 	request/RequestTest.cpp
 	response/ResponseTest.cpp
+	response/CGITest.cpp
 	# !Add new test files here!
 )
 

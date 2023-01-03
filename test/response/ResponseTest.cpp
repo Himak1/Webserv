@@ -10,19 +10,19 @@ TEST(ResponseTest, testPath)
 {
 	class Request request;
 	{
-		request.initRequest("GET / HTTP/1.1");
+		request.initRequest("GET / HTTP/1.1\n");
 		class Response respons(request, config);
 		EXPECT_EQ(respons.getFilepath(), "www/index.html");
 	}
 
 	{
-		request.initRequest("GET /favicon.ico HTTP/1.1");
+		request.initRequest("GET /favicon.ico HTTP/1.1\n");
 		class Response respons(request, config);
 		EXPECT_EQ(respons.getFilepath(), "www/favicon.ico");
 	}
 
 	{
-		request.initRequest("GET /test HTTP/1.1");
+		request.initRequest("GET /test HTTP/1.1\n");
 		class Response respons(request, config);
 		EXPECT_EQ(respons.getFilepath(), "www/test.html");
 	}

@@ -15,11 +15,11 @@ TEST(RequestTest, GET)
 
 	request.initRequest(test_string);
 
-	EXPECT_TRUE(request.isValidMethod());
 	EXPECT_EQ(request.getMethod(), "GET");
 	EXPECT_EQ(request.getURI(), "/hello.html");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".html");
+	EXPECT_EQ(request.getStatus(), 200);
 }
 
 TEST(RequestTest, POST)
@@ -36,11 +36,11 @@ TEST(RequestTest, POST)
 
 	request.initRequest(test_string);
 
-	EXPECT_TRUE(request.isValidMethod());
 	EXPECT_EQ(request.getMethod(), "POST");
 	EXPECT_EQ(request.getURI(), "/cgi-bin/process.cgi");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".cgi");
+	EXPECT_EQ(request.getStatus(), 200);
 }
 
 TEST(RequestTest, DELETE)
@@ -54,11 +54,11 @@ TEST(RequestTest, DELETE)
 
 	request.initRequest(test_string);
 
-	EXPECT_TRUE(request.isValidMethod());
 	EXPECT_EQ(request.getMethod(), "DELETE");
 	EXPECT_EQ(request.getURI(), "/echo/delete/json");
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".html");
+	EXPECT_EQ(request.getStatus(), 200);
 }
 
 TEST(RequestTest, invalid_method)
@@ -71,7 +71,6 @@ TEST(RequestTest, invalid_method)
 		"Host: reqbin.com";
 
 	request.initRequest(test_string);
-
-	EXPECT_FALSE(request.isValidMethod());
+	EXPECT_EQ(request.getStatus(), 400);
 }
 

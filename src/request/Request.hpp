@@ -5,6 +5,8 @@
 # include <vector>
 # include <sstream>
 
+using namespace std;
+
 class Request
 {
 	public:
@@ -13,26 +15,23 @@ class Request
 		~Request();
 		Request &operator = (const Request &src);
 
-		void						initRequest(std::string request);
-		bool						isValidMethod() const;
-		const std::string			getMethod() const;
-		const std::string			getURI() const;
-		const std::string			getHTTPVersion() const;
-		const std::string			getExtension() const;
-		int							getStatus() const;
+		void				initRequest(string request);
+		const string		getMethod() const;
+		const string		getURI() const;
+		const string		getHTTPVersion() const;
+		const string		getExtension() const;
+		int					getStatus() const;
 
 	private:
-		std::string					_method;
-		std::string 				_uri;
-		std::string					_http_version;
-		// std::vector<std::string>	_headers;
-		bool						_is_valid;
-		std::string					_extension;
-		int							_status;
+		string				_method;
+		string 				_uri;
+		string				_http_version;
+		string				_extension;
+		int					_status;
 
-		void						checkValidity();
-		void						checkExtension();
-		void 						handleFileUpload(std::string request);
+		void				checkStatus();
+		void				checkExtension();
+		// void 				handleFileUpload(string request);
 };
 
 #endif

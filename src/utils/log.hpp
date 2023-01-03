@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 void		log(const std::string message);
 
 #endif

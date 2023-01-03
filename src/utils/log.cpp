@@ -8,15 +8,15 @@ void printTimestamp()
 {
 	struct timeval time;
 	gettimeofday(&time, 0);
-	std::time_t t = time.tv_sec;
-	std::tm* now = std::localtime(&t);
+	time_t t = time.tv_sec;
+	tm* now = localtime(&t);
 	char buf[100];
-	std::strftime(buf, 100, "%Y-%m-%d %X", now);
-	std::cout 	<< buf;
+	strftime(buf, 100, "%Y-%m-%d %X", now);
+	cout 	<< buf;
 }
 
-void log(const std::string message)
+void log(const string message)
 {
 	printTimestamp();
-	std::cout << "   " << message << std::endl;
+	cout << "   " << message << endl;
 }

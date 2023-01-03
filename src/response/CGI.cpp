@@ -7,39 +7,40 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <stdlib.h>
-// #include <sstream>
-// #include <fstream>
+
 
 // CONSTRUCTOR
 CGI::CGI(class Request request, class Configuration config)
 	: _request(request), _config(config)
 {
-	std::string script_name = _request.getURI();
+	string script_name = _request.getURI();
 	int query_start = script_name.find(".cgi") + 4;
-	std::string query_string = script_name.substr(query_start, script_name.length()); 
+	string query_string = script_name.substr(query_start, script_name.length()); 
 	script_name = script_name.substr(0, query_start);
-	std::string path_from_request = _config.getPathWebsite() + script_name;
+	string path_from_request = _config.getPathWebsite() + script_name;
 	// mogen we realpath() gebruiken?
-	_pathSscript = realpath(&path_from_request[0], NULL);
-	_path[0] = &_pathSscript[0];
+	_pathScript = realpath(&path_from_request[0], NULL);
+	_path[0] = &_pathScript[0];
 	_path[1] = NULL;
-
+	
 	_env = createEnv(query_string);
 
 	// char* data = getenv("QUERY_STRING");
-	// std::cout << "GETENV " << data << std::endl;
+	// cout << "GETENV " << data << endl;
 }
 
 // DESTRUCTOR
 CGI::~CGI() {
-	free(_pathSscript);
+	free(_pathScript);
 	freeEnv();
 }
 
 // PUBLIC FUNTIONS
+char** 	CGI::getFormEnv() const { return _env; }
+
 #define CGI_BUFSIZE 1024
 
-std::string CGI::ExecuteCGI()
+string CGI::ExecuteCGI()
 {
 	// save stdin and stdout so we can restore them later
 	int	saveStdin = dup(STDIN_FILENO);
@@ -70,12 +71,12 @@ std::string CGI::ExecuteCGI()
 	dup2(saveStdin, STDIN_FILENO);
 	dup2(saveStdout, STDOUT_FILENO);
 	close(fd[1]);
-	std::string message(buffer);
+	string message(buffer);
 
 	return message;
 }
 
-char**	CGI::createEnv(std::string str)
+char**	CGI::createEnv(string str)
 {
 
 	// create list of environment
@@ -83,8 +84,8 @@ char**	CGI::createEnv(std::string str)
 
 	int			key_size;
 	int 		value_size;
-	std::list<std::string>env_list;
-	std::string entry;
+	list<string>env_list;
+	string entry;
 	while (true) {
 		key_size = str.find("=");
 		entry = str.substr(0, key_size);
@@ -93,7 +94,7 @@ char**	CGI::createEnv(std::string str)
 		entry += "=" + str.substr(0, value_size);
 		str = str.substr(value_size + 1, str.length());
 		env_list.push_back(entry);
-		if (str.find("=") == std::string::npos)
+		if (str.find("=") == string::npos)
 			break ;
 	}
 
@@ -102,12 +103,12 @@ char**	CGI::createEnv(std::string str)
 		return NULL;
 
 	_env = new char*[env_list.size() + 1];
-	std::list<std::string>::iterator it;
+	list<string>::iterator it;
 	int i = 0;
 	for (it = env_list.begin(); it != env_list.end(); it++) {
 		_env[i] = new char[(*it).length() + 1];
 		_env[i] = strcpy(_env[i], (const char*)(*it).c_str());
-		// std::cout << _env[i] << std::endl;
+		// cout << _env[i] << endl;
 		i++;
 	}
 	_env[i] = NULL;

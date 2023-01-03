@@ -13,7 +13,7 @@ Response::Response(class Request request, class Configuration config)
 {
 	if (_request.getURI() == "/")
 		_filepath = _config.getPathWebsite() +  "/index.html";
-	else if (_request.getURI().rfind('.') == std::string::npos)
+	else if (_request.getURI().rfind('.') == string::npos)
 		_filepath = _config.getPathWebsite() + _request.getURI() + ".html";
 	else
 		_filepath = _config.getPathWebsite() + _request.getURI();
@@ -26,15 +26,15 @@ Response::Response(class Request request, class Configuration config)
 Response::~Response() { }
 
 // PUBLIC FUNTIONS
-std::string Response::getFilepath() { return _filepath; }
+string Response::getFilepath() { return _filepath; }
 
-std::string Response::getMessage()
+string Response::getMessage()
 {
 	_status = setStatus();
 
 	if (_status == 400)
 		_content = createErrorHTML();
-	if (_filepath.find(".cgi") != std::string::npos) {
+	if (_filepath.find(".cgi") != string::npos) {
 		class CGI CGI(_request, _config);
 		_content = CGI.ExecuteCGI();
 	}
@@ -88,10 +88,10 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
-	std::cout << _request.getStatus() << std::endl;
+	cout << _request.getStatus() << endl;
 	if (_request.getStatus() != 200)
 		return _request.getStatus();
-	std::basic_ifstream<char> input_stream(_filepath.c_str());
+	basic_ifstream<char> input_stream(_filepath.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();
 		return 200;
@@ -109,14 +109,14 @@ int		Response::setStatus()
 	return 404;
 }
 
-std::string Response::redirect()
+string Response::redirect()
 {
 	// TO DO: costum redirect pages
 	// TO DO: error codes from 301 not correctly displayed on terminal
 	return createErrorHTML();
 }
 
-std::string Response::fileNotFound()
+string Response::fileNotFound()
 {
 	_status = 404;
 
@@ -128,14 +128,14 @@ std::string Response::fileNotFound()
 	return createErrorHTML();
 }
 
-std::string Response::createErrorHTML()
+string Response::createErrorHTML()
 {
-	std::string meta  = "";
+	string meta  = "";
 	if (_status == 301 || _status == 302)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
 
-	std::cout <<  _status_codes[_status] << std::endl;
-	std::ostringstream ss;
+	cout <<  _status_codes[_status] << endl;
+	ostringstream ss;
 	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
 		<< _status_codes[_status]
 		<< "</title>"
@@ -146,20 +146,20 @@ std::string Response::createErrorHTML()
 	return ss.str();
 }
 
-std::string Response::getFileContent()
+string Response::getFileContent()
 {
-	std::ifstream input_stream(_filepath.c_str());
+	ifstream input_stream(_filepath.c_str());
 
-	std::ostringstream ss;
-	std::string line;
-	while (std::getline(input_stream, line))
-		ss << line << std::endl;
+	ostringstream ss;
+	string line;
+	while (getline(input_stream, line))
+		ss << line << endl;
 	return ss.str();
 }
 
-std::string Response::createResponse()
+string Response::createResponse()
 {
-	std::ostringstream ss;
+	ostringstream ss;
 	ss	<< _request.getHTTPVersion() << " "
 		<< _status_codes[_status]
 		<< _content_types[ _request.getExtension()]

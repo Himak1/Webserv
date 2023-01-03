@@ -7,31 +7,33 @@
 # include <string>
 # include <map>
 
+using namespace std;
+
 class Response
 {
 	public:
 		Response(class Request request, class Configuration config);
 		~Response();
-		std::string					getMessage();
-		std::string					getFilepath();
+		string						getMessage();
+		string						getFilepath();
 
 	private:
-		std::string					_filepath;
+		string						_filepath;
 		int							_status;
-		std::string					_content;
+		string						_content;
 		const class Request			_request;
 		const class Configuration	_config;
-		std::map<int, std::string>	_status_codes;
-		std::map<std::string, std::string>_content_types;
+		map<int, string>			_status_codes;
+		map<string, string>			_content_types;
 
 		void						initStatusCodes();
 		void						initContentTypes();
 		int							setStatus();
-		std::string 				redirect();
-		std::string 				fileNotFound();
-		std::string					createErrorHTML();
-		std::string					getFileContent();
-		std::string					createResponse();
+		string 						redirect();
+		string 						fileNotFound();
+		string						createErrorHTML();
+		string						getFileContent();
+		string						createResponse();
 };
 
 #endif
