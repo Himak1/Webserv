@@ -19,14 +19,16 @@ class Request
 		const std::string			getURI() const;
 		const std::string			getHTTPVersion() const;
 		const std::string			getExtension() const;
+		int							getStatus() const;
 
 	private:
 		std::string					_method;
 		std::string 				_uri;
 		std::string					_http_version;
 		// std::vector<std::string>	_headers;
-		bool						_validity;
+		bool						_is_valid;
 		std::string					_extension;
+		int							_status;
 
 		void						checkValidity();
 		void						checkExtension();

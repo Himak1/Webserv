@@ -18,6 +18,10 @@ class CGI
 		const class Configuration	_config;
 		char*						_pathSscript;
 		char*						_path[2];
+		char**						_env;
+
+		char**						createEnv(std::string query_string);
+		void						freeEnv();
 };
 
 #endif

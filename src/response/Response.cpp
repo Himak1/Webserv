@@ -32,7 +32,9 @@ std::string Response::getMessage()
 {
 	_status = setStatus();
 
-	if (_request.getMethod() == "POST") {
+	if (_status == 400)
+		_content = createErrorHTML();
+	if (_filepath.find(".cgi") != std::string::npos) {
 		class CGI CGI(_request, _config);
 		_content = CGI.ExecuteCGI();
 	}
@@ -86,6 +88,9 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
+	std::cout << _request.getStatus() << std::endl;
+	if (_request.getStatus() != 200)
+		return _request.getStatus();
 	std::basic_ifstream<char> input_stream(_filepath.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();

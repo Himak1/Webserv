@@ -7,8 +7,9 @@
 Request::Request()
 {
 	_http_version = "HTTP/1.1";
-	_validity = false;
+	_is_valid = false;
 	_extension = ".html";
+	_status = 400;
 }
 
 Request::Request(const Request &src) { *this = src; }
@@ -23,8 +24,9 @@ Request &Request::operator = (const Request &src)
 		this->_method = src._method;
 		this->_uri = src._uri;
 		this->_http_version = src._http_version;
-		this->_validity = src._validity;
+		this->_is_valid = src._is_valid;
 		this->_extension = src._extension;
+		this->_status = src._status;
 	}
 	return (*this);
 }
@@ -50,25 +52,29 @@ void Request::initRequest(std::string request)
 	if (strings.size() > 2) _http_version = strings[2].substr(0, 8);
 
 	checkValidity();
+	if (_is_valid)
+		_status = 200;
+
 	checkExtension();
 
 	if (_method == "POST" && _uri == "/upload")
 		handleFileUpload(request);
 }
 
-bool 			  Request::isValidMethod() const { return _validity; }
+bool 			  Request::isValidMethod() const { return _is_valid; }
 const std::string Request::getMethod() const { return _method; }
 const std::string Request::getURI() const { return _uri; }
 const std::string Request::getHTTPVersion() const { return _http_version; }
 const std::string Request::getExtension() const { return _extension; }
+int				  Request::getStatus() const { return _status; }
 
 // PRIVATE FUNCTIONS
 void Request::checkValidity()
 {
-	_validity = false;
+	_is_valid = false;
 	if (_http_version == "HTTP/1.1"
 		&& (_method == "GET" || _method == "POST" || _method == "DELETE"))
-		_validity = true;
+		_is_valid = true;
 }
 
 void Request::checkExtension()

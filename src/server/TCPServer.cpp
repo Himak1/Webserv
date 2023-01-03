@@ -114,10 +114,6 @@ namespace http
 
 		_request.initRequest(std::string(buffer));
 
-		if (!_request.isValidMethod())
-			exitWithError("Invalid HTTP version (only HTTP/1.1 is supported) " \
-				"or invalid method (only GET, POST and DELETED are supported)");
-
 		// log(buffer);
 
 		std::ostringstream ss;
@@ -130,6 +126,8 @@ namespace http
 	{
 		class Response respons(_request, _config);
 		_serverMessage = respons.getMessage();
+
+		// log(_serverMessage);
 
 		long bytesSent = write(_new_socket, _serverMessage.c_str(), _serverMessage.size());
 
