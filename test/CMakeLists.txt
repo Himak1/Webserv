@@ -2,6 +2,7 @@
 set(TEST_FILES
 	# configuration_tests/config_test.cpp
 	# !Add new test files here!
+	configure_tests/Token_tests.cpp
 )
 
 ### Create Test Executables ###
@@ -12,7 +13,10 @@ foreach(file ${TEST_FILES})
 		${file}
 		main_test.cpp
 	)
-	target_include_directories(${name} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
+	target_include_directories(${name} PRIVATE
+		${PROJECT_SOURCE_DIR}/inc
+		${PROJECT_SOURCE_DIR}/inc/configure
+	)
 	target_link_libraries(${name} ${CMAKE_BINARY_DIR}/lib/lib_unit.a gtest_main)
 	target_compile_options(${name} PRIVATE -Wextra -Wall -g)
 	add_test(NAME ${name} COMMAND ${name})

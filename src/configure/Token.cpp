@@ -1,3 +1,4 @@
+
 #include "Token.hpp"
 
 /*
@@ -5,12 +6,18 @@
 */
 
 Token::Token()
-	: _tokenType(INVALID_TOKEN)
+	: _tokenType(INVALID_TOKEN), _token("")
+{
+}
+
+Token::Token( int type, std::string tokenString )
+	: _tokenType(type), _token(tokenString)
 {
 }
 
 Token::Token( const Token& src )
 {
+	*this = src;
 }
 
 
@@ -29,16 +36,17 @@ Token::~Token()
 
 Token&	Token::operator=( Token const& rhs )
 {
-	//if ( this != &rhs )
-	//{
-		//this->_value = rhs.getValue();
-	//}
+	if ( this != &rhs )
+	{
+		this->_tokenType = rhs.getTokenType();
+	}
 	return *this;
 }
 
 std::ostream&	operator<<( std::ostream& o, Token const& i )
 {
-	//o << "Value = " << i.getValue();
+	o << "Token: " << i.getToken() << '\n'
+		<< "Type: " << i.getTokenType() << std::endl;
 	return o;
 }
 
@@ -47,12 +55,12 @@ std::ostream&	operator<<( std::ostream& o, Token const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-int&	Token::getToken() const
+int	Token::getTokenType() const
 {
 	return (_tokenType);
 }
 
-std::string&	Token::getToken() const
+const std::string&	Token::getToken() const
 {
 	return (_token);
 }
