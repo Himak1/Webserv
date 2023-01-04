@@ -7,16 +7,16 @@
 	</head>
 <body>
 	<div id="content">
-
 		<div id="top">
 			<a href="/"><h1>webserv</h1></a>
-		</div>			
+		</div>
 
 		<div id="middle">
-			<h3 label for="fileInput">SELECT A FILE TO UPLOAD</h3>
-			<form class="form" action = "/cgi-bin/upload_files.cgi" method="POST" enctype="multipart/form-data">
-				<input class="" type="file" id="fileInput" name="file" required>
-				<input class="submit_button" type="submit" value="Upload">
+			<h3 class="">FORM GET</h3>
+			<form class="form" action = "/cgi-bin/form.cgi" method="GET" enctype="multipart/form-data">
+				<input class="input_field" placeholder="First Name" type = "text" name = "first_name"/>
+				<input class="input_field" placeholder="Last Name" type = "text" name = "last_name"/>
+				<input class="submit_button" type = "submit" value = "Submit" />
 			</form>
 		</div>
 
@@ -42,9 +42,9 @@
 			
 			<h3 class="">POST</h3>
 			<div class="column">
-				<a class="item" href="/form_get">form (get)</a>
+				<div class="item_active">form (get)</div>
 				<a class="item" href="/form_post">form (post)</a>
-				<div class="item_active">file upload</div>
+				<a class="item" href="/file_upload">file upload</a>
 				<!-- <a class="item" href="/cookie">cookies</a> -->
 			</div>
 			
@@ -53,7 +53,9 @@
 				<!-- <a class="item" href="/delete/" >delete directory</a> -->
 			</div>
 		</div>
-		
+			
 	</div>
 </body>
 </html>
+
+

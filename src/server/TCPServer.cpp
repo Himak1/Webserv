@@ -113,10 +113,6 @@ namespace http
 			exitWithError("Failed to read bytes from client socket connection");
 
 		_request.initRequest(std::string(buffer));
-		char formInput [ 1024 ] ;
-		getline ( cin, formInput, 1024 ) ;
-		log(formInput);
-
 		// log(buffer);
 
 		std::ostringstream ss;

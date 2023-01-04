@@ -18,10 +18,6 @@ Response::Response(class Request request, class Configuration config)
 	else
 		_filepath = _config.getPathWebsite() + _request.getURI();
 
-	_isCGI = false;
-	if (_filepath.find(".cgi") != string::npos)
-		_isCGI = true;
-
 	initStatusCodes();
 	initContentTypes();
 }
@@ -42,7 +38,7 @@ string Response::getMessage()
 		_content = fileNotFound();
 	else if (_status != OK)
 		_content = createErrorHTML();
-	else if (_isCGI) {
+	else if (_request.isCGI()) {
 		class CGI CGI(_request, _config);
 		_content = CGI.ExecuteCGI();
 		return createResponse();
@@ -56,23 +52,23 @@ string Response::getMessage()
 void	Response::initStatusCodes()
 {
 	_status_codes[200] = "200 OK\n";
-	_status_codes[201] = "201 Created\n";
-	_status_codes[202] = "202 Accepted\n";
-	_status_codes[204] = "204 No Content\n";
-	_status_codes[300] = "300 Multiple Choice\n";
+	// _status_codes[201] = "201 Created\n";
+	// _status_codes[202] = "202 Accepted\n";
+	// _status_codes[204] = "204 No Content\n";
+	// _status_codes[300] = "300 Multiple Choice\n";
 	_status_codes[301] = "301 Moved Permanently\n";
 	_status_codes[302] = "302 Found\n";
 	_status_codes[400] = "400 Bad Request\n";
-	_status_codes[401] = "401 Unauthorized\n";
-	_status_codes[403] = "403 Forbidden\n";
+	// _status_codes[401] = "401 Unauthorized\n";
+	// _status_codes[403] = "403 Forbidden\n";
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
-	_status_codes[413] = "413 Request Entity Too Large\n";
+	// _status_codes[413] = "413 Request Entity Too Large\n";
 	_status_codes[415] = "415 Unsupported Media Type\n";
-	_status_codes[500] = "500 Internal Server Error\n";
+	// _status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
-	_status_codes[502] = "502 Bad Gateway\n";
-	_status_codes[504] = "504 Gateway Timeout\n";
+	// _status_codes[502] = "502 Bad Gateway\n";
+	// _status_codes[504] = "504 Gateway Timeout\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
 
@@ -91,13 +87,13 @@ void	Response::initContentTypes()
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
 }
-
+#include <unistd.h>
 int		Response::setStatus()
 {
 	if (_request.getStatus() != OK)
 		return _request.getStatus();
 
-	if (_isCGI)
+	if (_request.isCGI())
 		return OK;
 
 	basic_ifstream<char> input_stream(_filepath.c_str());

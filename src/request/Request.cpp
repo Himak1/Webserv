@@ -8,6 +8,7 @@ Request::Request()
 {
 	_http_version = "HTTP/1.1";
 	_extension = ".html";
+	_env_list.clear();
 }
 
 Request::Request(const Request &src) { *this = src; }
@@ -24,6 +25,8 @@ Request &Request::operator = (const Request &src)
 		this->_http_version = src._http_version;
 		this->_extension = src._extension;
 		this->_status = src._status;
+		this->_isCGI = src._isCGI;
+		this->_env_list = src._env_list;
 	}
 	return (*this);
 }
@@ -36,7 +39,6 @@ void Request::initRequest(string request)
 	string token;
 
 	while (getline(ss, token)) {
-		// cout << "line: " << token << endl;
 		stringstream token_ss(token);
 		string sub_token;
 		while (getline(token_ss, sub_token, ' ')) {
@@ -48,12 +50,18 @@ void Request::initRequest(string request)
 	if (strings.size() > 1) _uri = strings[1];
 	if (strings.size() > 2) _http_version = strings[2].substr(0, 8);
 
-	checkStatus();
-	// cout << "_status = " << _status << endl;
+	_headers = request;
 
+	_isCGI = false;
+	if (_uri.find(".cgi") != string::npos) {
+		_isCGI = true;
+		createEnvList();
+	}
+
+	checkStatus();
 	checkExtension();
 
-	// if (_method == "POST" && _uri == "/upload")
+	// if (_method == "POST" && _uri == "/cgi-bin/upload_files.cgi")
 		// handleFileUpload(request);
 }
 
@@ -62,6 +70,8 @@ const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
 int			 Request::getStatus() const { return _status; }
+list<string> Request::getEnv() const { return _env_list; };
+bool		 Request::isCGI() const { return _isCGI; }
 
 // PRIVATE FUNCTIONS
 void Request::checkStatus()
@@ -81,9 +91,51 @@ void Request::checkExtension()
 		_extension = ".html";
 	else
 		_extension = _uri.substr(extension_start, _uri.length());
+	
+	if (_extension.find("?"))
+		_extension = _extension.substr(0, _extension.find("?"));
 }
 
-// TO DO: not working without CGI?
+void Request::createEnvList()
+{
+	string 	entry;
+	string	query;
+	size_t	pos;
+
+	_env_list.clear();
+	if (_method == "GET") {
+		istringstream ss(_uri.substr(_uri.find("?") + 1));
+		string line;
+		while (getline(ss, line, '&')) {
+			pos = line.find('=');
+			entry = line.substr(0, pos) + "=" + line.substr(pos + 1);
+			_env_list.push_back(entry);			
+	    }
+	}
+	// TO DO? will not work if input fields are empty. 
+	// Currently solved with 'required' tag in html form
+	if (_method == "POST") {
+		query = _headers;
+
+		istringstream ss(_headers.substr(_headers.find("name=")));
+		string line;
+		string previous_line;
+		string key;
+		int start;
+		int end;
+		while (getline(ss, line)) {
+			if (line.find("name=\"") != string::npos) {
+				start = line.find("name=\"") + 6;
+				end = line.rfind("\"") - start;
+				key = line.substr(start, end);
+			}
+			if (line.find("------We") != string::npos)
+				_env_list.push_back(key + "=" + previous_line);
+			previous_line = line;
+	    }
+	}
+}
+
 // void Request::handleFileUpload(string request)
 // {
 //  	// Parse the form data to find the file
@@ -92,7 +144,7 @@ void Request::checkExtension()
 // 	string line;
 
 // 	while (getline(dataStream, line)) {
-// 		// cout << "line :" << line << endl;
+// 		cout << "line :" << line << endl;
 
 // 		// Look for the boundary line
 // 		if (line.substr(0, 2) == "--") {

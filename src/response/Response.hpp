@@ -21,7 +21,6 @@ class Response
 	private:
 		string						_filepath;
 		int							_status;
-		bool						_isCGI;
 		string						_content;
 		const class Request			_request;
 		const class Configuration	_config;

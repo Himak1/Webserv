@@ -37,8 +37,6 @@ CGI::~CGI() {
 // PUBLIC FUNTIONS
 char** 	CGI::getFormEnv() const { return _env; }
 
-#define CGI_BUFSIZE 1024
-#include <sstream>
 string CGI::ExecuteCGI()
 {
 	// save stdin and stdout so we can restore them later
@@ -58,24 +56,8 @@ string CGI::ExecuteCGI()
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
 		execve(_path[0], _path, _env);
-
-		
-		ostringstream ss;
-		ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
-			<< "400 Bad Request\n"
-			<< "</title>"
-			<< "</head><body><center><h1>"
-			<< "400 Bad Request\n"
-			<< "</h1></center></body></html>";
-		return ss.str();
-
-		// string content = ss.str();
-		// cout << _request.getHTTPVersion() << " ";
-		// cout << "400 Bad Request\n";
-		// cout << "Content-Type: text/html; charset=utf-8\n";
-		// cout << "Content-Length: ";
-		// cout << content.size() << "\n\n";
-		// cout << content;
+		perror("execve failed: ");
+		cout << "Execve error" << endl;
 		exit(0);
 	}
 	// TO DO: message can currently not be bigger than CGI_BUFSIZE
@@ -94,28 +76,8 @@ string CGI::ExecuteCGI()
 // TO DO: opschonen
 char**	CGI::createEnv()
 {
-
-	// create list of environment
-	string uri = _request.getURI();
-	string query = uri.substr(uri.find("?") + 1, uri.length());
-
-	int			key_size;
-	int 		value_size;
-	list<string>env_list;
-	string entry;
-	while (true) {
-		key_size = query.find("=");
-		entry = query.substr(0, key_size);
-		query = query.substr(key_size + 1, query.length());
-		value_size = query.find("&");
-		entry += "=" + query.substr(0, value_size);
-		query = query.substr(value_size + 1, query.length());
-		env_list.push_back(entry);
-		if (query.find("=") == string::npos)
-			break ;
-	}
-
 	// convert list to char**
+	list<string> env_list = _request.getEnv();
 	if (env_list.empty())
 		return NULL;
 
@@ -134,6 +96,8 @@ char**	CGI::createEnv()
 
 void	CGI::freeEnv()
 {
+	if (_request.getEnv().empty())
+		return ;
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;

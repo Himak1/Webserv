@@ -26,3 +26,12 @@ fclean			:	clean
 					$(RM) -f $(NAME)
 re				: 	fclean all
 
+# TO DO:
+# install depencies:
+# - brew install cmake #only for tester
+# - brew install php-cgi  ?
+
+# $(NAME)			: 	$(OBJ)
+# 					which php-cgi || brew install pip-cgi
+# 					$(CC) $(OBJ) -o $@ $(SANIT)
+
