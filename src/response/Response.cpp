@@ -145,7 +145,6 @@ string Response::createErrorHTML()
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
 
-	// cout <<  _status_codes[_status] << endl;
 	ostringstream ss;
 	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
 		<< _status_codes[_status]

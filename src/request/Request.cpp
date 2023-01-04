@@ -81,7 +81,6 @@ void Request::checkStatus()
 		_status = HTTP_VERSION_NOT_SUPPORTED;
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
 		_status = NOT_IMPLEMENTED;
-	// cout << "_method = " << _method << endl;
 }
 
 void Request::checkExtension()

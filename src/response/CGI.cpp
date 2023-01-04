@@ -23,9 +23,6 @@ CGI::CGI(class Request request, class Configuration config)
 	_path[1] = NULL;
 	
 	_env = createEnv();
-
-	// char* data = getenv("QUERY_STRING");
-	// cout << "GETENV " << data << endl;
 }
 
 // DESTRUCTOR
@@ -73,10 +70,9 @@ string CGI::ExecuteCGI()
 	return message;
 }
 
-// TO DO: opschonen
+// convert list to char**
 char**	CGI::createEnv()
 {
-	// convert list to char**
 	list<string> env_list = _request.getEnv();
 	if (env_list.empty())
 		return NULL;
