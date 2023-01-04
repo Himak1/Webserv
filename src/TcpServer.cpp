@@ -20,13 +20,13 @@ namespace
 		std::cout << message << std::endl;
 	}
 
-	void logStartupMessage(struct sockaddr_in _socketAddress)
+	void logStartupMessage(struct sockaddr_in _socketAddress[0])
 	{
 		std::ostringstream ss;
 		ss	<< "\n*** Listening on ADDRESS: "
-			<< inet_ntoa(_socketAddress.sin_addr) 
+			<< inet_ntoa(_socketAddress[0].sin_addr) 
 			<< " PORT: "
-			<< ntohs(_socketAddress.sin_port) 
+			<< ntohs(_socketAddress[0].sin_port) 
 			<< " ***\n\n";
 		log(ss.str());
 	}
@@ -42,26 +42,37 @@ namespace http
 {;
 			// CONSTRUCTOR
 TcpServer::TcpServer(class Configuration configuration)
-	: _config(configuration), _socketAddress(), 
-	_socketAddress_len(sizeof(_socketAddress)),
+	: _config(configuration), 
+	
 	_socket_fds(), _number_of_socket_fds(0)
 {
-	_socketAddress.sin_family = AF_INET;
-	_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+	struct sockaddr_in	socket_in;
+
+	socket_in.sin_family = AF_INET;
+	socket_in.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 	// _socketAddress.sin_port = htons(_config.getPort());
+	socket_in.sin_port = htons(port++); 
 
-	for (int i = 0; i < 2; i++)		// loop through ports (from config file)
-	{
-		static int port = 8000;
-		_socketAddress.sin_port = htons(port++); 
+	_socketAddress.pushback(socket_in);
 
 
-		if (startServer() != 0) {
-			std::ostringstream ss;
-			ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
-			log(ss.str());
-		}
-	}	
+					////////////////////////////////////////////////// ############################//////////////////////////////////
+					/*
+					
+								HIER BEN IK. _socketAddress en _socketAddress_len zijn vectors, dit meot nog verder worden verwerkt in de code
+								zodat uiteindelijk tijdens het loopen door listening sockets de juiste waardes van deze twee attributes kunnenn worden
+								ingelezen
+					
+					
+					*/
+
+
+	if (startServer() != 0) {
+		std::ostringstream ss;
+		ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
+		log(ss.str());
+	}
+		
 	_isServerRunning = true;
 	startListen();
 }
@@ -83,6 +94,8 @@ int TcpServer::startServer()
 		return 1;
 	}
 	fcntl(listener.fd, F_SETFL, O_NONBLOCK);
+	if (setsockopt(listener.fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse)) < 0)
+		exitWithError("setsockopt error\n");
 	_listening_socket.push_back(listener.fd);
 	listener.events = POLLIN;			// listener socket only reports when ready to read on inc connection
 	_socket_fds.push_back(listener);
@@ -102,7 +115,7 @@ void TcpServer::startListen()
 		if (listen(_listening_socket[i], QUEU_LIMIT_LISTEN) < 0)
 			exitWithError("Socket listen failed");
 	}
-	logStartupMessage(_socketAddress);
+	// logStartupMessage(_socketAddress);
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 		
@@ -150,7 +163,6 @@ void TcpServer::acceptConnection(int idx)
 									socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
 									
 								*/
-
 	add_to_socket_fd.events = POLLIN;	
 	_socket_fds.push_back(add_to_socket_fd);
 	_number_of_socket_fds++;

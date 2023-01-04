@@ -113,7 +113,7 @@ void	connect_to_socket()
 int main(int argc, char const *argv[])
 {
 
-	for (int i = 0; i < 3; i++)
+	// for (int i = 0; i < 3; i++)
 		connect_to_socket();
     return 0;
 }

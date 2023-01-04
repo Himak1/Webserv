@@ -27,8 +27,8 @@ private:
 	class HTTPRequest	_request;
 	std::vector<int>	_listening_socket;
 	// int					_new_socket;
-	struct sockaddr_in	_socketAddress;
-	unsigned int		_socketAddress_len;
+	std::vector<struct sockaddr_in>	_socketAddress;
+	std::vector<unsigned int>		_socketAddress_len;
 	std::string			_serverMessage;
 	std::string			_unsendServerMessage;
 	void				acceptConnection(int);
