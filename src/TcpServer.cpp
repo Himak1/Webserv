@@ -50,7 +50,7 @@ TcpServer::TcpServer(class Configuration configuration)
 	_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 	// _socketAddress.sin_port = htons(_config.getPort());
 
-	for (int i = 0; i < 1; i++)		// loop through ports (from config file)
+	for (int i = 0; i < 2; i++)		// loop through ports (from config file)
 	{
 		static int port = 8000;
 		_socketAddress.sin_port = htons(port++); 
