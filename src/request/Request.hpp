@@ -1,6 +1,8 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
+# include "../defines.hpp"
+
 # include <string>
 # include <vector>
 # include <sstream>

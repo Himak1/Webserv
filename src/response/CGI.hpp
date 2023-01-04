@@ -23,7 +23,7 @@ class CGI
 		char*						_path[2];
 		char**						_env;
 
-		char**						createEnv(string query_string);
+		char**						createEnv();
 		void						freeEnv();
 };
 

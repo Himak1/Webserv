@@ -7,7 +7,7 @@ Configuration::Configuration()
 {
 	this->_pathWebsite = "www";
 	this->_ipAddress = "0.0.0.0";
-	this->_port = 8000;
+	this->_port = 8002;
 	// this->_errorPage404 = "/faq.html";
 	this->_errorPage404 = "default";
 }

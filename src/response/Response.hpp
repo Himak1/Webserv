@@ -3,6 +3,7 @@
 
 # include "../server/Configuration.hpp"
 # include "../request/Request.hpp"
+# include "../defines.hpp"
 
 # include <string>
 # include <map>
@@ -20,6 +21,7 @@ class Response
 	private:
 		string						_filepath;
 		int							_status;
+		bool						_isCGI;
 		string						_content;
 		const class Request			_request;
 		const class Configuration	_config;

@@ -18,6 +18,10 @@ Response::Response(class Request request, class Configuration config)
 	else
 		_filepath = _config.getPathWebsite() + _request.getURI();
 
+	_isCGI = false;
+	if (_filepath.find(".cgi") != string::npos)
+		_isCGI = true;
+
 	initStatusCodes();
 	initContentTypes();
 }
@@ -32,16 +36,17 @@ string Response::getMessage()
 {
 	_status = setStatus();
 
-	if (_status == 400)
-		_content = createErrorHTML();
-	if (_filepath.find(".cgi") != string::npos) {
-		class CGI CGI(_request, _config);
-		_content = CGI.ExecuteCGI();
-	}
-	else if (_status == 301 || _status == 302)
+	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		_content = redirect();
 	else if (_status == 404)
 		_content = fileNotFound();
+	else if (_status != OK)
+		_content = createErrorHTML();
+	else if (_isCGI) {
+		class CGI CGI(_request, _config);
+		_content = CGI.ExecuteCGI();
+		return createResponse();
+	}
 	else
 		_content = getFileContent();
 	return createResponse();
@@ -65,6 +70,7 @@ void	Response::initStatusCodes()
 	_status_codes[413] = "413 Request Entity Too Large\n";
 	_status_codes[415] = "415 Unsupported Media Type\n";
 	_status_codes[500] = "500 Internal Server Error\n";
+	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[502] = "502 Bad Gateway\n";
 	_status_codes[504] = "504 Gateway Timeout\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
@@ -88,25 +94,34 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
-	cout << _request.getStatus() << endl;
-	if (_request.getStatus() != 200)
+	if (_request.getStatus() != OK)
 		return _request.getStatus();
+
+	if (_isCGI)
+		return OK;
+
 	basic_ifstream<char> input_stream(_filepath.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();
-		return 200;
+		return OK;
 	}
+
 	if (_request.getURI() == "/permanently_moved")
-		return 301;
+		return MOVED_PERMANENTLY;
+
 	if (_request.getURI() == "/temporary_unavailable")
-		return 302;
+		return FOUND;
 	if (_filepath.rfind('/') > _config.getPathWebsite().length()) {
 		const char * dir = _filepath.substr(0, _filepath.rfind('/')).c_str();
 		struct stat sb;
 		if (stat(dir, &sb) == 0)
-			return 302;
+			return FOUND;
 	}
-	return 404;
+
+	if(_content_types.find(_request.getExtension()) == _content_types.end())
+		return UNSUPPORTED_MEDIA_TYPE;
+
+	return NOT_FOUND;
 }
 
 string Response::redirect()
@@ -131,10 +146,10 @@ string Response::fileNotFound()
 string Response::createErrorHTML()
 {
 	string meta  = "";
-	if (_status == 301 || _status == 302)
+	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
 
-	cout <<  _status_codes[_status] << endl;
+	// cout <<  _status_codes[_status] << endl;
 	ostringstream ss;
 	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
 		<< _status_codes[_status]

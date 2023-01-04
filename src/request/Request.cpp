@@ -49,7 +49,7 @@ void Request::initRequest(string request)
 	if (strings.size() > 2) _http_version = strings[2].substr(0, 8);
 
 	checkStatus();
-	cout << "_status = " << _status << endl;
+	// cout << "_status = " << _status << endl;
 
 	checkExtension();
 
@@ -66,12 +66,12 @@ int			 Request::getStatus() const { return _status; }
 // PRIVATE FUNCTIONS
 void Request::checkStatus()
 {
-	_status = 200;
+	_status = OK;
 	if (_http_version != "HTTP/1.1")
-		_status = 400;
+		_status = HTTP_VERSION_NOT_SUPPORTED;
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
-		_status = 400;
-	cout << "_method = " << _method << endl;
+		_status = NOT_IMPLEMENTED;
+	// cout << "_method = " << _method << endl;
 }
 
 void Request::checkExtension()

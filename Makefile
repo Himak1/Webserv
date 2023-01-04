@@ -9,14 +9,8 @@ RM				:=	@rm
 MKDIR_P			:=	@mkdir -p
 SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
-SRC				:=	main \
-					server/TCPServer \
-					server/Configuration \
-					request/Request \
-					response/Response \
-					response/CGI \
-					utils/log
-OBJ				:=	$(SRC:%=$(OBJ_DIR)/%.o)
+SRC				:=	$(shell find $(SRC_DIR) -name '*.cpp')
+OBJ				:=	$(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)
 $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
@@ -31,3 +25,4 @@ clean			:
 fclean			:	clean
 					$(RM) -f $(NAME)
 re				: 	fclean all
+
