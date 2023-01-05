@@ -4,9 +4,14 @@
 #include "tokenizer.hpp"
 #include "Token.hpp"
 
-std::vector<Token>	tokenizer( std::ofstream file )
+std::vector<Token>	tokenizer( std::ifstream file )
 {
 	std::vector<Token>	output;
 
+
+	while (std::getline(file, line)
+	{
+		std::istringstream iss(line);
+	}
 	return (output);
 }

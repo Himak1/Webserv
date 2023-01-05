@@ -1,6 +1,7 @@
 #include "BuildResponse.hpp"
 
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <fstream>
 
@@ -25,7 +26,7 @@ BuildResponse::~BuildResponse() { }
 // PUBLIC FUNTIONS
 std::string BuildResponse::getMessage(std::string status)
 {
-	std::basic_ifstream<char> input_stream(_filename);
+	std::basic_ifstream<char> input_stream(_filename.c_str());
 	if (!input_stream.is_open()) {
 		input_stream.close();
 		return (fileNotFound());
