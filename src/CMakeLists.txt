@@ -4,6 +4,7 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 set(SRC_FILES
     configure/Configuration.cpp
     configure/Token.cpp
+    configure/tokenizer.cpp
     #configure/AST.cpp
     BuildResponse.cpp
     HTTPRequest.cpp

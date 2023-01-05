@@ -6,7 +6,7 @@
 # include <vector>
 # include "Token.hpp"
 
-std::vector<Token>	tokenizer( std::ofstream file );
+std::vector<Token>	tokenizer( std::ifstream& file );
 
 
 #endif

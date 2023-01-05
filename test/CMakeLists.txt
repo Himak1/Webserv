@@ -3,6 +3,7 @@ set(TEST_FILES
 	# configuration_tests/config_test.cpp
 	# !Add new test files here!
 	configure_tests/Token_tests.cpp
+	configure_tests/tokenizer_tests.cpp
 )
 
 ### Create Test Executables ###
