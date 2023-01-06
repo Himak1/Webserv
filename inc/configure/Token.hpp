@@ -24,7 +24,8 @@ enum TokenTypes
 	BACK_SLASH,
 	SEMICOLON,
 	HASHTAG,
-	DOLLAR
+	DOLLAR,
+	HOME_DIR
 };
 
 class Token

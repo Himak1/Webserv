@@ -6,24 +6,25 @@
 #include "tokenizer.hpp"
 #include "Token.hpp"
 
-void	initMap( std::map<std::string, int>& tokenTypes )
+void	initMap( std::map<std::string, int>& tokenMap )
 {
-	tokenTypes["server"]		= SERVER;
-	tokenTypes["server_name"]	= SERVER_NAME;
-	tokenTypes["listen"] 		= LISTEN;
-	tokenTypes["port"] 			= PORT;
-	tokenTypes["access_log"]	= ACCESS_LOG;
-	tokenTypes["location"]		= LOCATION;
-	tokenTypes["root"]			= ROOT;
-	tokenTypes["expires"] 		= EXPIRES;
-	tokenTypes["error_page"]	= ERROR_PAGE;
-	tokenTypes["{"]				= BRACKET_OPEN;
-	tokenTypes["}"]				= BRACKET_CLOSE;
-	tokenTypes["/"]				= FORWARD_SLASH;
-	tokenTypes["\\"]			= BACK_SLASH;
-	tokenTypes[";"]				= SEMICOLON;
-	tokenTypes["#"]				= HASHTAG;
-	tokenTypes["$"]				= DOLLAR;
+	tokenMap["server"]		= SERVER;
+	tokenMap["server_name"]	= SERVER_NAME;
+	tokenMap["listen"] 		= LISTEN;
+	tokenMap["port"] 		= PORT;
+	tokenMap["access_log"]	= ACCESS_LOG;
+	tokenMap["location"]	= LOCATION;
+	tokenMap["root"]		= ROOT;
+	tokenMap["expires"] 	= EXPIRES;
+	tokenMap["error_page"]	= ERROR_PAGE;
+	tokenMap["{"]			= BRACKET_OPEN;
+	tokenMap["}"]			= BRACKET_CLOSE;
+	tokenMap["/"]			= FORWARD_SLASH;
+	tokenMap["\\"]			= BACK_SLASH;
+	tokenMap[";"]			= SEMICOLON;
+	tokenMap["#"]			= HASHTAG;
+	tokenMap["$"]			= DOLLAR;
+	tokenMap["~"]			= HOME_DIR;
 }
 
 int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
