@@ -22,3 +22,7 @@ foreach(file ${TEST_FILES})
 	target_compile_options(${name} PRIVATE -Wextra -Wall -g)
 	add_test(NAME ${name} COMMAND ${name})
 endforeach()
+
+add_custom_target(copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/configure_tests/dummy_config ${CMAKE_CURRENT_BINARY_DIR}/dummy_config
+)

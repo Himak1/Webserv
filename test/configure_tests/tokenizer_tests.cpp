@@ -3,11 +3,25 @@
 #include "tokenizer.hpp"
 #include <fstream>
 
-TEST(tokenizer_tests, basic)
+bool	string_eq(std::string a, std::string b)
 {
-	std::ifstream	file("nginx.conf");
+	return (a == b);
+}
 
-	tokenizer(file);
+TEST(tokenizer_tests, double_quotes)
+{
+	std::ifstream	file("dummy_config/quotations.conf");
+
+	std::list<Token*>	tokenList = tokenizer(file);
+	std::list<Token*>::iterator	iter = tokenList.begin();
+
+	EXPECT_PRED2(string_eq, (*iter)->getToken(), "server");
+	iter++;
+
+	EXPECT_PRED2(string_eq, (*iter)->getToken(), "\"dadadada   dadadadad\"");
+	iter++;
+
+	EXPECT_TRUE(iter == tokenList.end());
 }
 
 TEST(tokenizer_tests, checkTokenType)
