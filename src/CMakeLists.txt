@@ -5,6 +5,7 @@ set(SRC_FILES
     configure/Configuration.cpp
     configure/Token.cpp
     configure/tokenizer.cpp
+    configure/checkTokenType.cpp
     #configure/AST.cpp
     BuildResponse.cpp
     HTTPRequest.cpp

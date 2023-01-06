@@ -1,3 +1,4 @@
+
 #ifndef TOKEN_HPP
 # define TOKEN_HPP
 
@@ -6,7 +7,8 @@
 
 enum TokenTypes
 {
-	INVALID_TOKEN = 0,
+	STRING = 0,
+	SERVER,
 	SERVER_NAME,
 	LISTEN,
 	PORT,
@@ -14,13 +16,12 @@ enum TokenTypes
 	LOCATION,
 	ROOT,
 	EXPIRES,
-	STRING,
 	ERROR_PAGE,
 	// Punctuation and Seperators
 	BRACKET_OPEN,
 	BRACKET_CLOSE,
 	FORWARD_SLASH,
-	BACKWARDS_SLASH,
+	BACK_SLASH,
 	SEMICOLON,
 	HASHTAG,
 	DOLLAR
@@ -29,16 +30,16 @@ enum TokenTypes
 class Token
 {
 	public:
-		Token();
 		Token( int type, std::string tokenString );
 		Token( Token const& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
 
-		int				getTokenType() const;
+		int			getTokenType() const;
 		const std::string&	getToken() const;
 	private:
+		Token();
 		int			_tokenType;
 		std::string	_token;
 };

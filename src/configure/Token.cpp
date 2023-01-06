@@ -6,7 +6,7 @@
 */
 
 Token::Token()
-	: _tokenType(INVALID_TOKEN), _token("")
+	: _tokenType(-1), _token("")
 {
 }
 

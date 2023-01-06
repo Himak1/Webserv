@@ -4,8 +4,9 @@
 
 TEST(Token_tests, getTokenType)
 {
-	Token	t1;
-	EXPECT_EQ(t1.getTokenType(), INVALID_TOKEN);
+	Token	t1(STRING, "string");
+
+	EXPECT_EQ(t1.getTokenType(), STRING);
 }
 
 TEST(Token_tests, getToken)
