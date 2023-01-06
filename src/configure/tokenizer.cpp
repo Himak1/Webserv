@@ -28,10 +28,10 @@ void	initMap( std::map<std::string, int>& tokenTypes )
 
 std::vector<Token>	tokenizer( std::ifstream& file )
 {
-	std::vector<Token>			output;
-	std::map<std::string, int>	tokenMap;
-	std::string					line;
-	std::string					word;
+	std::vector<Token>	output;
+	TokenMap			tokenMap;
+	std::string			line;
+	std::string			word;
 
 	initMap(tokenMap);
 	while (std::getline(file, line))
@@ -39,6 +39,11 @@ std::vector<Token>	tokenizer( std::ifstream& file )
 		std::istringstream	stream(line);
 		stream >> word;
 		output.push_back(Token(checkTokenType(tokenMap, word), word));
+		std::cout << output.back() << std::endl;
+	}
+	for (std::vector<Token>::iterator iter = output.begin(); iter != output.end(); iter++)
+	{
+		// std::cout << iter->getToken() << std::endl;
 	}
 	return (output);
 }

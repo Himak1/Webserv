@@ -5,7 +5,7 @@
 
 TEST(tokenizer_tests, basic)
 {
-	std::ifstream	file("Makefile");
+	std::ifstream	file("nginx.conf");
 
 	tokenizer(file);
 }

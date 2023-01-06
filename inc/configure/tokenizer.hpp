@@ -7,8 +7,10 @@
 # include <map>
 # include "Token.hpp"
 
+typedef std::map<std::string, int> TokenMap;
+
 std::vector<Token>	tokenizer( std::ifstream& file );
-void				initMap( std::map<std::string, int>& tokenTypes );
-int					checkTokenType( const std::map<std::string, int>& tokenTypes, const std::string& token );
+void				initMap( TokenMap& tokenTypes );
+int					checkTokenType( const TokenMap& tokenTypes, const std::string& token );
 
 #endif

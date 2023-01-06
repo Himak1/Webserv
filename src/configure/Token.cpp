@@ -6,7 +6,7 @@
 */
 
 Token::Token()
-	: _tokenType(-1), _token("")
+	: _tokenType(-1), _token("dada")
 {
 }
 
@@ -62,6 +62,7 @@ int	Token::getTokenType() const
 
 const std::string&	Token::getToken() const
 {
+	std::cout << "in gettoken: " << this->_token << std::endl;
 	return (_token);
 }
 

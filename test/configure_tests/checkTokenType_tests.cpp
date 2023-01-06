@@ -3,9 +3,9 @@
 #include "Token.hpp"
 #include "tokenizer.hpp"
 
-TEST(assignTokenType_tests, basic)
+TEST(checkTokenType_tests, basic)
 {
-	std::map<std::string, int>	tokenMap;
+	TokenMap	tokenMap;
 
 	initMap(tokenMap);
 	EXPECT_EQ(checkTokenType(tokenMap, "server"), SERVER);
