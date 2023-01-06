@@ -62,7 +62,6 @@ int	Token::getTokenType() const
 
 const std::string&	Token::getToken() const
 {
-	std::cout << "in gettoken: " << this->_token << std::endl;
 	return (_token);
 }
 

@@ -26,9 +26,19 @@ void	initMap( std::map<std::string, int>& tokenTypes )
 	tokenTypes["$"]				= DOLLAR;
 }
 
-std::vector<Token>	tokenizer( std::ifstream& file )
+int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
 {
-	std::vector<Token>	output;
+	TokenMap::const_iterator	it;
+
+	it = tokenMap.find(token);
+	if (it == tokenMap.end())
+		return (STRING);
+	return (it->second);
+}
+
+std::list<Token*>	tokenizer( std::ifstream& file )
+{
+	std::list<Token*>	output;
 	TokenMap			tokenMap;
 	std::string			line;
 	std::string			word;
@@ -37,13 +47,15 @@ std::vector<Token>	tokenizer( std::ifstream& file )
 	while (std::getline(file, line))
 	{
 		std::istringstream	stream(line);
-		stream >> word;
-		output.push_back(Token(checkTokenType(tokenMap, word), word));
-		std::cout << output.back() << std::endl;
+		while (!stream.eof())
+		{
+			stream >> word;
+			output.push_back(new Token(checkTokenType(tokenMap, word), word));
+		}
 	}
-	for (std::vector<Token>::iterator iter = output.begin(); iter != output.end(); iter++)
+	for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
 	{
-		// std::cout << iter->getToken() << std::endl;
+		std::cout << **iter << std::endl;
 	}
 	return (output);
 }
