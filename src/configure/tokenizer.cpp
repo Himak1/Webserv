@@ -37,24 +37,23 @@ int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
 	return (it->second);
 }
 
-std::string	stringSplit( std::istringstream& stream )
+std::list<std::string>	stringSplit( std::istringstream& stream )
 {
 
 }
 
 std::list<Token*>	tokenizer( std::ifstream& file )
 {
-	std::list<Token*>	output;
-	TokenMap			tokenMap;
-	std::string			line;
-	std::string			word;
+	std::list<Token*>		output;
+	TokenMap				tokenMap;
+	std::string				line;
+	std::list<std::string>	words;
 
 	initMap(tokenMap);
 	while (std::getline(file, line))
 	{
-		std::istringstream	stream(line);
-		word = stringSplit(stream);
-		if (!stream.eof())
+		words = stringSplit(line);
+		
 		output.push_back(new Token(checkTokenType(tokenMap, word), word));
 	}
 	for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
