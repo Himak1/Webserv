@@ -1,3 +1,4 @@
+
 #include "AST.hpp"
 
 /*
@@ -8,10 +9,9 @@ AST::AST()
 {
 }
 
-AST::AST( const AST & src )
+AST::AST( const AST& src )
 {
 }
-
 
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
@@ -21,35 +21,21 @@ AST::~AST()
 {
 }
 
-
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-AST &				AST::operator=( AST const & rhs )
+AST&	AST::operator=( AST const& rhs )
 {
-	//if ( this != &rhs )
-	//{
-		//this->_value = rhs.getValue();
-	//}
+	if ( this != &rhs )
+	{
+		this->_value = rhs.getValue();
+	}
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, AST const & i )
+std::ostream&	operator<<( std::ostream& o, AST const& i )
 {
-	//o << "Value = " << i.getValue();
+	o << i.getValue();
 	return o;
 }
-
-
-/*
-** --------------------------------- METHODS ----------------------------------
-*/
-
-
-/*
-** --------------------------------- ACCESSOR ---------------------------------
-*/
-
-
-/* ************************************************************************** */
