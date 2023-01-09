@@ -112,8 +112,8 @@ namespace http
 		if (bytesReceived < 0)
 			exitWithError("Failed to read bytes from client socket connection");
 
+		log(buffer);
 		_request.initRequest(std::string(buffer));
-		// log(buffer);
 
 		std::ostringstream ss;
 		ss	<< _request.getMethod() << " "

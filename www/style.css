@@ -1,7 +1,7 @@
 /* VARIABLES */
 :root {
 	--main_color:#09477d;
-	--secundairy_color: #194072;
+	--secundairy_color: #425876;
 	--main_color_link:#9fb2c8;
 	--off_white: #bed7ed;
   }
@@ -65,7 +65,7 @@ h1 {
 	text-align:center;
 } h2 {
 	font-size:10pt;
-	color: var(--secundairy_color);
+	color: var(--main_color);
 	padding: 0px;
 	padding-top: 20px;
 	margin:0px;
@@ -75,6 +75,12 @@ h1 {
 	color: var(--main_color);
 	padding: 0px;
 	margin:5px 0 5px 0;
+	font-weight:bold;
+} h4 {
+	font-size:10pt;
+	color: var(--main_color_link);
+	padding: 0px;
+	/* margin:5px 0 5px 0; */
 	font-weight:bold;
 } p {
 	font-size: 10pt;
@@ -119,17 +125,20 @@ table {
 	background-color: white;
 	margin-bottom:15px;
 	padding: 35px;
+	border-radius: 0 0 5px 5px;
 }
 
 #middle {
 	background-color: white;
 	margin-bottom:15px;
 	padding: 35px;
+	border-radius: 5px;
 }
 
 #bottom {
 	background-color: white;
 	padding: 35px;
+	border-radius: 5px;
 }
 
 .column {

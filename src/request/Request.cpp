@@ -4,12 +4,7 @@
 #include <fstream>
 
 // CONSTRUCTOR
-Request::Request()
-{
-	_http_version = "HTTP/1.1";
-	_extension = ".html";
-	_env_list.clear();
-}
+Request::Request() { _env_list.clear(); }
 
 Request::Request(const Request &src) { *this = src; }
 
@@ -52,17 +47,14 @@ void Request::initRequest(string request)
 
 	_headers = request;
 
-	_isCGI = false;
-	if (_uri.find(".cgi") != string::npos) {
-		_isCGI = true;
-		createEnvList();
-	}
-
 	checkStatus();
 	checkExtension();
 
-	// if (_method == "POST" && _uri == "/cgi-bin/upload_files.cgi")
-		// handleFileUpload(request);
+	_isCGI = false;
+	if (_extension == ".php" || _extension == ".py") {
+		_isCGI = true;
+		createEnvList();
+	}
 }
 
 const string Request::getMethod() const { return _method; }
@@ -87,10 +79,10 @@ void Request::checkExtension()
 {
 	const size_t extension_start = _uri.rfind('.');
 	if (extension_start == string::npos)
-		_extension = ".html";
+		_extension = ".php";
 	else
 		_extension = _uri.substr(extension_start, _uri.length());
-	
+
 	if (_extension.find("?"))
 		_extension = _extension.substr(0, _extension.find("?"));
 }
@@ -100,11 +92,11 @@ void Request::createEnvList()
 	string 	entry;
 	string	query;
 	size_t	pos;
+	string	line;
 
 	_env_list.clear();
 	if (_method == "GET") {
 		istringstream ss(_uri.substr(_uri.find("?") + 1));
-		string line;
 		while (getline(ss, line, '&')) {
 			pos = line.find('=');
 			entry = line.substr(0, pos) + "=" + line.substr(pos + 1);
@@ -117,7 +109,6 @@ void Request::createEnvList()
 		query = _headers;
 
 		istringstream ss(_headers.substr(_headers.find("name=")));
-		string line;
 		string previous_line;
 		string key;
 		int start;
@@ -134,46 +125,3 @@ void Request::createEnvList()
 	    }
 	}
 }
-
-// void Request::handleFileUpload(string request)
-// {
-//  	// Parse the form data to find the file
-// 	istringstream dataStream(request);
-// 	string boundary;
-// 	string line;
-
-// 	while (getline(dataStream, line)) {
-// 		cout << "line :" << line << endl;
-
-// 		// Look for the boundary line
-// 		if (line.substr(0, 2) == "--") {
-// 			boundary = line;
-// 			break;
-// 		}
-// 	}
-
-// 	// No boundary line was found, return an error
-// 	if (boundary.empty()) {
-// 		// TO DO: return error
-// 		return;
-// 	}
-
-// 	// Read the file data
-// 	string fileData;
-// 	while (getline(dataStream, line)) {
-// 		// Stop reading when we reach the end boundary
-// 		if (line == boundary + "--") {
-// 			break;
-// 		}
-// 		fileData += line;
-// 	}
-
-// 	// Save the file to a location on the server
-// 	ofstream file("/path/to/uploaded/file.txt", ios::binary);
-// 	file << fileData;
-// 	file.close();
-
-// 	// Send a success response
-// 	// TO DO:
-// 	cout << "HTTP/1.1 200 OK\r\n\r\n";
-// }

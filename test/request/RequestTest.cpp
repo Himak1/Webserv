@@ -21,6 +21,7 @@ TEST(RequestTest, GET)
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".html");
 	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), false);
 }
 
 TEST(RequestTest, POST)
@@ -42,6 +43,7 @@ TEST(RequestTest, POST)
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".html");
 	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), false);
 }
 
 TEST(RequestTest, DELETE)
@@ -60,6 +62,7 @@ TEST(RequestTest, DELETE)
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".html");
 	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), false);
 }
 
 TEST(RequestTest, invalid_method)
@@ -114,6 +117,7 @@ std::string test_string = "GET /cgi-bin/form.cgi?first_name=Milan&last_name=Weit
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".cgi");
 	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), true);
 
 	list<string>	env_list = request.getEnv();
 	print(env_list);
@@ -142,6 +146,7 @@ std::string test_string = "GET /cgi-bin/form.cgi?first_name=&last_name= HTTP/1.1
 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
 	EXPECT_EQ(request.getExtension(), ".cgi");
 	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), true);
 
 	list<string>	env_list = request.getEnv();
 	print(env_list);
@@ -201,49 +206,22 @@ TEST(RequestTest, env_list_POST)
 
 // TO DO? will not work if input fields are empty. 
 // Currently solved with 'required' tag in html form
-// TEST(RequestTest, env_list_POST_empty)
-// {
-// 	std::string test_string = "POST /cgi-bin/form.cgi HTTP/1.1" \
-// 		"Host: localhost:8002\n" \
-// 		"Connection: keep-alive\n" \
-// 		"Content-Length: 252\n" \
-// 		"Cache-Control: max-age=0\n" \
-// 		"sec-ch-ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"\n" \
-// 		"sec-ch-ua-mobile: ?0\n" \
-// 		"sec-ch-ua-platform: \"macOS\"\n" \
-// 		"Origin: http://localhost:8002\n" \
-// 		"DNT: 1\n" \
-// 		"Upgrade-Insecure-Requests: 1\n" \
-// 		"Content-Type: multipart/form-data; boundary=----WebKitFormBoundarycFDkSdFGBfMmUHBF\n" \
-// 		"User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36\n" \
-// 		"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n" \
-// 		"Sec-Fetch-Site: same-origin\n" \
-// 		"Sec-Fetch-Mode: navigate\n" \
-// 		"Sec-Fetch-User: ?1\n" \
-// 		"Sec-Fetch-Dest: document\n" \
-// 		"Referer: http://localhost:8002/form_post\n" \
-// 		"Accept-Encoding: gzip, deflate, br\n" \
-// 		"Accept-Language: nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7\n\n" \
-// 		"Cookie: _ga=GA1.1.885127528.1671626776; _scid=06d1678e-0192-4660-b27b-6fc06cb31016; hubspotutk=19b15014c9b9b1756dd5d5aefd63497d; __hstc=181257784.19b15014c9b9b1756dd5d5aefd63497d.1671626777281.1671629297789.1671641955265.3; collect_chat_page_load=10; _ga_LX73YYEH7W=GS1.1.1671641952.3.1.1671643490.0.0.0\n\n" \
-// 		"------WebKitFormBoundarycFDkSdFGBfMmUHBF\n" \
-// 		"Content-Disposition: form-data; name=\"first_name\"\n\n" \
-// 		"------WebKitFormBoundarycFDkSdFGBfMmUHBF\n" \
-// 		"Content-Disposition: form-data; name=\"last_name\"\n\n" \
-// 		"------WebKitFormBoundarycFDkSdFGBfMmUHBF--";
 
-// 	request.initRequest(test_string);
+TEST(RequestTest, Multiple_extensions)
+{
+	std::string test_string = "GET /hello.cgi.php.html HTTP/1.1\n" \
+		"User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\n" \
+		"Host: www.tutorialspoint.com\n" \
+		"Accept-Language: en-us\n" \
+		"Accept-Encoding: gzip, deflate\n" \
+		"Connection: Keep-Alive";
 
-// 	EXPECT_EQ(request.getMethod(), "POST");
-// 	EXPECT_EQ(request.getURI(), "/cgi-bin/form.cgi");
-// 	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
-// 	EXPECT_EQ(request.getExtension(), ".cgi");
-// 	EXPECT_EQ(request.getStatus(), OK);
+	request.initRequest(test_string);
 
-// 	list<string>	env_list_2 = request.getEnv();
-// 	print(env_list_2);
-// 	auto it2 = env_list_2.cbegin();
-// 	EXPECT_EQ((*it2), "first_name=Milan");
-// 	it2++;
-// 	EXPECT_EQ(*it2, "last_name=Nivard");
-// }
-
+	EXPECT_EQ(request.getMethod(), "GET");
+	EXPECT_EQ(request.getURI(), "/hello.cgi.php.html");
+	EXPECT_EQ(request.getHTTPVersion(), "HTTP/1.1");
+	EXPECT_EQ(request.getExtension(), ".html");
+	EXPECT_EQ(request.getStatus(), OK);
+	EXPECT_EQ(request.isCGI(), false);
+}

@@ -24,7 +24,9 @@
 
 // TEMPORARY 
 #define CGI_BUFSIZE 30720
-
-
+#define PATH_TO_PHP_CGI "/Users/mweitenb/.brew/bin/php-cgi"
+#define PATH_TO_PHP_CGI_LENGTH 33
+#define PATH_TO_PY_CGI "/usr/bin/python"
+#define PATH_TO_PY_CGI_LENGTH 15
 
 #endif

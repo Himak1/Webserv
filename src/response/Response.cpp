@@ -14,7 +14,7 @@ Response::Response(class Request request, class Configuration config)
 	if (_request.getURI() == "/")
 		_filepath = _config.getPathWebsite() +  "/index.html";
 	else if (_request.getURI().rfind('.') == string::npos)
-		_filepath = _config.getPathWebsite() + _request.getURI() + ".html";
+		_filepath = _config.getPathWebsite() + _request.getURI() + ".php";
 	else
 		_filepath = _config.getPathWebsite() + _request.getURI();
 
@@ -39,9 +39,8 @@ string Response::getMessage()
 	else if (_status != OK)
 		_content = createErrorHTML();
 	else if (_request.isCGI()) {
-		class CGI CGI(_request, _config);
+		class CGI CGI(_request, _config, _filepath);
 		_content = CGI.ExecuteCGI();
-		return createResponse();
 	}
 	else
 		_content = getFileContent();
@@ -83,17 +82,17 @@ void	Response::initContentTypes()
 	_content_types[".png"] 	= "Content-type: image/png\n";
 	_content_types[".mp4"] 	= "Content-type: video/mp4\n";
 	_content_types[".ico"] 	= "Content-type: image/vnd.microsoft.icon\n";
-	_content_types[".php"] 	= "Content-Type: text/plain; charset=utf-8\n";
+	_content_types[".php"] 	= "Content-Type: text/html; charset=utf-8\n";
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
 }
-#include <unistd.h>
+
 int		Response::setStatus()
 {
 	if (_request.getStatus() != OK)
 		return _request.getStatus();
 
-	if (_request.isCGI())
+	if (_filepath.find(".php?") != string::npos)
 		return OK;
 
 	basic_ifstream<char> input_stream(_filepath.c_str());

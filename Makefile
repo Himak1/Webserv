@@ -29,9 +29,9 @@ re				: 	fclean all
 # TO DO:
 # install depencies:
 # - brew install cmake #only for tester
-# - brew install php-cgi  ?
+# - brew install php  ?
 
 # $(NAME)			: 	$(OBJ)
-# 					which php-cgi || brew install pip-cgi
+# 					which php-cgi || brew install php
 # 					$(CC) $(OBJ) -o $@ $(SANIT)
 

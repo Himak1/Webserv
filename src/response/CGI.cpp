@@ -11,23 +11,37 @@
 
 
 // CONSTRUCTOR
-CGI::CGI(class Request request, class Configuration config)
-	: _request(request), _config(config)
+CGI::CGI(class Request request, class Configuration config, string filepath)
+	: _request(request), _config(config), _filepath(filepath)
 {
-	string script_name = _request.getURI();
-	script_name = script_name.substr(0, script_name.find(".cgi") + 4);
-	string path_from_request = _config.getPathWebsite() + script_name;
+	_filepath = _filepath.substr(0, _filepath.find("?"));
 	// mogen we realpath() gebruiken?
-	_pathScript = realpath(&path_from_request[0], NULL);
-	_path[0] = &_pathScript[0];
-	_path[1] = NULL;
-	
+	_path_to_script = realpath(&_filepath[0], NULL);
+
+	_argument = new char[3];
+	_argument = strcpy(_argument, "-q");
+	if (_request.getExtension() == ".php") {
+		_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
+		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
+	}
+	if (_request.getExtension() == ".py") {
+		_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
+		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
+	}
+	_path[0] = &_path_to_cgi[0];
+	_path[1] = &_path_to_script[0];
+	_path[2] = &_argument[0];
+	_path[3] = NULL;
 	_env = createEnv();
+
+	cout << "_filepath = " << _filepath << endl;
+	cout << "_request.getExtension() = " << _request.getExtension() << endl;
+	cout << "_path_to_script = " << _path_to_script << endl;
 }
 
 // DESTRUCTOR
 CGI::~CGI() {
-	free(_pathScript);
+	free(_path_to_script);
 	freeEnv();
 }
 
@@ -74,19 +88,25 @@ string CGI::ExecuteCGI()
 char**	CGI::createEnv()
 {
 	list<string> env_list = _request.getEnv();
-	if (env_list.empty())
-		return NULL;
 
-	_env = new char*[env_list.size() + 1];
+	_env = new char*[env_list.size() + 3];
 	list<string>::iterator it;
 	int i = 0;
 	for (it = env_list.begin(); it != env_list.end(); it++) {
 		_env[i] = new char[(*it).length() + 1];
 		_env[i] = strcpy(_env[i], (const char*)(*it).c_str());
-		cout << _env[i] << endl;
 		i++;
 	}
-	_env[i] = NULL;
+
+	string directory_listing = "directory_listing=true";
+	_env[i] = new char[directory_listing.length() + 1];
+	_env[i] = strcpy(_env[i], directory_listing.c_str());
+
+	string upload_directory = "upload_directory=uploads";
+	_env[++i] = new char[upload_directory.length() + 1];
+	_env[i] = strcpy(_env[i], upload_directory.c_str());
+
+	_env[++i] = NULL;
 	return _env;
 }
 

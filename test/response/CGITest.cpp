@@ -63,3 +63,5 @@ TEST(CGITest, testFormEnvPOST)
 	EXPECT_EQ(env_0, "first_name=Milan");
 	EXPECT_EQ(env_1, "last_name=Nivard");
 }
+
+// TO DO: test filename.cgi.php en filename.php.cgi

@@ -11,7 +11,7 @@ using namespace std;
 class CGI
 {
 	public:
-		CGI(class Request request, class Configuration config);
+		CGI(class Request request, class Configuration config, string filepath);
 		~CGI();
 		string						ExecuteCGI();
 		char** 						getFormEnv() const;
@@ -19,8 +19,11 @@ class CGI
 	private:
 		const class Request			_request;
 		const class Configuration	_config;
-		char*						_pathScript;
-		char*						_path[2];
+		string						_filepath;
+		char*						_path_to_cgi;
+		char*						_path_to_script;
+		char*						_argument;
+		char*						_path[4];
 		char**						_env;
 
 		char**						createEnv();
