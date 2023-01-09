@@ -17,10 +17,10 @@ HTTPRequest::~HTTPRequest() { }
 // Overload operator
 HTTPRequest &HTTPRequest::operator = (const HTTPRequest &src) {
 	if (this != &src) {
-		this->_method = src._method;
-		this->_uri = src._uri;
-		this->_http_version = src._http_version;
-		this->_validity = src._validity;
+		_method = src._method;
+		_uri = src._uri;
+		_http_version = src._http_version;
+		_validity = src._validity;
 	}
 	return (*this);
 }

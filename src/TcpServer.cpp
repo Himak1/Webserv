@@ -33,6 +33,7 @@ namespace
 
 	void exitWithError(const std::string &errorMessage)
 	{
+		perror(strerror(errno));
 		log("ERROR: " + errorMessage);
 		exit(1);
 	}
@@ -40,39 +41,13 @@ namespace
 
 namespace http
 {;
+
 			// CONSTRUCTOR
 TcpServer::TcpServer(class Configuration configuration)
 	: _config(configuration), 
-	
-	_socket_fds(), _number_of_socket_fds(0)
+	_nbListeningSockets(0)
 {
-	struct sockaddr_in	socket_in;
-
-	socket_in.sin_family = AF_INET;
-	socket_in.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
-	// _socketAddress.sin_port = htons(_config.getPort());
-	socket_in.sin_port = htons(port++); 
-
-	_socketAddress.pushback(socket_in);
-
-
-					////////////////////////////////////////////////// ############################//////////////////////////////////
-					/*
-					
-								HIER BEN IK. _socketAddress en _socketAddress_len zijn vectors, dit meot nog verder worden verwerkt in de code
-								zodat uiteindelijk tijdens het loopen door listening sockets de juiste waardes van deze twee attributes kunnenn worden
-								ingelezen
-					
-					
-					*/
-
-
-	if (startServer() != 0) {
-		std::ostringstream ss;
-		ss << "Failed to start server with PORT: " << ntohs(_socketAddress.sin_port);
-		log(ss.str());
-	}
-		
+	setUpListeningSockets();
 	_isServerRunning = true;
 	startListen();
 }
@@ -86,65 +61,125 @@ TcpServer::~TcpServer()
 			// PRIVATE FUNCTIONS
 int TcpServer::startServer()
 {
-	struct pollfd	listener;
-	
-	listener.fd = socket(AF_INET, SOCK_STREAM, 0);		
-	if (listener.fd < 0) {
-		exitWithError("Cannot create listening socket");
-		return 1;
-	}
-	fcntl(listener.fd, F_SETFL, O_NONBLOCK);
-	if (setsockopt(listener.fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse)) < 0)
-		exitWithError("setsockopt error\n");
-	_listening_socket.push_back(listener.fd);
-	listener.events = POLLIN;			// listener socket only reports when ready to read on inc connection
-	_socket_fds.push_back(listener);
-	_number_of_socket_fds++;
-	if (bind(listener.fd, (sockaddr *)&_socketAddress, _socketAddress_len) < 0) {
-		exitWithError("Cannot connect socket to address");
-		return 1;
-	}
 	return 0;
+}
+
+void	TcpServer::setUpListeningSockets()
+{
+	t_socket		listening_socket;
+	struct pollfd	listener;
+	int				re_use = 1;
+
+	/*************************************************************/
+	/* Moet loopen door het aantal poorten uit config            */
+	/* setup van de struct s_socket (socket info)   			 */
+	/*************************************************************/
+	for (int i = 0; i < 1; i++) {								
+		memset(&listening_socket, 0, sizeof(listening_socket));
+		listening_socket.socket_in.sin_family = AF_INET;
+		listening_socket.socket_in.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+		// listening_socket.socket_in.sin_port = htons(_config.getPort());
+							int test_port = 8000;							// tmp
+		listening_socket.socket_in.sin_port = htons(test_port++); 			// tmp
+		_socketInfo.push_back(listening_socket);
+
+		/*************************************************************/
+		/* setup van de pollfd struct					            */
+		/* setsocktopt() zorgt ervoor dat we ingeval van een restart
+			de socket kunnen hergebruiken                            */
+
+		/*************************************************************/
+		memset(&listener, 0, sizeof(listener));
+		listener.fd = socket(AF_INET, SOCK_STREAM, 0);		
+		if (listener.fd < 0) {
+			exitWithError("Cannot create listening socket");
+		}
+		if (setsockopt(listener.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
+			exitWithError("setsockopt error\n");
+		}	
+		fcntl(listener.fd, F_SETFL, O_NONBLOCK);			
+		listener.events = POLLIN;
+		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_address, _socketInfo[i].socket_address_len) < 0) {		/// we casten van sockaddr_in -> sock_addr waarom?
+			exitWithError("Cannot connect socket to address");
+		}
+		_pollFds.push_back(listener);
+		_nbListeningSockets++;
+	}
 }
 
 void TcpServer::startListen()
 {
 	int	poll_count;
 	
-	for (int i = 0; i < _listening_socket.size(); i++) {
-		if (listen(_listening_socket[i], QUEU_LIMIT_LISTEN) < 0)
+	for (int i = 0; i < _nbListeningSockets; i++) {
+		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
 			exitWithError("Socket listen failed");
 	}
 	// logStartupMessage(_socketAddress);
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
-		
-
 		sleep(1);
 
-								/*
-									Poll checkt elke socket of er iets gebeurt (read / write request) en houdt 
-									dit bij in de array van structs _socket_fds (door .events aan te passen)
-									De -1 geeft aan dat hij oneindig lang wacht op read/write requests)
-								*/ 
-		poll_count = poll (&_socket_fds[0], _number_of_socket_fds, -1);		
+		/****************************************************************/
+		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
+		/*	write request) en houdt dit bij in de array van structs 	*/
+		/*	_socket_fds (door .events aan te passen) 					*/
+		/*	De -1 geeft aan dat hij oneindig lang wacht op read/write 	*/
+		/*	requests)   												*/
+		/****************************************************************/
+		poll_count = poll (&_pollFds[0], _pollFds.size(), -1);		
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
-		lookupActiveSocket();			// vervolgens kunnen we kijken op welke socket er iets is gebeurd
+		lookupActiveSocket();
 	}	
 }
 
-void TcpServer::acceptConnection(int idx) 
+// Finds the socket where poll() found activity 
+void	TcpServer::lookupActiveSocket()
 {
-	struct pollfd	add_to_socket_fd;
+	int i = 0;
 
-	add_to_socket_fd.fd = accept(_listening_socket[idx], (sockaddr *)&_socketAddress, &_socketAddress_len);
-	if (add_to_socket_fd.fd == -1)
-		exitWithError("ERROR: accept() (TcpServer::acceptConnection");
+	for (; i < _nbListeningSockets; i++)
+	{
+		if (_pollFds[i].revents == 0)			// nothing happened on this socket
+			continue ;
+		else
+			newConnection(i);	
+	}
 
-	fcntl(add_to_socket_fd.fd, F_SETFL, O_NONBLOCK);			// nodig om elke socket op non blocking te zetten?
+	/****************************************************************/
+	/* 	loop door de client sockets om te kijken welke actief is	*/
+	/*	POLLIN geeft aan dat een read request klaar staat			*/
+	/*	POLLOUT geeft aan dat een write request klaar staat			*/
+	/****************************************************************/
+	for (; i < (_pollFds.size() - _nbListeningSockets); i++) {
+		if (_pollFds[i].revents == 0)
+			continue;
+		if (_pollFds[i].revents & POLLIN) {		
+			receiveRequest(i);
+		} else if (_pollFds[i].revents & POLLOUT) {
+			sendResponse(i);
+		}
+	}  													 		
+}
 
+
+// 	Accepts new connections. These don't need to be set to non-blocking since they inherit from the listeningsocket
+// 	(which is already non-blocking)
+void TcpServer::newConnection(int active_socket_idx)
+{
+	// Client	*new_pollfd = new Client(_pollFds.size() + 1);
+	struct pollfd	new_pollfd;
+	t_socket		new_socket;
+
+	memset(&new_pollfd, 0, sizeof(struct pollfd));
+	memset(&new_socket, 0, sizeof(t_socket));
+	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)new_socket.socket_address, &new_socket.socket_address_len);
+	if (new_pollfd.fd == -1) {
+		exitWithError("ERROR: accept() (TcpServer::newConnection");
+	}
+															
 
 								/*
 									set events for added socket?
@@ -163,31 +198,21 @@ void TcpServer::acceptConnection(int idx)
 									socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
 									
 								*/
-	add_to_socket_fd.events = POLLIN;	
-	_socket_fds.push_back(add_to_socket_fd);
-	_number_of_socket_fds++;
+	new_pollfd.events = POLLIN;
+	_pollFds.push_back(new_pollfd);
+	_socketInfo.push_back(new_socket);
+
 	std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(_socketAddress.sin_addr) << "; PORT: " 
-			<< ntohs(_socketAddress.sin_port) << "; Socket fd: " << _socket_fds.back().fd << std::endl;
+			<< inet_ntoa(new_socket.socket_in.sin_addr) << "; PORT: " 
+			<< ntohs(new_socket.socket_in.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
-// Finds the socket where poll() found activity 
-void	TcpServer::lookupActiveSocket()
+void	TcpServer::closeClientConnection(int close)
 {
-	for (int i = 0; i < _number_of_socket_fds; i++) {
-		if (_socket_fds[i].revents & POLLIN) {
-																// revents houdt bij of er iets gebeurd is (POLLIN == receive / read, POLLOUT == send / write)
-			for (int j = 0; i < _listening_socket.size(); i++)													
-				if (_socket_fds[i].fd == _listening_socket[j]) 			// als dit listeneing socket is betekent dat dat er een nieuwe connectie is 
-					acceptConnection(j);
-				else 
-					receiveRequest(i);
-		} else if (_socket_fds[i].revents & POLLOUT) {
-			sendResponse(i);
-		}
+											////////////////////////// remove both _socketInfo en _pollFDs!!!!!
 
-	}  													 		
 }
+
 
 
 // idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
