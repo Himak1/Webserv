@@ -5,8 +5,15 @@
 #include <list>
 
 class Token;
-class AST;
+class Node;
 
-std::list<AST*>	parser()
+std::list<Node*>	parser( std::list<Token*> tokenList );
+
+class	Visitor
+{
+	public:
+		visit();
+	private:
+};
 
 #endif

@@ -1,15 +1,15 @@
 
-#include "AST.hpp"
+#include "Node.hpp"
 
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-AST::AST()
+Node::Node()
 {
 }
 
-AST::AST( const AST& src )
+Node::Node( const Node& src )
 {
 }
 
@@ -17,7 +17,7 @@ AST::AST( const AST& src )
 ** -------------------------------- DESTRUCTOR --------------------------------
 */
 
-AST::~AST()
+Node::~Node()
 {
 }
 
@@ -25,17 +25,17 @@ AST::~AST()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-AST&	AST::operator=( AST const& rhs )
-{
-	if ( this != &rhs )
-	{
-		this->_value = rhs.getValue();
-	}
-	return *this;
-}
-
-std::ostream&	operator<<( std::ostream& o, AST const& i )
+std::ostream&	operator<<( std::ostream& o, Node const& i )
 {
 	o << i.getValue();
 	return o;
+}
+
+/*
+** --------------------------------- METHODS ----------------------------------
+*/
+
+void	Node::addNodeToList( Node* newNode )
+{
+	_nodes.push_back(newNode);
 }
