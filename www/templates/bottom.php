@@ -15,7 +15,7 @@
 
 			<h3 class="">ERROR PAGES</h3>
 			<div class="column">
-				<a class="item" target="_blank" href="/404">error 404</a>
+				<a class="item" href="/404">error 404</a>
 				<a class="item" href="/permanently_moved">redirect 301</a>
 				<a class="item" href="/inc/temporary_unavailable">redirect 302</a>
 			</div>
@@ -24,7 +24,7 @@
 			<div class="column">
 				<a class="item" href="/form_get">form (get)</a>
 				<a class="item" href="/form_post">form (post)</a>
-				<a class="item" href="/file_upload">file upload</a>
+				<a class="item" href="/upload">file upload</a>
 			</div>
 
 			<h3 class="">BONUS</h3>

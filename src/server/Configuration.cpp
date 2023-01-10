@@ -8,7 +8,8 @@ Configuration::Configuration()
 	this->_pathWebsite = "www";
 	this->_ipAddress = "0.0.0.0";
 	this->_port = 8000;
-	this->_errorPage404 = "default";
+	this->_errorPage404 = "/templates/404.html";
+	// this->_errorPage404 = "default";
 }
 
 Configuration::Configuration(const Configuration &src) { *this = src; }

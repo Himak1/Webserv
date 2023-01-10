@@ -27,14 +27,19 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 	if (_request.getExtension() == ".py") {
 		_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
 		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
+		// _path_to_cgi = realpath("/", NULL);
 	}
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
-	_path[2] = &_argument[0];
+	if (_request.getExtension() == ".php")
+		_path[2] = &_argument[0];
+	else
+		_path[2] = NULL;
 	_path[3] = NULL;
 	_env = createEnv();
 
 	cout << "_filepath = " << _filepath << endl;
+	cout << "_path_to_cgi = " << _path_to_cgi << endl;
 	cout << "_request.getExtension() = " << _request.getExtension() << endl;
 	cout << "_path_to_script = " << _path_to_script << endl;
 }

@@ -41,6 +41,7 @@ string Response::getMessage()
 	else if (_request.isCGI()) {
 		class CGI CGI(_request, _config, _filepath);
 		_content = CGI.ExecuteCGI();
+		_content = _content.substr(_content.find("\n"));
 	}
 	else
 		_content = getFileContent();
@@ -121,6 +122,16 @@ int		Response::setStatus()
 
 string Response::redirect()
 {
+	if (_status == 301 && COSTUM_301 != "default") {
+		_filepath = _config.getPathWebsite() + COSTUM_301;
+		return getFileContent();
+	}
+
+	if (_status == 302 && COSTUM_302 != "default") {
+		_filepath = _config.getPathWebsite() + COSTUM_302;
+		return getFileContent();
+	}
+
 	// TO DO: costum redirect pages
 	// TO DO: error codes from 301 not correctly displayed on terminal
 	return createErrorHTML();
@@ -175,5 +186,7 @@ string Response::createResponse()
 		<< "Content-Length: "
 		<< _content.size() << "\n\n"
 		<< _content;
+	// if (_request.getExtension() == ".php")
+		// cout << ss.str() << endl;
 	return ss.str();
 }

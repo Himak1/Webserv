@@ -1,7 +1,7 @@
 /* VARIABLES */
 :root {
 	--main_color:#09477d;
-	--secundairy_color: #425876;
+	--secundairy_color: #1f3a63;
 	--main_color_link:#9fb2c8;
 	--off_white: #bed7ed;
   }
@@ -16,7 +16,7 @@ body{
 	padding:0px;
 	display: flex;
 	justify-content: center;
-	background-image: url('inc/bg.jpg');
+	background-image: url('../inc/bg.jpg');
 	background-repeat: no-repeat;
 	background-attachment: fixed;
 	background-size: cover;
@@ -80,8 +80,8 @@ h1 {
 	font-size:10pt;
 	color: var(--main_color_link);
 	padding: 0px;
-	/* margin:5px 0 5px 0; */
-	font-weight:bold;
+	margin: 10px 0 0 0;
+	font-weight: 600;
 } p {
 	font-size: 10pt;
 	font-weight:normal;
@@ -186,12 +186,13 @@ table {
 
 .form {
 	height:30px;
+	display: flex;
+	justify-content: space-between;
 }
 
 .input_field {
-	width:110px;
-	margin-right: 34px;
-	height:18px;
+	width:120px;
+	height:19px;
 }
 
 .submit_button {
@@ -200,9 +201,9 @@ table {
 	color:var(--off_white);
 	width:120px;
 	height:25px;
-	float:right;
 	text-decoration: none;
 	border-radius: 5px;
+	padding: 5px;
 	transition: 1s;
 }
 
@@ -212,6 +213,28 @@ table {
 	/* background-color: var(--main_color); */
 	transition: 1s;
 }
+
+.button_link {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:var(--off_white);
+	width:110px;
+	height:15px;
+	float:right;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 5px;
+	padding: 5px;
+	transition: 1s;
+}
+
+.button_link:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
 
 .choose_file {
 	background-color: var(--secundairy_color);
