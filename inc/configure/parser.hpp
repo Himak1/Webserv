@@ -7,13 +7,21 @@
 class Token;
 class Node;
 
-std::list<Node*>	parser( std::list<Token*> tokenList );
+typedef std::list<Token*>	TokenList;
 
-class	Visitor
-{
-	public:
-		visit();
-	private:
-};
+std::list<Node*>	parser( TokenList tokenList );
+
+
+
+
+
+
+
+// class	Visitor
+// {
+// 	public:
+// 		visit();
+// 	private:
+// };
 
 #endif

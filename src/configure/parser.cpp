@@ -2,7 +2,7 @@
 #include <list>
 #include "parser.hpp"
 
-Node*	parser( std::list<Token*> tokenList )
+Node*	parser( TokenList tokenList )
 {
 	std::list<Token*>::iterator	iter;
 	Node*						ast;
@@ -18,10 +18,8 @@ Node*	parser( std::list<Token*> tokenList )
 	return (status);
 }
 
-int	server()
+Node*	server()
 {
-	int	status = 0;
-
 	while ()
 	{
 		switch (iter->getTokenType())
