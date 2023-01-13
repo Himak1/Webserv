@@ -38,10 +38,10 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 	_path[3] = NULL;
 	_env = createEnv();
 
-	cout << "_filepath = " << _filepath << endl;
-	cout << "_path_to_cgi = " << _path_to_cgi << endl;
-	cout << "_request.getExtension() = " << _request.getExtension() << endl;
-	cout << "_path_to_script = " << _path_to_script << endl;
+	// cout << "_filepath = " << _filepath << endl;
+	// cout << "_path_to_cgi = " << _path_to_cgi << endl;
+	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
+	// cout << "_path_to_script = " << _path_to_script << endl;
 }
 
 // DESTRUCTOR
@@ -94,7 +94,7 @@ char**	CGI::createEnv()
 {
 	list<string> env_list = _request.getEnv();
 
-	_env = new char*[env_list.size() + 3];
+	_env = new char*[env_list.size() + 4];
 	list<string>::iterator it;
 	int i = 0;
 	for (it = env_list.begin(); it != env_list.end(); it++) {
@@ -111,7 +111,16 @@ char**	CGI::createEnv()
 	_env[++i] = new char[upload_directory.length() + 1];
 	_env[i] = strcpy(_env[i], upload_directory.c_str());
 
+	if (_request.getUploadSucces() == true) {
+		string upload_succes = "upload_succes=true";
+		_env[++i] = new char[upload_succes.length() + 1];
+		_env[i] = strcpy(_env[i], upload_succes.c_str());
+	}
+	else
+		_env[++i] = NULL;
+	
 	_env[++i] = NULL;
+
 	return _env;
 }
 

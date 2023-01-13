@@ -1,11 +1,15 @@
 #include "Response.hpp"
 #include "CGI.hpp"
 #include "../utils/log.hpp"
+#include "../utils/strings.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <sys/stat.h>
+#include <cstdio>
+
+#include <list>
 
 // CONSTRUCTOR
 Response::Response(class Request request, class Configuration config)
@@ -26,12 +30,19 @@ Response::Response(class Request request, class Configuration config)
 Response::~Response() { }
 
 // PUBLIC FUNTIONS
-string Response::getFilepath() { return _filepath; }
+string 	Response::getFilepath() { return _filepath; }
 
-string Response::getMessage()
+string 	Response::getMessage()
 {
 	_status = setStatus();
+	// list<string> envlist = _request.getEnv();
+	// for (list<string>::iterator i = envlist.begin(); i != envlist.end(); ++i)
+	// 	cout << *i << endl;
+	if (safe_substr(_request.getURI(), 0, _request.getURI().find("?")) == "/upload_handler.php")
+		uploadFile();
 
+	if (_request.getMethod() == "DELETE")
+		_content = deleteFile();
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		_content = redirect();
 	else if (_status == 404)
@@ -41,7 +52,7 @@ string Response::getMessage()
 	else if (_request.isCGI()) {
 		class CGI CGI(_request, _config, _filepath);
 		_content = CGI.ExecuteCGI();
-		_content = _content.substr(_content.find("\n"));
+		_content = safe_substr(_content, _content.find("\n"), -1);
 	}
 	else
 		_content = getFileContent();
@@ -53,8 +64,8 @@ void	Response::initStatusCodes()
 {
 	_status_codes[200] = "200 OK\n";
 	// _status_codes[201] = "201 Created\n";
-	// _status_codes[202] = "202 Accepted\n";
-	// _status_codes[204] = "204 No Content\n";
+	_status_codes[202] = "202 Accepted\n";
+	_status_codes[204] = "204 No Content\n";
 	// _status_codes[300] = "300 Multiple Choice\n";
 	_status_codes[301] = "301 Moved Permanently\n";
 	_status_codes[302] = "302 Found\n";
@@ -90,8 +101,13 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
-	if (_request.getStatus() != OK)
-		return _request.getStatus();
+	if (_request.getHTTPVersion() != "HTTP/1.1")
+		return HTTP_VERSION_NOT_SUPPORTED;
+
+	if (_request.getMethod() != "GET" 
+		&& _request.getMethod() != "POST" 
+		&& _request.getMethod() != "DELETE")
+		return NOT_IMPLEMENTED;
 
 	if (_filepath.find(".php?") != string::npos)
 		return OK;
@@ -99,6 +115,8 @@ int		Response::setStatus()
 	basic_ifstream<char> input_stream(_filepath.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();
+		if (_request.getMethod() == "DELETE")
+			return ACCEPTED;
 		return OK;
 	}
 
@@ -108,7 +126,7 @@ int		Response::setStatus()
 	if (_request.getURI() == "/temporary_unavailable")
 		return FOUND;
 	if (_filepath.rfind('/') > _config.getPathWebsite().length()) {
-		const char * dir = _filepath.substr(0, _filepath.rfind('/')).c_str();
+		const char * dir = safe_substr(_filepath, 0, _filepath.rfind('/')).c_str();
 		struct stat sb;
 		if (stat(dir, &sb) == 0)
 			return FOUND;
@@ -118,6 +136,47 @@ int		Response::setStatus()
 		return UNSUPPORTED_MEDIA_TYPE;
 
 	return NOT_FOUND;
+}
+
+string Response::deleteFile()
+{
+	if (remove(_filepath.c_str()) != 0) {
+		_status = NOT_FOUND;
+		return createErrorHTML();
+	}
+	_status = OK;
+	return "File " + _filepath + " has been deleted";
+}
+
+void Response::uploadFile() {
+	_request.setUploadSucces(false);
+
+	string input_path;
+	list<string> envlist = _request.getEnv();
+	for (list<string>::iterator it = envlist.begin(); it != envlist.end(); ++it) {
+		input_path = safe_substr(*it, (*it).find("=") + 1, -1);
+	}
+
+	// stream input to file_data
+	ifstream input_stream(input_path.c_str());
+	ostringstream ss;
+	string line;
+	while (getline(input_stream, line))
+		ss << line << endl;
+	string file_data = ss.str();
+
+	// write file_data to output_path
+	string upload_path = _config.getPathWebsite() + "/uploads/" + input_path;
+	ofstream fout(upload_path);
+	fout << file_data << endl;
+    fout.close();
+
+	// check if upload was succesful
+	basic_ifstream<char> check_upload(upload_path.c_str());
+	if (check_upload.is_open()) {
+		check_upload.close();
+		_request.setUploadSucces(true);
+	}
 }
 
 string Response::redirect()

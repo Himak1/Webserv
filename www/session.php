@@ -3,6 +3,8 @@
 			<h3>SESSION MANAGEMENT</h3>
 
 			<?php
+				// https://www.tutorialspoint.com/php/php_function_session_start.htm
+
 				// session_start();
 
 				// if ($_SERVER["REQUEST_METHOD"] == "POST")

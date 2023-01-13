@@ -31,7 +31,7 @@
 			<div class="column">
 				<a class="item" href="/cookies">cookies</a>
 				<a class="item" href="/session">session<br/>management</a>
-				<a class="item" href="/directory_list.php">directory list</a>
+				<a class="item" href="/upload_files.php">uploaded files</a>
 			</div>
 
 		</div>

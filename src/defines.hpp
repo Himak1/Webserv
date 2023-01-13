@@ -4,8 +4,8 @@
 // STATUS CODES
 # define OK 200
 // # define CREATED 201
-// # define ACCEPTED 202
-// # define NO_CONTENT 204
+# define ACCEPTED 202
+# define NO_CONTENT 204
 // # define MULITPLE_CHOICE 300
 # define MOVED_PERMANENTLY 301
 # define FOUND 302

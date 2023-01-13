@@ -1,7 +1,7 @@
 <?php include("templates/top.php");?>
 
 		<div id="middle">
-			<h3 class="">FORM POST</h3>
+			<h3 class="">FORM</h3>
 			<?php
 				$first_name = getenv("first_name");
 				$last_name = getenv("last_name");

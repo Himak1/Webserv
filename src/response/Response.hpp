@@ -22,7 +22,7 @@ class Response
 		string						_filepath;
 		int							_status;
 		string						_content;
-		const class Request			_request;
+		class Request				_request;
 		const class Configuration	_config;
 		map<int, string>			_status_codes;
 		map<string, string>			_content_types;
@@ -30,6 +30,8 @@ class Response
 		void						initStatusCodes();
 		void						initContentTypes();
 		int							setStatus();
+		string 						deleteFile();
+		void 						uploadFile();
 		string 						redirect();
 		string 						fileNotFound();
 		string						createErrorHTML();

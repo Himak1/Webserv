@@ -4,9 +4,10 @@
 # include "../defines.hpp"
 
 # include <string>
+# include <map>
 # include <vector>
-# include <sstream>
 # include <list>
+# include <sstream>
 
 using namespace std;
 
@@ -23,9 +24,10 @@ class Request
 		const string		getURI() const;
 		const string		getHTTPVersion() const;
 		const string		getExtension() const;
-		int					getStatus() const;
 		list<string>		getEnv() const;
 		bool				isCGI() const;
+		bool				getUploadSucces() const;
+		void				setUploadSucces(bool result);
 
 	private:
 		string				_method;
@@ -33,13 +35,15 @@ class Request
 		string				_http_version;
 		string				_extension;
 		string				_headers;
-		int					_status;
 		bool				_isCGI;
 		list<string>		_env_list;
+		map<string, string>	_cookies;
+		bool				_is_succesfull_uploaded;
 
-		void				checkStatus();
-		void				checkExtension();
-		void				createEnvList();
+		void				parseHTTPInfoAndHeaders(string request);
+		void				parseExtension();
+		void				parseEnv();
+		void				parseCookies();
 		// void 				handleFileUpload(string request);
 };
 
