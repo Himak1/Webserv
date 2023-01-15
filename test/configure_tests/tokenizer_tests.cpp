@@ -10,7 +10,7 @@ bool	string_eq(std::string a, std::string b)
 
 TEST(tokenizer_tests, double_quotes)
 {
-	std::ifstream	file("dummy_config/quotations.conf");
+	std::ifstream	file("dummy_config/comments.conf");
 
 	std::list<Token*>	tokenList = tokenizer(file);
 	std::list<Token*>::iterator	iter = tokenList.begin();

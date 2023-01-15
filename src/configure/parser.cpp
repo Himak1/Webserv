@@ -2,7 +2,7 @@
 #include <list>
 #include "parser.hpp"
 
-Node*	parser( TokenList tokenList )
+NodeList	parse( TokenList tList )
 {
 	std::list<Token*>::iterator	iter;
 	Node*						ast;
@@ -11,14 +11,14 @@ Node*	parser( TokenList tokenList )
 	ast = new Node();
 	while (iter != tokenList.end() && status != -1)
 	{
-		ast.addNewNode()
+		ast.addNewNode();
 		ast._nodes() = server(iter);
 		iter++;
 	}
 	return (status);
 }
 
-Node*	server()
+NodeList	server( TokenList tList)
 {
 	while ()
 	{
@@ -40,12 +40,27 @@ Node*	server()
 	}
 }
 
-int	parsePort()
+Node*	parsePort()
 {
 
 }
 
-int	parseLocation()
+Node*	parseLocation( TokenList tList, TokenList::iterator& pos )
 {
-	while ()
+	Node*	newNode;
+
+	if ((*pos)->GetTokenType() != LOCATION))
+		return (0);
+	pos++;
+	if ((*pos)->GetTokenType() != BRACKET_OPEN)
+		return (0);
+	pos++;
+	if ((*pos)->GetTokenType() != BRACKET_CLOSE)
+		return (0);
+	pos++;
+	return (new Node())
 }
+
+/*
+
+*/

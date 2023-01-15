@@ -7,21 +7,10 @@
 class Token;
 class Node;
 
-typedef std::list<Token*>	TokenList;
+typedef std::list<Node*>	NodeList;
 
-std::list<Node*>	parser( TokenList tokenList );
+Node*	parser( TokenList tList );
 
-
-
-
-
-
-
-// class	Visitor
-// {
-// 	public:
-// 		visit();
-// 	private:
-// };
+Node*	parseLocation( TokenList tList, TokenList& pos );
 
 #endif

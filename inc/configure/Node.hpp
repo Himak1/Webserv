@@ -9,16 +9,18 @@
 class Node
 {
 	public:
-		Node();
-		Node( Node const& src );
+		Node( Node const& src );c
+		Node( int nodeType, std::string terminal)
 		~Node();
 
-		void	addNodeToList();
+		void	addChild();
 		// void accept( Visitor visitor );
 	private:
-		int						_nodeType;
-		std::list<std::string>	_terminals;
-		std::list<Node*>		_nodes;
+		Node();
+
+		int					_nodeType;
+		std::string			_terminal;
+		std::list<Node*>	_children;
 };
 
 std::ostream&	operator<<( std::ostream& o, Node const& i );

@@ -13,6 +13,11 @@ Node::Node( const Node& src )
 {
 }
 
+Node::Node( int nodeType, std::string terminal )
+	: _nodeType(nodeType), _terminal(terminal)
+{
+}
+
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
 */
@@ -35,7 +40,7 @@ std::ostream&	operator<<( std::ostream& o, Node const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Node::addNodeToList( Node* newNode )
+void	Node::addChild( Node* newNode )
 {
 	_nodes.push_back(newNode);
 }

@@ -7,6 +7,7 @@
 # include <map>
 # include "Token.hpp"
 
+typedef std::list<Token*>	TokenList;
 typedef std::map<std::string, int> TokenMap;
 
 std::list<Token*>	tokenizer( std::ifstream& file );
