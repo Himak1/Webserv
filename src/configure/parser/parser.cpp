@@ -2,23 +2,22 @@
 #include <list>
 #include "parser.hpp"
 
-NodeList	parse( TokenList tList )
+Node*	parser( TokenList tList )
 {
-	std::list<Token*>::iterator	iter;
-	Node*						ast;
+	TokenList::iterator			pos = tokenList.begin();
+	const TokenList::iterator	end = tokenList.end();
+	Node*						ast = new Node();
 
-	iter = tokenList.begin();
-	ast = new Node();
-	while (iter != tokenList.end() && status != -1)
+	while (pos != end && status != -1)
 	{
 		ast.addNewNode();
-		ast._nodes() = server(iter);
+		ast._nodes() = server(pos, end);
 		iter++;
 	}
 	return (status);
 }
 
-NodeList	server( TokenList tList)
+NodeList	server( TokenList::iterator& pos, const TokenList::iterator& end );
 {
 	while ()
 	{
@@ -45,19 +44,32 @@ Node*	parsePort()
 
 }
 
-Node*	parseLocation( TokenList tList, TokenList::iterator& pos )
+Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& end )
 {
 	Node*	newNode;
 
-	if ((*pos)->GetTokenType() != LOCATION))
-		return (0);
-	pos++;
-	if ((*pos)->GetTokenType() != BRACKET_OPEN)
-		return (0);
-	pos++;
-	if ((*pos)->GetTokenType() != BRACKET_CLOSE)
-		return (0);
-	pos++;
+	// if ((*pos)->GetTokenType() != LOCATION))
+	// 	return (0);
+	// pos++;
+	// if ((*pos)->GetTokenType() != BRACKET_OPEN)
+	// 	return (0);
+	// pos++;
+	// if ((*pos)->GetTokenType() != BRACKET_CLOSE)
+	// 	return (0);
+	// pos++;
+
+	/*
+		if (token == location)
+			continue
+		if (token == string)
+			continue
+		if (token == bracket_open)
+			continue
+		while (token != bracket_close)
+		{
+			if (token == )
+		}
+	*/
 	return (new Node())
 }
 

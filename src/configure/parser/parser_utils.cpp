@@ -1,4 +1,7 @@
 
 #include "parser.hpp"
 
-void	parseSingleParameter;
+void	parseSingleParameter()
+{
+	
+}
