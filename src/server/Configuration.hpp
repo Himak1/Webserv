@@ -12,13 +12,12 @@ class Configuration
 		Configuration &operator = (const Configuration &src);
 
 		void       			parseConfiguration(std::string filename);
-		std::string			getPathWebsite() const;
+		std::string			getPathRoot() const;
 		std::string			getIP() const;
 		unsigned int		getPort() const;
-		std::string			get404() const;
 
 	private:
-		std::string			_pathWebsite;
+		std::string			_pathRoot;
 		std::string			_ipAddress;
 		unsigned int		_port;
 		std::string			_errorPage404;

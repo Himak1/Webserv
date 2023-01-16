@@ -27,16 +27,20 @@
 
 #define COSTUM_301 "/templates/301.html"
 #define COSTUM_302 "/templates/302.html"
+#define COSTUM_404 "/templates/404.html"
 
+#define UPLOAD_FOLDER "uploads"
 
-// #define PATH_TO_PHP_CGI "/Users/mweitenb/.brew/bin/php-cgi"
-// #define PATH_TO_PHP_CGI_LENGTH 33
-// #define PATH_TO_PY_CGI "/usr/bin/python"
-// #define PATH_TO_PY_CGI_LENGTH 15
+// THUIS
+#define PATH_TO_PHP_CGI "/Users/mweitenb/.brew/bin/php-cgi"
+#define PATH_TO_PHP_CGI_LENGTH 33
+#define PATH_TO_PY_CGI "/usr/bin/python"
+#define PATH_TO_PY_CGI_LENGTH 15
 
-#define PATH_TO_PHP_CGI "/usr/bin/php-cgi"
-#define PATH_TO_PHP_CGI_LENGTH 16
-#define PATH_TO_PY_CGI "/usr/bin/python3"
-#define PATH_TO_PY_CGI_LENGTH 16
+// CODAM
+// #define PATH_TO_PHP_CGI "/usr/bin/php-cgi"
+// #define PATH_TO_PHP_CGI_LENGTH 16
+// #define PATH_TO_PY_CGI "/usr/bin/python3"
+// #define PATH_TO_PY_CGI_LENGTH 16
 
 #endif

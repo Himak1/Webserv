@@ -15,7 +15,7 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 	: _request(request), _config(config), _filepath(filepath)
 {
 	_filepath = _filepath.substr(0, _filepath.find("?"));
-	// mogen we realpath() gebruiken?
+	// mogen we realpath() gebruiken? Is onderdeel van C POSIX library, waar bijv. unistd.h en stdlib.h ook onder vallen
 	_path_to_script = realpath(&_filepath[0], NULL);
 
 	_argument = new char[3];
@@ -27,7 +27,6 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 	if (_request.getExtension() == ".py") {
 		_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
 		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
-		// _path_to_cgi = realpath("/", NULL);
 	}
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
@@ -92,14 +91,16 @@ string CGI::ExecuteCGI()
 // convert list to char**
 char**	CGI::createEnv()
 {
-	list<string> env_list = _request.getEnv();
+	map<string, string>	env_list = _request.getEnv();
 
 	_env = new char*[env_list.size() + 4];
-	list<string>::iterator it;
+	map<string, string>::iterator it;
 	int i = 0;
 	for (it = env_list.begin(); it != env_list.end(); it++) {
-		_env[i] = new char[(*it).length() + 1];
-		_env[i] = strcpy(_env[i], (const char*)(*it).c_str());
+		string env_var = (*it).first + "=" + (*it).second;
+		int length = env_var.length() + 2;
+		_env[i] = new char[length];
+		_env[i] = strncpy(_env[i], (const char*)env_var.c_str(), length);
 		i++;
 	}
 
@@ -107,7 +108,8 @@ char**	CGI::createEnv()
 	_env[i] = new char[directory_listing.length() + 1];
 	_env[i] = strcpy(_env[i], directory_listing.c_str());
 
-	string upload_directory = "upload_directory=uploads";
+	string temp_define = UPLOAD_FOLDER;
+	string upload_directory = "upload_directory=" + temp_define;
 	_env[++i] = new char[upload_directory.length() + 1];
 	_env[i] = strcpy(_env[i], upload_directory.c_str());
 

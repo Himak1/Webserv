@@ -16,11 +16,11 @@ Response::Response(class Request request, class Configuration config)
 	: _request(request), _config(config)
 {
 	if (_request.getURI() == "/")
-		_filepath = _config.getPathWebsite() +  "/index.html";
+		_filepath = _config.getPathRoot() +  "/index.html";
 	else if (_request.getURI().rfind('.') == string::npos)
-		_filepath = _config.getPathWebsite() + _request.getURI() + ".php";
+		_filepath = _config.getPathRoot() + _request.getURI() + ".php";
 	else
-		_filepath = _config.getPathWebsite() + _request.getURI();
+		_filepath = _config.getPathRoot() + _request.getURI();
 
 	initStatusCodes();
 	initContentTypes();
@@ -35,9 +35,7 @@ string 	Response::getFilepath() { return _filepath; }
 string 	Response::getMessage()
 {
 	_status = setStatus();
-	// list<string> envlist = _request.getEnv();
-	// for (list<string>::iterator i = envlist.begin(); i != envlist.end(); ++i)
-	// 	cout << *i << endl;
+
 	if (safe_substr(_request.getURI(), 0, _request.getURI().find("?")) == "/upload_handler.php")
 		uploadFile();
 
@@ -52,7 +50,7 @@ string 	Response::getMessage()
 	else if (_request.isCGI()) {
 		class CGI CGI(_request, _config, _filepath);
 		_content = CGI.ExecuteCGI();
-		_content = safe_substr(_content, _content.find("\n"), -1);
+		_content = safe_substr(_content, _content.find("<!doctype html>"), -1);
 	}
 	else
 		_content = getFileContent();
@@ -125,7 +123,7 @@ int		Response::setStatus()
 
 	if (_request.getURI() == "/temporary_unavailable")
 		return FOUND;
-	if (_filepath.rfind('/') > _config.getPathWebsite().length()) {
+	if (_filepath.rfind('/') > _config.getPathRoot().length()) {
 		const char * dir = safe_substr(_filepath, 0, _filepath.rfind('/')).c_str();
 		struct stat sb;
 		if (stat(dir, &sb) == 0)
@@ -152,10 +150,9 @@ void Response::uploadFile() {
 	_request.setUploadSucces(false);
 
 	string input_path;
-	list<string> envlist = _request.getEnv();
-	for (list<string>::iterator it = envlist.begin(); it != envlist.end(); ++it) {
-		input_path = safe_substr(*it, (*it).find("=") + 1, -1);
-	}
+	map<string, string> env = _request.getEnv();
+	if (env.find("file_to_upload") != env.end())
+			input_path = env["file_to_upload"];
 
 	// stream input to file_data
 	ifstream input_stream(input_path.c_str());
@@ -166,7 +163,7 @@ void Response::uploadFile() {
 	string file_data = ss.str();
 
 	// write file_data to output_path
-	string upload_path = _config.getPathWebsite() + "/uploads/" + input_path;
+	string upload_path = _config.getPathRoot() + "/" + UPLOAD_FOLDER + "/" + input_path;
 	ofstream fout(upload_path);
 	fout << file_data << endl;
     fout.close();
@@ -179,20 +176,38 @@ void Response::uploadFile() {
 	}
 }
 
+string Response::setCookie() {
+
+	string value;
+
+	// cout << "REQUEST = " << _request.getURI();
+	if (_request.getURI() == "/session_logout.php") {
+		value = "deleted";
+		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
+	}
+
+	map<string, string> env = _request.getEnv();
+	if (_request.getURI() == "/session_login.php") {
+		if (env.find("username") != env.end())
+			value = env["username"];
+		return "Set-Cookie: sessionID=" + value + "\n";
+	}
+
+	return "";
+}
+
 string Response::redirect()
 {
 	if (_status == 301 && COSTUM_301 != "default") {
-		_filepath = _config.getPathWebsite() + COSTUM_301;
+		_filepath = _config.getPathRoot() + COSTUM_301;
 		return getFileContent();
 	}
 
 	if (_status == 302 && COSTUM_302 != "default") {
-		_filepath = _config.getPathWebsite() + COSTUM_302;
+		_filepath = _config.getPathRoot() + COSTUM_302;
 		return getFileContent();
 	}
 
-	// TO DO: costum redirect pages
-	// TO DO: error codes from 301 not correctly displayed on terminal
 	return createErrorHTML();
 }
 
@@ -200,9 +215,8 @@ string Response::fileNotFound()
 {
 	_status = 404;
 
-	// TO DO: config file should check if supplied path exists
-	if (_config.get404() != "default") {
-		_filepath = _config.getPathWebsite() + _config.get404();
+	if (COSTUM_404 != "default") {
+		_filepath = _config.getPathRoot() + COSTUM_404;
 		return getFileContent();
 	}
 	return createErrorHTML();
@@ -242,10 +256,12 @@ string Response::createResponse()
 	ss	<< _request.getHTTPVersion() << " "
 		<< _status_codes[_status]
 		<< _content_types[ _request.getExtension()]
+		<< setCookie()
 		<< "Content-Length: "
 		<< _content.size() << "\n\n"
 		<< _content;
+
 	// if (_request.getExtension() == ".php")
-		// cout << ss.str() << endl;
+	// 	cout << "RESPONS: " << ss.str() << endl;
 	return ss.str();
 }

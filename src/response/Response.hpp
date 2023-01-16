@@ -32,6 +32,7 @@ class Response
 		int							setStatus();
 		string 						deleteFile();
 		void 						uploadFile();
+		string						setCookie();
 		string 						redirect();
 		string 						fileNotFound();
 		string						createErrorHTML();

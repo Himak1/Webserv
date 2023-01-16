@@ -1,8 +1,0 @@
-curl -v GET 127.0.0.1:8000
-curl -v GET 127.0.0.1:8000/upload_handler.php?file_to_upload=Makefile
-curl -v GET 127.0.0.1:8000/upload_handler.php?file_to_upload=notes.txt
-curl -v GET 127.0.0.1:8000/form_handler.php?first_name=Codam&last_name=42
-curl -v DELETE 127.0.0.1:8000/uploads/php.ini
-curl -v DELETE 127.0.0.1:8000/uploads/notes.txt
-curl -v HEAD 127.0.0.1:8000
-

@@ -21,7 +21,7 @@ Request &Request::operator = (const Request &src)
 		this->_http_version = src._http_version;
 		this->_extension = src._extension;
 		this->_isCGI = src._isCGI;
-		this->_env_list = src._env_list;
+		this->_env = src._env;
 		this->_cookies = src._cookies;
 	}
 	return (*this);
@@ -37,15 +37,16 @@ void Request::initRequest(string request)
 	if (_extension == ".php" || _extension == ".py")
 		_isCGI = true;
 
-	parseEnv();
 	parseCookies();
+	parseEnv();
 }
 
 const string Request::getMethod() const { return _method; }
 const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
-list<string> Request::getEnv() const { return _env_list; };
+map<string, string> Request::getEnv() const { return _env; };
+map<string, string> Request::getCookies() const { return _cookies; };
 bool		 Request::isCGI() const { return _isCGI; }
 bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
 void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
@@ -70,6 +71,7 @@ void Request::parseHTTPInfoAndHeaders(string request)
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
 
 	_headers = request;
+	// cout << _headers << endl;
 }
 
 void Request::parseExtension()
@@ -90,7 +92,10 @@ void Request::parseEnv()
 {
 	string	line;
 
-	_env_list.clear();
+	_env.clear();
+
+	if (_cookies.find("sessionID") != _cookies.end())
+		_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
 
 	if (_method == "GET") {
 		istringstream ss(safe_substr(_uri, _uri.find("?") + 1, -1));
@@ -98,8 +103,9 @@ void Request::parseEnv()
 			int pos = line.find('=');
 			if (pos == string::npos)
 				break;
-			string entry = safe_substr(line, 0, pos) + "=" + safe_substr(line, pos + 1, -1);
-			_env_list.push_back(entry);			
+			string key = trim_spaces(safe_substr(line, 0, pos));
+			string value = trim_spaces(safe_substr(line, pos + 1, -1));
+			_env.insert(pair<string, string> (key, value));
 	    }
 	}
 	// TO DO? will not work if input fields are empty. 
@@ -107,7 +113,7 @@ void Request::parseEnv()
 	else if (_method == "POST") {
 		string query = _headers;
 
-		istringstream ss(safe_substr(_headers, _headers.find("name="), -1));
+		istringstream ss(safe_substr(_headers, _headers.find("Content-Disposition:"), -1));
 		string previous_line;
 		string key;
 		int start;
@@ -119,7 +125,7 @@ void Request::parseEnv()
 				key = safe_substr(line, start, end);
 			}
 			if (line.find("------We") != string::npos)
-				_env_list.push_back(key + "=" + previous_line);
+				_env.insert(pair<string, string> (key, previous_line));
 			previous_line = line;
 	    }
 	}
@@ -127,23 +133,23 @@ void Request::parseEnv()
 
 void	Request::parseCookies()
 {
-	string 	line;
-	string	cookies = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
-	cookies = safe_substr(cookies, 0, cookies.find("\n"));
-	_cookies.clear();
+	string	cookie_input = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
+	cookie_input = safe_substr(cookie_input, 0, cookie_input.find("\n"));
 
-	istringstream ss(cookies);
+	_cookies.clear();
+	string 	line;
+	istringstream ss(cookie_input);
 	while (getline(ss, line, ';')) {
 		int pos = line.find('=');
 		if (pos == string::npos)
 			break;
 		string key = trim_spaces(safe_substr(line, 0, pos));
 		string value = trim_spaces(safe_substr(line, pos + 1, -1));
-		_cookies.insert({key, value});
+		_cookies.insert(pair<string, string> (key, value));
 	}
 
 	// for (map<string, string>::iterator it = _cookies.begin(); it != _cookies.end(); ++it) {
-	// 	cout << it->first << ": " << it->second << endl;
+		// cout << "cookie | " << it->first << ": " << it->second << endl;
 	// }
 }
 

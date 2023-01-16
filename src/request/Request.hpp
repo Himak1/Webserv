@@ -24,7 +24,8 @@ class Request
 		const string		getURI() const;
 		const string		getHTTPVersion() const;
 		const string		getExtension() const;
-		list<string>		getEnv() const;
+		map<string, string>	getEnv() const;
+		map<string, string>	getCookies() const;
 		bool				isCGI() const;
 		bool				getUploadSucces() const;
 		void				setUploadSucces(bool result);
@@ -36,7 +37,7 @@ class Request
 		string				_extension;
 		string				_headers;
 		bool				_isCGI;
-		list<string>		_env_list;
+		map<string, string>	_env;
 		map<string, string>	_cookies;
 		bool				_is_succesfull_uploaded;
 
