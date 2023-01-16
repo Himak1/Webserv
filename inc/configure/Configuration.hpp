@@ -3,6 +3,10 @@
 # define CONFIGURATION_HPP
 
 # include <string>
+# include <list>
+# include <utility>
+
+class Location;
 
 class Configuration
 {
@@ -18,13 +22,13 @@ class Configuration
 		unsigned int		getPort() const;
 		std::string			get404() const;
 
+		std::list<Location>	_locations;
 	private:
-		std::string			_pathWebsite;
-		std::string			_ipAddress;
-		unsigned int		_port;
-		std::string			_errorPage404;
+		std::string			_rootPath; // dependency
+		std::string			_ipAddress; // dependency
+		std::string			_host;
+		unsigned int		_port; // dependency
+		std::list< std::pair<int, std::string> >	_errorPages;
 };
-
-int	exampleFunc(int number);
 
 #endif

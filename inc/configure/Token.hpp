@@ -17,6 +17,7 @@ enum TokenTypes
 	ROOT,
 	EXPIRES,
 	ERROR_PAGE,
+	RETURN,
 	// Punctuation and Seperators
 	BRACKET_OPEN,
 	BRACKET_CLOSE,

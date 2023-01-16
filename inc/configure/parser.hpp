@@ -13,4 +13,5 @@ Node*	parser( TokenList tList );
 
 Node*	parseLocation( TokenList tList, TokenList& pos );
 
+void    parseSingleParameter( );
 #endif
