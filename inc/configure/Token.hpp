@@ -18,6 +18,9 @@ enum TokenTypes
 	EXPIRES,
 	ERROR_PAGE,
 	RETURN,
+	ALLOWED_METHODS,
+	CGI_PASS,
+	ALIAS,
 	// Punctuation and Seperators
 	BRACKET_OPEN,
 	BRACKET_CLOSE,

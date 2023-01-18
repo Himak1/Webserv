@@ -30,8 +30,9 @@ class Location
 		bool		_acceptedMethods[4]; // variadic arguments
 		bool		_autoIndex; // single argument
 		std::string	_defaultFile; // single argument
+		std::string	_alias;
 		std::string	_cgiExtension;
-		std::string	_cgiSavePath;
+		std::string	_cgiPath;
 };
 
 std::ostream &			operator<<( std::ostream & o, Location const & i );
