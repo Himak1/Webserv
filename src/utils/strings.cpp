@@ -4,12 +4,12 @@ string safe_substr(string str, int start, int length)
 {
 	if (start < 0)
 		start = 0;
-	if (str.length() <= start)
+	if (str.length() <= (unsigned long)start)
 		return (str);
 
 	if (length < 0)
 		length = str.length() - start;
-	if (str.length() < (start + length))
+	if (str.length() < (unsigned long)(start + length))
 		length = str.length() - start;
 
 	return (str.substr(start, length));

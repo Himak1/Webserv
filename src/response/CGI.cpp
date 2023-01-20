@@ -20,17 +20,19 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 
 	_argument = new char[3];
 	_argument = strcpy(_argument, "-q");
+
 	if (_request.getExtension() == ".php") {
 		_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
 		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
 	}
-	if (_request.getExtension() == ".py") {
+	else if (_request.getExtension() == ".py") {
 		_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
 		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
 	}
+
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
-	if (_request.getExtension() == ".php")
+	if (_request.getExtension() == ".php") 
 		_path[2] = &_argument[0];
 	else
 		_path[2] = NULL;
@@ -104,12 +106,13 @@ char**	CGI::createEnv()
 		i++;
 	}
 
-	string directory_listing = "directory_listing=true";
+	string temp_define_1 = DIRECTORY_LISTING;
+	string directory_listing = "directory_listing=" + temp_define_1;
 	_env[i] = new char[directory_listing.length() + 1];
 	_env[i] = strcpy(_env[i], directory_listing.c_str());
 
-	string temp_define = UPLOAD_FOLDER;
-	string upload_directory = "upload_directory=" + temp_define;
+	string temp_define_2 = UPLOAD_FOLDER;
+	string upload_directory = "upload_directory=" + temp_define_2;
 	_env[++i] = new char[upload_directory.length() + 1];
 	_env[i] = strcpy(_env[i], upload_directory.c_str());
 
@@ -130,6 +133,7 @@ void	CGI::freeEnv()
 {
 	if (_request.getEnv().empty())
 		return ;
+
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;

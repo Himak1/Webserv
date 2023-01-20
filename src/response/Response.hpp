@@ -19,6 +19,7 @@ class Response
 		string						getFilepath();
 
 	private:
+		string						_method;
 		string						_filepath;
 		int							_status;
 		string						_content;
@@ -29,9 +30,11 @@ class Response
 
 		void						initStatusCodes();
 		void						initContentTypes();
+		bool						isExistingFile();
 		int							setStatus();
 		string 						deleteFile();
 		void 						uploadFile();
+		string						getCGI();
 		string						setCookie();
 		string 						redirect();
 		string 						fileNotFound();

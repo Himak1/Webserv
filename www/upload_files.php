@@ -22,7 +22,7 @@
 			if ($opendirectory = opendir($directory)) {
 				while (($file = readdir($opendirectory)) !== false) {
 					if ($file[0] != ".")
-						echo "<a href='/$directory" . "$file'>$file</a>"."<br>";
+						echo "<a href='/$directory/" . "$file'>$file</a>"."<br>";
 				}
 				closedir($opendirectory);
 			}

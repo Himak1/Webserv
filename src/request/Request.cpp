@@ -20,9 +20,11 @@ Request &Request::operator = (const Request &src)
 		this->_uri = src._uri;
 		this->_http_version = src._http_version;
 		this->_extension = src._extension;
+		this->_headers = src._headers;
 		this->_isCGI = src._isCGI;
 		this->_env = src._env;
 		this->_cookies = src._cookies;
+		this->_is_succesfull_uploaded = src._is_succesfull_uploaded;
 	}
 	return (*this);
 }
@@ -98,13 +100,17 @@ void Request::parseEnv()
 		_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
 
 	if (_method == "GET") {
+		string value;
 		istringstream ss(safe_substr(_uri, _uri.find("?") + 1, -1));
 		while (getline(ss, line, '&')) {
-			int pos = line.find('=');
+			unsigned long pos = line.find('=');
 			if (pos == string::npos)
 				break;
 			string key = trim_spaces(safe_substr(line, 0, pos));
-			string value = trim_spaces(safe_substr(line, pos + 1, -1));
+			if (pos + 1 == line.length())
+				value = "";
+			else
+				value = trim_spaces(safe_substr(line, pos + 1, -1));
 			_env.insert(pair<string, string> (key, value));
 	    }
 	}
@@ -140,7 +146,7 @@ void	Request::parseCookies()
 	string 	line;
 	istringstream ss(cookie_input);
 	while (getline(ss, line, ';')) {
-		int pos = line.find('=');
+		unsigned long pos = line.find('=');
 		if (pos == string::npos)
 			break;
 		string key = trim_spaces(safe_substr(line, 0, pos));

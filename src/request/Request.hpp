@@ -15,8 +15,8 @@ class Request
 {
 	public:
 		Request();
-		Request(const Request &src);
 		~Request();
+		Request(const Request &src);
 		Request &operator = (const Request &src);
 
 		void				initRequest(string request);

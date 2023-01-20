@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 	if (argc == 2)
 		configuration.parseConfiguration(argv[1]);
 
-	TCPServer server = TCPServer(configuration);
+	TCPServer server(configuration);
 	server.startListen();
 
 	return 0;

@@ -8,6 +8,7 @@ set(SRC_FILES
     response/Response.cpp
 	response/CGI.cpp
 	utils/log.cpp
+	utils/strings.cpp
     main.cpp
     # !Add new src files here! #
     CACHE INTERNAL ""

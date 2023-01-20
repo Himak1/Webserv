@@ -3,6 +3,7 @@
 #include "../../src/request/Request.hpp"
 #include "../../src/response/Response.hpp"
 #include "../../src/response/CGI.hpp"
+#include "../../src/utils/strings.hpp"
 
 class Configuration config;
 
@@ -11,7 +12,7 @@ TEST(CGITest, testFormEnvGET)
 	class Request	request;
 	request.initRequest("GET /cgi-bin/form.cgi?first_name=Milan&last_name=Weitenberg\n");
 	class Response	respons(request, config);
-	class CGI		cgi(request, config);
+	class CGI		cgi(request, config, respons.getFilepath());
 
 	char** env = cgi.getFormEnv();
 	string env_0(env[0]);
@@ -55,7 +56,7 @@ TEST(CGITest, testFormEnvPOST)
 	class Request	request;
 	request.initRequest(test_string);
 	class Response	respons(request, config);
-	class CGI		cgi(request, config);
+	class CGI		cgi(request, config, respons.getFilepath());
 
 	char** env = cgi.getFormEnv();
 	string env_0(env[0]);
@@ -64,4 +65,5 @@ TEST(CGITest, testFormEnvPOST)
 	EXPECT_EQ(env_1, "last_name=Nivard");
 }
 
-// TO DO: test filename.cgi.php en filename.php.cgi
+// TO DO: test session management
+

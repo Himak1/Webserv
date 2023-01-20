@@ -39,21 +39,14 @@ string 	Response::getMessage()
 	if (safe_substr(_request.getURI(), 0, _request.getURI().find("?")) == "/upload_handler.php")
 		uploadFile();
 
-	if (_request.getMethod() == "DELETE")
-		_content = deleteFile();
-	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		_content = redirect();
-	else if (_status == 404)
-		_content = fileNotFound();
-	else if (_status != OK)
-		_content = createErrorHTML();
-	else if (_request.isCGI()) {
-		class CGI CGI(_request, _config, _filepath);
-		_content = CGI.ExecuteCGI();
-		_content = safe_substr(_content, _content.find("<!doctype html>"), -1);
-	}
-	else
-		_content = getFileContent();
+	if (_request.getMethod() == "DELETE")	_content = deleteFile();
+	else if (_status == MOVED_PERMANENTLY)	_content = redirect();
+	else if (_status == FOUND)				_content = redirect();
+	else if (_status == NOT_FOUND)			_content = fileNotFound();
+	else if (_status != OK)					_content = createErrorHTML();
+	else if (_request.isCGI())				_content = getCGI();
+	else									_content = getFileContent();
+
 	return createResponse();
 }
 
@@ -97,42 +90,33 @@ void	Response::initContentTypes()
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
 }
 
-int		Response::setStatus()
-{
-	if (_request.getHTTPVersion() != "HTTP/1.1")
-		return HTTP_VERSION_NOT_SUPPORTED;
-
-	if (_request.getMethod() != "GET" 
-		&& _request.getMethod() != "POST" 
-		&& _request.getMethod() != "DELETE")
-		return NOT_IMPLEMENTED;
-
-	if (_filepath.find(".php?") != string::npos)
-		return OK;
-
+bool	Response::isExistingFile() {
 	basic_ifstream<char> input_stream(_filepath.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();
-		if (_request.getMethod() == "DELETE")
-			return ACCEPTED;
-		return OK;
+		return true;
 	}
+	return false;
+}
 
-	if (_request.getURI() == "/permanently_moved")
-		return MOVED_PERMANENTLY;
+int		Response::setStatus()
+{
+	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
+	bool is_incorrect_method	= _request.getMethod() != "GET" 
+									&& _request.getMethod() != "POST" 
+									&& _request.getMethod() != "DELETE";
+	bool is_php_file			= _filepath.find(".php?") != string::npos;
+	bool is_301					= _request.getURI() == CASE_301;
+	bool is_302					= _request.getURI() == CASE_302;
+	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
 
-	if (_request.getURI() == "/temporary_unavailable")
-		return FOUND;
-	if (_filepath.rfind('/') > _config.getPathRoot().length()) {
-		const char * dir = safe_substr(_filepath, 0, _filepath.rfind('/')).c_str();
-		struct stat sb;
-		if (stat(dir, &sb) == 0)
-			return FOUND;
-	}
-
-	if(_content_types.find(_request.getExtension()) == _content_types.end())
-		return UNSUPPORTED_MEDIA_TYPE;
-
+	if (is_correct_HTTP)		return HTTP_VERSION_NOT_SUPPORTED;
+	if (is_incorrect_method)	return NOT_IMPLEMENTED;
+	if (is_301)					return MOVED_PERMANENTLY;
+	if (is_302)					return FOUND;
+	if (is_php_file)			return OK;
+	if (isExistingFile())		return OK;
+	if (is_unsupported_type)	return UNSUPPORTED_MEDIA_TYPE;
 	return NOT_FOUND;
 }
 
@@ -142,7 +126,6 @@ string Response::deleteFile()
 		_status = NOT_FOUND;
 		return createErrorHTML();
 	}
-	_status = OK;
 	return "File " + _filepath + " has been deleted";
 }
 
@@ -176,11 +159,16 @@ void Response::uploadFile() {
 	}
 }
 
-string Response::setCookie() {
+string Response::getCGI() {
+	class CGI CGI(_request, _config, _filepath);
+	string cgi = CGI.ExecuteCGI();
+	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
+}
 
+string Response::setCookie()
+{
 	string value;
 
-	// cout << "REQUEST = " << _request.getURI();
 	if (_request.getURI() == "/session_logout.php") {
 		value = "deleted";
 		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
@@ -198,28 +186,28 @@ string Response::setCookie() {
 
 string Response::redirect()
 {
-	if (_status == 301 && COSTUM_301 != "default") {
+	if ((_status == 301 && COSTUM_301 == "default")
+		|| (_status == 302 && COSTUM_302 == "default"))
+		return createErrorHTML();
+
+	if (_status == 301)
 		_filepath = _config.getPathRoot() + COSTUM_301;
-		return getFileContent();
-	}
 
-	if (_status == 302 && COSTUM_302 != "default") {
+	if (_status == 302)
 		_filepath = _config.getPathRoot() + COSTUM_302;
-		return getFileContent();
-	}
 
-	return createErrorHTML();
+	return getFileContent();
 }
 
 string Response::fileNotFound()
 {
 	_status = 404;
 
-	if (COSTUM_404 != "default") {
-		_filepath = _config.getPathRoot() + COSTUM_404;
-		return getFileContent();
-	}
-	return createErrorHTML();
+	if (COSTUM_404 == "default")
+		return createErrorHTML();
+
+	_filepath = _config.getPathRoot() + COSTUM_404;
+	return getFileContent();
 }
 
 string Response::createErrorHTML()
