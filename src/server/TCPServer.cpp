@@ -8,6 +8,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <fstream>
+#include <string.h>
 
 #define QUEU_LIMIT_LISTEN 20
 
