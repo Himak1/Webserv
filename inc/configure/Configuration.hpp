@@ -5,8 +5,7 @@
 # include <string>
 # include <list>
 # include <utility>
-
-class Location;
+# include "Location.hpp"
 
 class Configuration
 {
@@ -28,6 +27,8 @@ class Configuration
 		std::string			_ipAddress; // dependency
 		std::string			_host;
 		unsigned int		_port; // dependency
+		std::string			_pathWebsite; // dependency
+		std::string			_errorPage404; // dependency
 		std::list< std::pair<int, std::string> >	_errorPages;
 };
 

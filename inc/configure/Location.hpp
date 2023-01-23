@@ -20,10 +20,10 @@ class Location
 
 		Location &		operator=( Location const & rhs );
 
-		void		setRoot();
-		void		setPath();
-		void		setAcceptedMethods();
-		void		setAutoIndex();
+		// void		setRoot();
+		// void		setPath();
+		// void		setAcceptedMethods();
+		// void		setAutoIndex();
 	private:
 		std::string	_root; // single argument
 		std::string	_path;

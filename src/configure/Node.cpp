@@ -9,10 +9,6 @@ Node::Node()
 {
 }
 
-Node::Node( const Node& src )
-{
-}
-
 Node::Node( int nodeType, std::string terminal )
 	: _nodeType(nodeType), _terminal(terminal)
 {
@@ -32,7 +28,7 @@ Node::~Node()
 
 std::ostream&	operator<<( std::ostream& o, Node const& i )
 {
-	o << i.getValue();
+	o << i.getNodeType();
 	return o;
 }
 
@@ -40,7 +36,13 @@ std::ostream&	operator<<( std::ostream& o, Node const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Node::addChild( Node* newNode )
+int		Node::getNodeType() const
 {
-	_nodes.push_back(newNode);
+	return (_nodeType);
+}
+
+int		Node::addChild( Node* newNode )
+{
+	_children.push_back(newNode);
+	return (0);
 }

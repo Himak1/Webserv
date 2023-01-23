@@ -9,12 +9,11 @@
 class Node
 {
 	public:
-		Node( Node const& src );c
-		Node( int nodeType, std::string terminal)
+		Node( int nodeType, std::string terminal);
 		~Node();
 
-		void	addChild();
-		// void accept( Visitor visitor );
+		int		addChild( Node* newNode );
+		int		getNodeType() const;
 	private:
 		Node();
 
