@@ -1,6 +1,6 @@
-#include <TcpServer.hpp>
-#include "configuration/Configuration.hpp"
-#include <main.hpp>
+#include "server/TcpServer.hpp"
+#include "server/Configuration.hpp"
+
 
 int main(int argc, char **argv)
 {

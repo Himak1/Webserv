@@ -1,18 +1,15 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Isrc# -Wall -Wextra -Werror -std=c++98 -pedantic
-SANIT			:=	#-g -fsanitize=address
-CC				:=	c++
+CFLAGS			:=	-Isrc -Wall -Wextra -Werror -std=c++98 -pedantic
+SANIT			:=	-g -fsanitize=address
+CC				:=	@c++
 
 # STATIC
-RM				:=	rm
+RM				:=	@rm
 MKDIR_P			:=	@mkdir -p
 SRC_DIR			:=	./src
 OBJ_DIR			:=	./obj
 SRC				:=	$(shell find $(SRC_DIR) -name '*.cpp')
-
-
-
 OBJ				:=	$(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 $(NAME)			: 	$(OBJ)
 					$(CC) $(OBJ) -o $@ $(SANIT)
@@ -37,4 +34,5 @@ re				: 	fclean all
 # $(NAME)			: 	$(OBJ)
 # 					which php-cgi || brew install php
 # 					$(CC) $(OBJ) -o $@ $(SANIT)
+
 

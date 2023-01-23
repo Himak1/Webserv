@@ -1,8 +1,13 @@
 build
 obj
+<<<<<<< HEAD
 .DS_Store
 .vscode
 webserv
 client.dSYM
 a.out
 
+=======
+webserv
+.DS_Store
+>>>>>>> milan
