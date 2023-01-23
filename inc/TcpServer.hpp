@@ -18,9 +18,9 @@ namespace http
 
 typedef struct s_socket {
 	// const unsigned int	socket_idx;
-	int					socket_address;		// is ook een struct?
+	// int					socket_address;		// is ook een struct?
 	unsigned int		socket_address_len;
-	struct sockaddr_in	socket_in;
+	struct sockaddr_in	socket_info;
 }	t_socket;
 
 class TcpServer

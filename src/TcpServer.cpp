@@ -76,11 +76,13 @@ void	TcpServer::setUpListeningSockets()
 	/*************************************************************/
 	for (int i = 0; i < 1; i++) {								
 		memset(&listening_socket, 0, sizeof(listening_socket));
-		listening_socket.socket_in.sin_family = AF_INET;
-		listening_socket.socket_in.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
-		// listening_socket.socket_in.sin_port = htons(_config.getPort());
+		listening_socket.socket_info.sin_family = AF_INET;
+		// listening_socket.socket_info.sin_port = htons(_config.getPort());
 							int test_port = 8000;							// tmp
-		listening_socket.socket_in.sin_port = htons(test_port++); 			// tmp
+		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
+		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+		
+		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
 		_socketInfo.push_back(listening_socket);
 
 		/*************************************************************/
@@ -99,8 +101,8 @@ void	TcpServer::setUpListeningSockets()
 		}	
 		fcntl(listener.fd, F_SETFL, O_NONBLOCK);			
 		listener.events = POLLIN;
-		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_address, _socketInfo[i].socket_address_len) < 0) {		/// we casten van sockaddr_in -> sock_addr waarom?
-			exitWithError("Cannot connect socket to address");
+		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len) < 0) {		/// we casten van sockaddr_in -> sock_addr waarom?
+			exitWithError("Cannot bind() socket to address");
 		}
 		_pollFds.push_back(listener);
 		_nbListeningSockets++;
@@ -120,10 +122,11 @@ void TcpServer::startListen()
 		log("\n====== Waiting for a new connection ======\n");
 		sleep(1);
 
+
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
 		/*	write request) en houdt dit bij in de array van structs 	*/
-		/*	_socket_fds (door .events aan te passen) 					*/
+		/*	_pollFds (door .events aan te passen) 					*/
 		/*	De -1 geeft aan dat hij oneindig lang wacht op read/write 	*/
 		/*	requests)   												*/
 		/****************************************************************/
@@ -148,17 +151,22 @@ void	TcpServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
+
 	/****************************************************************/
 	/* 	loop door de client sockets om te kijken welke actief is	*/
 	/*	POLLIN geeft aan dat een read request klaar staat			*/
 	/*	POLLOUT geeft aan dat een write request klaar staat			*/
 	/****************************************************************/
-	for (; i < (_pollFds.size() - _nbListeningSockets); i++) {
+	for (; i < (_pollFds.size() - _nbListeningSockets + 1); i++) {
 		if (_pollFds[i].revents == 0)
 			continue;
-		if (_pollFds[i].revents & POLLIN) {		
+		if (_pollFds[i].revents & POLLIN) {
+			printf("POLLIN with i = %i\n", i);		
 			receiveRequest(i);
 		} else if (_pollFds[i].revents & POLLOUT) {
+
+			printf("POLLOUT with i = %i\n", i);		
+
 			sendResponse(i);
 		}
 	}  													 		
@@ -175,7 +183,7 @@ void TcpServer::newConnection(int active_socket_idx)
 
 	memset(&new_pollfd, 0, sizeof(struct pollfd));
 	memset(&new_socket, 0, sizeof(t_socket));
-	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)new_socket.socket_address, &new_socket.socket_address_len);
+	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, &new_socket.socket_address_len);
 	if (new_pollfd.fd == -1) {
 		exitWithError("ERROR: accept() (TcpServer::newConnection");
 	}
@@ -203,8 +211,8 @@ void TcpServer::newConnection(int active_socket_idx)
 	_socketInfo.push_back(new_socket);
 
 	std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(new_socket.socket_in.sin_addr) << "; PORT: " 
-			<< ntohs(new_socket.socket_in.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
+			<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
+			<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
 void	TcpServer::closeClientConnection(int close)
@@ -221,19 +229,19 @@ void TcpServer::receiveRequest(int idx)
 	char	buff[BUFFER_SIZE];
 	size_t	bytes_received;
 
-	bytes_received = recv(_socket_fds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
+	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																			// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
 	if (bytes_received <= 0) {
 		if (bytes_received == 0)
-			std::cout << "Socket fd " << _socket_fds[idx].fd << " closed their connection." << std::endl;
+			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		else
-			std::cout << "Recv() error on socket fd " << _socket_fds[idx].fd << " in TcpServer::startListen()" << std::endl;		
-		close (_socket_fds[idx].fd);
-		_socket_fds.erase(_socket_fds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
-		_number_of_socket_fds--;
+			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TcpServer::startListen()" << std::endl;		
+		close (_pollFds[idx].fd);
+		_socketInfo.erase(_socketInfo.begin() + idx);
+		_pollFds.erase(_pollFds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
 	} 
 		
-	_socket_fds[idx].events = POLLIN | POLLOUT;			// Socket heeft data gestuurd en kan dus nu op POLLIN | POLLOUT zodat hij data kan ontvangen
+	_pollFds[idx].events = POLLIN | POLLOUT;			// Socket heeft data gestuurd en kan dus nu op POLLIN | POLLOUT zodat hij data kan ontvangen
 
 	_request.initHTTPRequest(std::string(buff));
 	// if (!_request.isValidMethod())
@@ -254,14 +262,14 @@ void TcpServer::sendResponse(int idx)
 	_serverMessage = respons.getMessage("200 OK");
 
 	// _serverMessage = "Test\n";
-	if (_serverMessage.empty())							// Deze check doen waar de _serverMessage wordt gemaakt?
+	if (_serverMessage.empty())								// Deze check doen waar de _serverMessage wordt gemaakt?
 		std::cout << "No server message! Client won't receive anything!" << std::endl;
 
 	_unsendServerMessage = _serverMessage;
 
 	while (!_unsendServerMessage.empty())
 	{
-		bytes_send = send(_socket_fds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
+		bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
 		if (bytes_send < 0)
 			std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 		_unsendServerMessage.erase(0, bytes_send);
@@ -272,8 +280,8 @@ void TcpServer::sendResponse(int idx)
 
 void TcpServer::closeServer()
 {
-	// close(_socket_fds[0].fd); 	// exit closes all fds(?)
-	exit(0);					
+	// close(_pollFds[0].fd); 	// exit closes all fds(?)
+	exit(0);
 								/*
 									Als we threads gaan gebruiken geen exit() meer.
 									Exit() sluit dan automatisch alle threads, maar dat is
