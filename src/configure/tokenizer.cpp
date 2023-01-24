@@ -42,24 +42,45 @@ int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
 	return (it->second);
 }
 
+bool	isEnd(std::string::iterator it)
+{
+	if (*it == ' '
+		|| *it == '\t'
+		|| *it == '\v'
+		|| *it == ';')
+		return true;
+	return false;
+}
+
+std::list<std::string>	splitLine( std::string line )
+{
+	std::list<std::string>	words;
+	size_t					start = 0;
+	size_t					ending = 0;
+
+	while (start != line.length())
+	{
+		start = ending;
+		while (!isEnd(ending))
+			
+		words.push_back(substr)
+	}
+}
+
 std::list<Token*>	tokenizer( std::ifstream& file )
 {
-	std::list<Token*>	output;
-	TokenMap			tokenMap;
-	std::string			line;
-	std::string			word;
+	std::list<Token*>		output;
+	std::list<std::string>	words;
+	TokenMap				tokenMap;
+	std::string				line;
 
 	initMap(tokenMap);
 	while (std::getline(file, line))
 	{
-		std::istringstream	stream(line);
-		while (!stream.eof())
-		{
-			stream >> word;
-			output.push_back(new Token(checkTokenType(tokenMap, word), word));
-			if (output.back()->getTokenType() == HASHTAG)
-				break ;
-		}
+		words = splitLine(line);
+		output.push_back(new Token(checkTokenType(tokenMap, word), word));
+		if (output.back()->getTokenType() == HASHTAG)
+			break ;
 	}
 	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
 	// {
@@ -67,3 +88,29 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 	// }
 	return (output);
 }
+
+// std::list<Token*>	tokenizer( std::ifstream& file )
+// {
+// 	std::list<Token*>	output;
+// 	TokenMap			tokenMap;
+// 	std::string			line;
+// 	std::string			word;
+
+// 	initMap(tokenMap);
+// 	while (std::getline(file, line))
+// 	{
+// 		std::istringstream	stream(line);
+// 		while (!stream.eof())
+// 		{
+// 			stream >> word;
+// 			output.push_back(new Token(checkTokenType(tokenMap, word), word));
+// 			if (output.back()->getTokenType() == HASHTAG)
+// 				break ;
+// 		}
+// 	}
+// 	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
+// 	// {
+// 	// 	std::cout << **iter << std::endl;
+// 	// }
+// 	return (output);
+// }

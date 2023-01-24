@@ -38,3 +38,14 @@ TEST(tokenizer_tests, checkTokenType)
 	initMap(tokenMap);
 	EXPECT_EQ(checkTokenType(tokenMap, "server"), SERVER);
 }
+
+TEST(splitLine_tests, basic_string)
+{
+	std::string	input("this is a line");
+
+	std::list<std::string>	words = splitLine(input);
+	EXPECT_EQ(words[0], "this");
+	EXPECT_EQ(words[1], "is");
+	EXPECT_EQ(words[2], "a");
+	EXPECT_EQ(words[3], "line");
+}
