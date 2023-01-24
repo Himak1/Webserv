@@ -20,6 +20,11 @@ Node::Node( int nodeType, std::string terminal )
 
 Node::~Node()
 {
+	std::list<Node*>::iterator	it;
+	for (it = _children.begin(); it != _children.end(); ++it)
+	{
+		delete *it;
+	}
 }
 
 /*

@@ -12,8 +12,8 @@ class Node
 		Node( int nodeType, std::string terminal);
 		~Node();
 
-		int		addChild( Node* newNode );
 		int		getNodeType() const;
+		int		addChild( Node* newNode );
 	private:
 		Node();
 
