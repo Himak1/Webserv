@@ -61,9 +61,9 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 				break ;
 		}
 	}
-	for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
-	{
-		std::cout << **iter << std::endl;
-	}
+	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
+	// {
+	// 	std::cout << **iter << std::endl;
+	// }
 	return (output);
 }

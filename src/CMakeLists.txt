@@ -9,6 +9,7 @@ set(SRC_FILES
     configure/tokenizer.cpp
     #configure/AST.cpp
     configure/parser/parser.cpp
+    configure/parser/parseLocation.cpp
     BuildResponse.cpp
     HTTPRequest.cpp
     main.cpp

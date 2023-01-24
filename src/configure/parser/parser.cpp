@@ -59,7 +59,6 @@ Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& end )
 
 	if (!accept(pos, LOCATION))
 		return (NULL);
-	pos++;
 	newNode = new Node(123, "");
 	status = newNode->addChild(parseLocationPath(pos, end));
 	// if (status == 0)
