@@ -55,16 +55,20 @@ bool	isEnd(std::string::iterator it)
 std::list<std::string>	splitLine( std::string line )
 {
 	std::list<std::string>	words;
-	size_t					start = 0;
-	size_t					ending = 0;
+	size_t	start = 0;
+	size_t	ending = 0;
 
-	while (start != line.length())
+	while (start != std::string::npos && line[start] != '#')
 	{
+		ending = line.find_first_of(" \t\v;#", start);
+		if (ending - start != 0)
+			words.push_back(line.substr(start, ending - start));
+		if (line[ending] == '#')
+			break ;
+		ending = line.find_first_not_of(" \t\v;", ending);
 		start = ending;
-		while (!isEnd(ending))
-			
-		words.push_back(substr)
 	}
+	return (words);
 }
 
 std::list<Token*>	tokenizer( std::ifstream& file )
@@ -78,9 +82,12 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 	while (std::getline(file, line))
 	{
 		words = splitLine(line);
-		output.push_back(new Token(checkTokenType(tokenMap, word), word));
-		if (output.back()->getTokenType() == HASHTAG)
-			break ;
+		for (std::list<std::string>::iterator it = words.begin(); it != words.end(); ++it)
+		{
+			if ((*it)[0] == '#')
+				break ;
+			output.push_back(new Token(checkTokenType(tokenMap, *it), *it));
+		}
 	}
 	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
 	// {

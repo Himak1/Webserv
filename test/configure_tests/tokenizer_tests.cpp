@@ -22,8 +22,6 @@ TEST(tokenizer_tests, double_quotes)
 	iter++;
 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "{");
 	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "#");
-	iter++;
 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}");
 	iter++;
 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}");
@@ -44,8 +42,42 @@ TEST(splitLine_tests, basic_string)
 	std::string	input("this is a line");
 
 	std::list<std::string>	words = splitLine(input);
-	EXPECT_EQ(words[0], "this");
-	EXPECT_EQ(words[1], "is");
-	EXPECT_EQ(words[2], "a");
-	EXPECT_EQ(words[3], "line");
+	std::list<std::string>::iterator it = words.begin();
+	EXPECT_EQ(*it, "this");
+	++it;
+	EXPECT_EQ(*it, "is");
+	++it;
+	EXPECT_EQ(*it, "a");
+	++it;
+	EXPECT_EQ(*it, "line");
+}
+
+TEST(splitLine_tests, line_with_comment)
+{
+	std::string	input("line { } #comment");
+
+	std::list<std::string>	words = splitLine(input);
+	std::list<std::string>::iterator it = words.begin();
+	EXPECT_EQ(*it, "line");
+	++it;
+	EXPECT_EQ(*it, "{");
+	++it;
+	EXPECT_EQ(*it, "}");
+	++it;
+	EXPECT_EQ(it, words.end());
+}
+
+TEST(splitLine_tests, multiple_delimiters_in_a_row)
+{
+	std::string	input("line 	{  }#comment");
+
+	std::list<std::string>	words = splitLine(input);
+	std::list<std::string>::iterator it = words.begin();
+	EXPECT_EQ(*it, "line");
+	++it;
+	EXPECT_EQ(*it, "{");
+	++it;
+	EXPECT_EQ(*it, "}");
+	++it;
+	EXPECT_EQ(it, words.end());
 }
