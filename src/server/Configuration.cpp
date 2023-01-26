@@ -7,7 +7,7 @@ Configuration::Configuration()
 {
 	this->_pathRoot = "www";
 	this->_ipAddress = "0.0.0.0";
-	this->_port = 8000;
+	this->_port = 8000;									/// komt binnen als list of vector
 	// this->_errorPage404 = "/templates/404.html";
 	// this->_errorPage404 = "default";
 }

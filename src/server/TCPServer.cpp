@@ -11,6 +11,8 @@
 
 #define QUEU_LIMIT_LISTEN 20
 
+using namespace std;
+
 namespace
 {;
 	const int BUFFER_SIZE = 30720;
@@ -20,13 +22,13 @@ namespace
 		std::cout << message << std::endl;
 	}
 
-	void logStartupMessage(struct sockaddr_in _socketAddress[0])
+	void logStartupMessage(struct sockaddr_in _socketAddress)
 	{
 		std::ostringstream ss;
 		ss	<< "\n*** Listening on ADDRESS: "
-			<< inet_ntoa(_socketAddress[0].sin_addr) 
+			<< inet_ntoa(_socketAddress.sin_addr) 
 			<< " PORT: "
-			<< ntohs(_socketAddress[0].sin_port) 
+			<< ntohs(_socketAddress.sin_port) 
 			<< " ***\n\n";
 		log(ss.str());
 	}
@@ -59,10 +61,10 @@ TcpServer::~TcpServer()
 }
 
 			// PRIVATE FUNCTIONS
-int TcpServer::startServer()
-{
-	return 0;
-}
+// int TcpServer::startServer()
+// {
+// 	return 0;
+// }
 
 void	TcpServer::setUpListeningSockets()
 {
@@ -70,15 +72,23 @@ void	TcpServer::setUpListeningSockets()
 	struct pollfd	listener;
 	int				re_use = 1;
 
+
+
+	int test_port = 8000;	// tmp variable
+
+
+
 	/*************************************************************/
 	/* Moet loopen door het aantal poorten uit config            */
-	/* setup van de struct s_socket (socket info)   			 */
+	/* ports	staan in the config class, in een list of vector */
+	/* we kunnen dus itteraten op de ports				     	 */
 	/*************************************************************/
-	for (int i = 0; i < 1; i++) {								
+	for (int i = 0; i < 6; i++) {								
+	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {								
 		memset(&listening_socket, 0, sizeof(listening_socket));
 		listening_socket.socket_info.sin_family = AF_INET;
 		// listening_socket.socket_info.sin_port = htons(_config.getPort());
-							int test_port = 8000;							// tmp
+
 		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
 		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
 		
@@ -116,12 +126,13 @@ void TcpServer::startListen()
 	for (int i = 0; i < _nbListeningSockets; i++) {
 		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
 			exitWithError("Socket listen failed");
+		logStartupMessage(_socketInfo[i].socket_info);
 	}
-	// logStartupMessage(_socketAddress);
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
-		sleep(1);
 
+
+		sleep(1);
 
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
@@ -134,6 +145,7 @@ void TcpServer::startListen()
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
+		cout << "Poll count = " << poll_count << endl;
 		lookupActiveSocket();
 	}	
 }
@@ -168,7 +180,8 @@ void	TcpServer::lookupActiveSocket()
 			printf("POLLOUT with i = %i\n", i);		
 
 			sendResponse(i);
-		}
+		} else if (_pollFds[i].revents & (POLLIN & POLLOUT))		// tmp
+			cout << "POLLIN & POLLOUT with i = " << i << endl;		// tmp
 	}  													 		
 }
 
@@ -177,34 +190,32 @@ void	TcpServer::lookupActiveSocket()
 // 	(which is already non-blocking)
 void TcpServer::newConnection(int active_socket_idx)
 {
-	// Client	*new_pollfd = new Client(_pollFds.size() + 1);
 	struct pollfd	new_pollfd;
 	t_socket		new_socket;
 
 	memset(&new_pollfd, 0, sizeof(struct pollfd));
 	memset(&new_socket, 0, sizeof(t_socket));
-	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, &new_socket.socket_address_len);
+	new_socket.socket_address_len = sizeof(new_socket.socket_info);
+	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, &new_socket.socket_address_len);	// moet het laatste argument niet sizeof(socketinfo) zijn?
 	if (new_pollfd.fd == -1) {
 		exitWithError("ERROR: accept() (TcpServer::newConnection");
 	}
 															
 
 								/*
-									set events for added socket?
-
-									add_to_socket.events = POLLIN | POLLOUT
-									hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
-
-									huidige vorm = 
-									- nieuwe connectie dan gaat socket op POLLIN
-									- een read op een socket ontvangen dan gaat hij op POLLIN | POLLOUT
-
-									Op deze manier zou een connectie dus nooit iets ontvangen voordat hij zelf iets stuurt,
-									maar is ook logisch want een connectie moet altijd eerst iets sturen (request) voordat hij kan ontvangen
-							
-									evt toevoegen : 
-									socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
-									
+								set events for added socket?
+								add_to_socket.events = POLLIN | POLLOUT
+								hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
+								huidige vorm = 
+								- nieuwe connectie dan gaat socket op POLLIN
+								- een read op een socket ontvangen dan gaat hij op POLLIN | POLLOUT
+			
+								Op deze manier zou een connectie dus nooit iets ontvangen voordat hij zelf iets stuurt,
+								maar is ook logisch want een connectie moet altijd eerst iets sturen (request) voordat hij kan ontvangen
+						
+								evt toevoegen : 
+								socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
+								
 								*/
 	new_pollfd.events = POLLIN;
 	_pollFds.push_back(new_pollfd);
@@ -244,9 +255,28 @@ void TcpServer::receiveRequest(int idx)
 		_pollFds.erase(_pollFds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
 	} 
 		
-	_pollFds[idx].events = POLLIN | POLLOUT;			// Socket heeft data gestuurd en kan dus nu op POLLIN | POLLOUT zodat hij data kan ontvangen
+
+
 
 	_request.initRequest(std::string(buff));
+	/*
+	
+		Hier zou events op POLLOUT moeten indien wij data hebben om te versturen. 
+		Dit betekent dat in de volgende loop van poll, poll aangeeft dat op deze socket
+		write activity is zodat we dan sendResponse kunnen sturen, en vervolgens de
+		servermessage daar kunnen versturen.
+		
+	*/
+	// _pollFds[idx].events = POLLIN | POLLOUT;			
+	
+	class Response respons(_request, _config);
+
+	_socketInfo[idx].server_message = respons.getMessage();
+	if (_socketInfo[idx].server_message.empty())
+		cout << "Emtpy message on idx " << idx << endl;
+	else
+		_pollFds[idx].events = POLLOUT;	
+
 	// if (!_request.isValidMethod())
 	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
 	std::ostringstream ss;
@@ -260,25 +290,34 @@ void TcpServer::receiveRequest(int idx)
 void TcpServer::sendResponse(int idx)
 {
 	size_t	bytes_send;
-	class	Response respons(_request, _config);
+	// class	Response respons(_request, _config);
 
-	_serverMessage = respons.getMessage();
+	// _serverMessage = respons.getMessage();
 
-	std::cout << _serverMessage << " <- is de serverMessage" << std::endl;
+	// std::cout << _serverMessage << " <- is de serverMessage" << std::endl;		// tmp
 
-	// _serverMessage = "Test\n";
-	if (_serverMessage.empty())								// Deze check doen waar de _serverMessage wordt gemaakt?
-		std::cout << "No server message! Client won't receive anything!" << std::endl;
-
-	_unsendServerMessage = _serverMessage;
-
-	while (!_unsendServerMessage.empty())
-	{
+	// if (_serverMessage.empty())								// Deze check doen waar de _serverMessage wordt gemaakt?
+	// 	std::cout << "No server message! Client won't receive anything!" << std::endl;
+	_unsendServerMessage = _socketInfo[idx].server_message;
+	// while (!_unsendServerMessage.empty())
+	// {
 		bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
 		if (bytes_send < 0)
 			std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 		_unsendServerMessage.erase(0, bytes_send);
-	}
+	// }
+	_socketInfo[idx].server_message = _unsendServerMessage;
+	
+
+	/*************************************************************/
+	/* In het geval servermessage niet compleet is verstuurd     */
+	/* blijft deze socket op POLLOUT staan zodat in de volgende  */
+	/* loop hij weer kan versturen								 */
+	/* Als wel alles is verstuurd gaat hij op POLLIN		     */
+	/*************************************************************/
+
+	if (_unsendServerMessage.empty())
+		_pollFds[idx].events = POLLIN;
 }
 
 

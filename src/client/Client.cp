@@ -1,5 +1,5 @@
 
-// Client side C/C++ program to demonstrate Socket programming
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -7,8 +7,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>
-
-
 
 #include <thread>
 

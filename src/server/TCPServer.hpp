@@ -21,6 +21,7 @@ typedef struct s_socket {
 	// int					socket_address;		// is ook een struct?
 	unsigned int		socket_address_len;
 	struct sockaddr_in	socket_info;
+	std::string			server_message;
 }	t_socket;
 
 class TcpServer
