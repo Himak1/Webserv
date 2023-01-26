@@ -81,3 +81,49 @@ TEST(splitLine_tests, multiple_delimiters_in_a_row)
 	++it;
 	EXPECT_EQ(it, words.end());
 }
+
+TEST(splitLine_tests, semicolons)
+{
+	std::string	input("alias /usr/bin/; allowed_methods GET;");
+
+	std::list<std::string>	words = splitLine(input);
+	std::list<std::string>::iterator it = words.begin();
+	EXPECT_EQ(*it, "alias");
+	++it;
+	EXPECT_EQ(*it, "/usr/bin/");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(*it, "allowed_methods");
+	++it;
+	EXPECT_EQ(*it, "GET");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(it, words.end());
+}
+
+TEST(splitLine_tests, semicolons_in_a_row)
+{
+	std::string	input("alias /usr/bin/;;; allowed_methods GET;");
+
+	std::list<std::string>	words = splitLine(input);
+	std::list<std::string>::iterator it = words.begin();
+	EXPECT_EQ(*it, "alias");
+	++it;
+	EXPECT_EQ(*it, "/usr/bin/");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(*it, "allowed_methods");
+	++it;
+	EXPECT_EQ(*it, "GET");
+	++it;
+	EXPECT_EQ(*it, ";");
+	++it;
+	EXPECT_EQ(it, words.end());
+}

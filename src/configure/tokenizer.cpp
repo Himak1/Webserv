@@ -58,14 +58,21 @@ std::list<std::string>	splitLine( std::string line )
 	size_t	start = 0;
 	size_t	ending = 0;
 
-	while (start != std::string::npos && line[start] != '#')
+	while ( start != std::string::npos && start != line.size() && line[start] != '#')
 	{
 		ending = line.find_first_of(" \t\v;#", start);
 		if (ending - start != 0)
 			words.push_back(line.substr(start, ending - start));
+		else if (line[start] == ';')
+		{
+			words.push_back(line.substr(start, ending - start + 1));
+			ending++;
+			start = ending;
+			continue ;
+		}
 		if (line[ending] == '#')
 			break ;
-		ending = line.find_first_not_of(" \t\v;", ending);
+		ending = line.find_first_not_of(" \t\v", ending);
 		start = ending;
 	}
 	return (words);
