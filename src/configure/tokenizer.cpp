@@ -8,28 +8,28 @@
 
 void	initMap( std::map<std::string, int>& tokenMap )
 {
-	tokenMap["server"]			= SERVER;
-	tokenMap["server_name"]		= SERVER_NAME;
-	tokenMap["listen"] 			= LISTEN;
-	tokenMap["port"] 			= PORT;
-	tokenMap["access_log"]		= ACCESS_LOG;
-	tokenMap["location"]		= LOCATION;
-	tokenMap["root"]			= ROOT;
-	tokenMap["expires"] 		= EXPIRES;
-	tokenMap["error_page"]		= ERROR_PAGE;
-	tokenMap["return"]			= RETURN;
-	tokenMap["allowed_methods"]	= ALLOWED_METHODS;
-	tokenMap["cgi_pass"]		= CGI_PASS;
-	tokenMap["alias"]			= ALIAS;
+	tokenMap["server"]			= T_SERVER;
+	tokenMap["server_name"]		= T_SERVER_NAME;
+	tokenMap["listen"] 			= T_LISTEN;
+	tokenMap["port"] 			= T_PORT;
+	tokenMap["access_log"]		= T_ACCESS_LOG;
+	tokenMap["location"]		= T_LOCATION;
+	tokenMap["root"]			= T_ROOT;
+	tokenMap["expires"] 		= T_EXPIRES;
+	tokenMap["error_page"]		= T_ERROR_PAGE;
+	tokenMap["return"]			= T_RETURN;
+	tokenMap["allowed_methods"]	= T_ALLOWED_METHODS;
+	tokenMap["cgi_pass"]		= T_CGI_PASS;
+	tokenMap["alias"]			= T_ALIAS;
 	// Punctuation and Seperators
-	tokenMap["{"]				= BRACKET_OPEN;
-	tokenMap["}"]				= BRACKET_CLOSE;
-	tokenMap["/"]				= FORWARD_SLASH;
-	tokenMap["\\"]				= BACK_SLASH;
-	tokenMap[";"]				= SEMICOLON;
-	tokenMap["#"]				= HASHTAG;
-	tokenMap["$"]				= DOLLAR;
-	tokenMap["~"]				= HOME_DIR;
+	tokenMap["{"]				= T_BRACKET_OPEN;
+	tokenMap["}"]				= T_BRACKET_CLOSE;
+	tokenMap["/"]				= T_FORWARD_SLASH;
+	tokenMap["\\"]				= T_BACK_SLASH;
+	tokenMap[";"]				= T_SEMICOLON;
+	tokenMap["#"]				= T_HASHTAG;
+	tokenMap["$"]				= T_DOLLAR;
+	tokenMap["~"]				= T_HOME_DIR;
 }
 
 int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
@@ -38,7 +38,7 @@ int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
 
 	it = tokenMap.find(token);
 	if (it == tokenMap.end())
-		return (STRING);
+		return (T_STRING);
 	return (it->second);
 }
 

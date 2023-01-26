@@ -6,13 +6,13 @@
 // Node*	parser( TokenList tList )
 // {
 // 	TokenList::iterator			pos = tokenList.begin();
-// 	const TokenList::iterator	end = tokenList.end();
+// 	const TokenList::iterator	ending = tokenList.end();
 // 	Node*						ast = new Node();
 
-// 	while (pos != end && status != -1)
+// 	while (pos != ending && status != -1)
 // 	{
 // 		ast.addNewNode();
-// 		ast._nodes() = server(pos, end);
+// 		ast._nodes() = server(pos, ending);
 // 		iter++;
 // 	}
 // 	return (status);
@@ -39,6 +39,12 @@
 // 		}
 // 	}
 // }
+
+Node*	deleteNewNode( Node* newNode )
+{
+	delete newNode;
+	return (NULL);
+}
 
 bool	accept( TokenList::iterator& pos, int expected_token )
 {

@@ -9,6 +9,11 @@ Node::Node()
 {
 }
 
+Node::Node( int nodeType )
+	: _nodeType(nodeType)
+{
+}
+
 Node::Node( int nodeType, std::string terminal )
 	: _nodeType(nodeType), _terminal(terminal)
 {
@@ -48,6 +53,8 @@ int		Node::getNodeType() const
 
 int		Node::addChild( Node* newNode )
 {
+	if (newNode == NULL)
+		return (0);
 	_children.push_back(newNode);
-	return (0);
+	return (1);
 }

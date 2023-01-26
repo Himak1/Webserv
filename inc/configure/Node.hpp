@@ -6,9 +6,27 @@
 # include <string>
 # include <list>
 
+enum NodeTypes
+{
+	N_SERVER = 100,
+	N_SERVER_NAME,
+	N_LISTEN,
+	N_PORT,
+	N_LOCATION,
+	N_ROOT,
+	N_EXPIRES,
+	N_ERROR_PAGE,
+	N_RETURN,
+	N_ALLOWED_METHODS,
+	N_CGI_PASS,
+	N_ALIAS,
+	TERMINAL
+}
+
 class Node
 {
 	public:
+		Node( int nodeType );
 		Node( int nodeType, std::string terminal);
 		~Node();
 
