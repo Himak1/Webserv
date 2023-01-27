@@ -24,3 +24,11 @@ string trim_spaces(const string& str)
 	size_t last = str.find_last_not_of(' ');
 	return safe_substr(str, first, (last - first + 1));
 }
+
+size_t	ft_strlen(char *s)
+{
+	size_t	i;
+
+	for (i = 0; s[i]; i++) ;
+	return i;
+}

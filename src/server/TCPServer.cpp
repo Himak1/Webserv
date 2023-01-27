@@ -1,5 +1,6 @@
 #include "TcpServer.hpp"
 #include "../response/Response.hpp"
+#include "../utils/strings.hpp"
 
 #include <errno.h>
 #include <poll.h>
@@ -9,6 +10,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <string.h>
+
 
 #define QUEU_LIMIT_LISTEN 20
 
@@ -146,12 +148,14 @@ void TcpServer::startListen()
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
-		cout << "Poll count = " << poll_count << endl;
+		// cout << "Poll count = " << poll_count << endl;	// tmp   shows number of active sockets
 		lookupActiveSocket();
 	}	
 }
 
-// Finds the socket where poll() found activity 
+// Finds the socket where poll() found activity. It first loops through the listening sockets
+// to see if there is a new connection. If not it loops through the rest of the sockets to see
+// it there is any write or read activity. 
 void	TcpServer::lookupActiveSocket()
 {
 	int i = 0;
@@ -164,25 +168,20 @@ void	TcpServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
+	// cout << "i in lookupacitvesocket " << i << endl;
 
-	/****************************************************************/
-	/* 	loop door de client sockets om te kijken welke actief is	*/
-	/*	POLLIN geeft aan dat een read request klaar staat			*/
-	/*	POLLOUT geeft aan dat een write request klaar staat			*/
-	/****************************************************************/
-	for (; i < (_pollFds.size() - _nbListeningSockets + 1); i++) {
+	// cout << (_pollFds.size() - _nbListeningSockets) << endl << endl;
+
+	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if (_pollFds[i].revents == 0)
 			continue;
 		if (_pollFds[i].revents & POLLIN) {
-			printf("POLLIN with i = %i\n", i);		
+			// printf("POLLIN with i = %i\n", i);		
 			receiveRequest(i);
 		} else if (_pollFds[i].revents & POLLOUT) {
-
-			printf("POLLOUT with i = %i\n", i);		
-
+			// printf("POLLOUT with i = %i\n", i);		
 			sendResponse(i);
-		} else if (_pollFds[i].revents & (POLLIN & POLLOUT))		// tmp
-			cout << "POLLIN & POLLOUT with i = " << i << endl;		// tmp
+		}
 	}  													 		
 }
 
@@ -201,23 +200,6 @@ void TcpServer::newConnection(int active_socket_idx)
 	if (new_pollfd.fd == -1) {
 		exitWithError("ERROR: accept() (TcpServer::newConnection");
 	}
-															
-
-								/*
-								set events for added socket?
-								add_to_socket.events = POLLIN | POLLOUT
-								hoe weten we of een nieuwe connectie POLLIN, POLLOUT of POLLIN | POLLOUT moet zijn?
-								huidige vorm = 
-								- nieuwe connectie dan gaat socket op POLLIN
-								- een read op een socket ontvangen dan gaat hij op POLLIN | POLLOUT
-			
-								Op deze manier zou een connectie dus nooit iets ontvangen voordat hij zelf iets stuurt,
-								maar is ook logisch want een connectie moet altijd eerst iets sturen (request) voordat hij kan ontvangen
-						
-								evt toevoegen : 
-								socket kan weer op alleen POLLIN nadat de gehele _serverMessage is verstuurd
-								
-								*/
 	new_pollfd.events = POLLIN;
 	_pollFds.push_back(new_pollfd);
 	_socketInfo.push_back(new_socket);
@@ -233,9 +215,10 @@ void	TcpServer::closeClientConnection(int close)
 
 }
 
-
-
 // idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
+// Verder ontvangt receive request data op een socket en maakt (evt) een response aan.
+// Als er een response is zal de socket events op POLLOUT worden gezet, zodat in de volgende loop 
+// poll() zal aangeven dat er data verstuurd kan worden. 
 void TcpServer::receiveRequest(int idx)
 {
 	char	buff[BUFFER_SIZE];
@@ -244,7 +227,9 @@ void TcpServer::receiveRequest(int idx)
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																							// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
 
-	std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;
+	cout << "receivereq with i = " << idx << endl;
+
+	// std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;
 
 	if (bytes_received <= 0) {
 		if (bytes_received == 0)
@@ -257,8 +242,6 @@ void TcpServer::receiveRequest(int idx)
 	} 
 		
 
-
-
 	_request.initRequest(std::string(buff));
 	/*
 	
@@ -268,7 +251,6 @@ void TcpServer::receiveRequest(int idx)
 		servermessage daar kunnen versturen.
 		
 	*/
-	// _pollFds[idx].events = POLLIN | POLLOUT;			
 	
 	class Response respons(_request, _config);
 
@@ -291,23 +273,33 @@ void TcpServer::receiveRequest(int idx)
 void TcpServer::sendResponse(int idx)
 {
 	size_t	bytes_send;
-	// class	Response respons(_request, _config);
+	char	*message;
 
-	// _serverMessage = respons.getMessage();
+	// _unsendServerMessage = _socketInfo[idx].server_message;
+	message = (char *) _socketInfo[idx].server_message.c_str();
 
-	// std::cout << _serverMessage << " <- is de serverMessage" << std::endl;		// tmp
+	printf("length of message = %lu\n", ft_strlen(message));
+	printf("message = %s\n", message);
 
-	// if (_serverMessage.empty())								// Deze check doen waar de _serverMessage wordt gemaakt?
-	// 	std::cout << "No server message! Client won't receive anything!" << std::endl;
-	_unsendServerMessage = _socketInfo[idx].server_message;
+
+	// _unsendServerMessage = "testing purpose"; 	// tmp
+	// cout << "sendResponse idx = " << idx << endl;		// tmp test
+	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp test
+	// cout << "sendResponse to fd " << _pollFds[idx].fd << endl;				// tmp test
+
 	// while (!_unsendServerMessage.empty())
 	// {
-		bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
-		if (bytes_send < 0)
-			std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
-		_unsendServerMessage.erase(0, bytes_send);
+	// bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
+	bytes_send = send(_pollFds[idx].fd, message, ft_strlen(message), 0);
+	if (bytes_send < 0)
+		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
+
+	cout << bytes_send << " bytes are send" << endl;
+
+	_socketInfo[idx].server_message = message;
+	_socketInfo[idx].server_message.erase(0, bytes_send);
+	// _unsendServerMessage.erase(0, bytes_send);
 	// }
-	_socketInfo[idx].server_message = _unsendServerMessage;
 	
 
 	/*************************************************************/
@@ -317,7 +309,7 @@ void TcpServer::sendResponse(int idx)
 	/* Als wel alles is verstuurd gaat hij op POLLIN		     */
 	/*************************************************************/
 
-	if (_unsendServerMessage.empty())
+	if (_socketInfo[idx].server_message.empty())
 		_pollFds[idx].events = POLLIN;
 }
 
