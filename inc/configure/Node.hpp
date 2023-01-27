@@ -21,7 +21,7 @@ enum NodeTypes
 	N_CGI_PASS,
 	N_ALIAS,
 	TERMINAL
-}
+};
 
 class Node
 {

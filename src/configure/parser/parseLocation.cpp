@@ -1,32 +1,41 @@
 #include <list>
+#include <vector>
 #include "parser.hpp"
+#include "Token.hpp"
 #include "Node.hpp"
 
-bool	checkTokenSequence(std::vector<int>& sequence, TokenList::iterator pos, const TokenList::iterator& ending)
+bool	checkTokenSequence(int* sequence, int seqLength, TokenList::iterator pos, const TokenList::iterator& ending)
 {
-	std::vector<int>::iterator	seqIter = sequence.begin();
+	int	i = 0;
 
-	while (seqIter != sequence.end() && pos != ending)
+	while (i < seqLength && pos != ending)
 	{
-		if (*seqIter == (*pos)->getTokenType)
-		++seqIter;
+		if (sequence[i] != (*pos)->getTokenType())
+			return (0);
+		i++;
 		++pos;
 	}
-	return (0);
+	return (1);
 }
 
 Node*   parseLocationAlias( TokenList::iterator& pos, const TokenList::iterator& ending )
 {
 	Node*	newNode;
-	std::vector<int>	tokenSequence = {T_STRING, T_SEMICOLON};
+	int		tokenSequence[] = {T_STRING, T_SEMICOLON};
 
 	if (!accept(pos, T_ALIAS))
 		return (NULL);
 	newNode = new Node(N_ALIAS);
-	if (checkTokenSequence(tokenSequence))
-		newNode.addChild(new Node(TERMINAL, (*pos)->getToken()));
+	if (checkTokenSequence(tokenSequence, sizeof(tokenSequence), pos, ending))
+		newNode->addChild(new Node(TERMINAL, (*pos)->getToken()));
 	++pos;
 	++pos;
+	return (newNode);
+}
+
+Node*	parseLocationAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending )
+{
+	//Node*	new
 }
 
 Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& ending )
@@ -37,7 +46,7 @@ Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& en
 		return (NULL);
 	if ((*pos)->getTokenType() != T_STRING)
 		return (NULL);
-	newNode = new Node(STRING, (*pos)->getToken());
+	newNode = new Node(T_STRING, (*pos)->getToken());
 	return (newNode);
 }
 

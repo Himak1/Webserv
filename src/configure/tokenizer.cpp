@@ -70,7 +70,7 @@ std::list<std::string>	splitLine( std::string line )
 			start = ending;
 			continue ;
 		}
-		if (line[ending] == '#')
+		if (ending != std::string::npos && line[ending] == '#')
 			break ;
 		ending = line.find_first_not_of(" \t\v", ending);
 		start = ending;
