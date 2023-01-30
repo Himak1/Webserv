@@ -18,7 +18,7 @@ bool	checkTokenSequence(int* sequence, int seqLength, TokenList::iterator pos, c
 	return (1);
 }
 
-Node*   parseLocationAlias( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*   parseAlias( TokenList::iterator& pos, const TokenList::iterator& ending )
 {
 	Node*	newNode;
 	int		tokenSequence[] = {T_STRING, T_SEMICOLON};
@@ -33,9 +33,35 @@ Node*   parseLocationAlias( TokenList::iterator& pos, const TokenList::iterator&
 	return (newNode);
 }
 
-Node*	parseLocationAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*	parseAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending )
 {
-	//Node*	new
+	Node*	newNode;
+
+	accept(pos, T_ALLOWED_METHODS);
+	newNode = new Node(N_ALLOWED_METHODS);
+	while (pos != ending && (*pos)->getTokenType() == T_STRING)
+	{
+		newNode->addChild(new Node(TERMINAL, (*pos)->getToken()));
+		++pos;
+	}
+	if (pos != ending && !accept(pos, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	if (pos != ending && !accept(pos, T_BRACKET_CLOSE))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
+Node*	parseCgiPass( TokenList::iterator& pos, const TokenList::iterator& ending )
+{
+	Node*	newNode;
+
+	accept(pos, T_CGI_PASS);
+	if (!accept(pos, T_STRING))
+		return (deleteNewNode(newNode));
+	if (!accept(pos, T_STRING))
+		return (deleteNewNode(newNode));
+	if (!accept(pos, T_SEMICOLON))
+		return (deleteNewNode(newNode));
 }
 
 Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& ending )
@@ -63,17 +89,24 @@ Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& ending
 		return (deleteNewNode(newNode));
 	if (!accept(pos, T_BRACKET_OPEN))
 		return (deleteNewNode(newNode));
-	newNode->addChild(parseLocationAlias(pos, ending));
-	if (!accept(pos, T_BRACKET_CLOSE))
-		return (deleteNewNode(newNode));
-	// if (status == 0)
-	// 	handle_parse_error();
-	// if (token == bracket_open)
-	// 	continue
-	// while (token != bracket_close)
-	// {
-	// 	if (token == )
-
-	// }
+	while (pos != ending && !accept(pos, T_BRACKET_CLOSE) && status != 0)
+	{
+		switch ((*pos)->getTokenType())
+		{
+			case T_ALIAS:
+				status = newNode->addChild(parseAlias(pos, ending));
+				break;
+			case T_ALLOWED_METHODS:
+				status = newNode->addChild(parseAllowedMethods(pos, ending));
+				break;
+			case T_CGI_PASS:
+				status = newNode->addChild(parseCgiPass(pos, ending));
+				break;
+			default:
+				status = 0;
+				break;
+		}
+	}
 	return (newNode);
 }
+

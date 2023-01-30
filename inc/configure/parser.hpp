@@ -16,7 +16,9 @@ Node*	deleteNewNode( Node* newNode );
 
 Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& ending );
 Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& ending );
-Node*   parseLocationAlias( TokenList::iterator& pos, const TokenList::iterator& ending );
+Node*   parseAlias( TokenList::iterator& pos, const TokenList::iterator& ending );
+Node*	parseAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending );
+Node*	parseCgiPass( TokenList::iterator& pos, const TokenList::iterator& ending );
 
 void    parseSingleParameter( TokenList::iterator& pos, const TokenList::iterator& ending );
 

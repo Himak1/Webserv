@@ -9,6 +9,13 @@ TEST(parseLocation, AllowedMethods)
 	lst.push_back(new Token(T_ALLOWED_METHODS, "allowed_methods"));
 	lst.push_back(new Token(T_STRING, "GET"));
 	lst.push_back(new Token(T_STRING, "POST"));
+	lst.push_back(new Token(T_SEMICOLON, ";"));
+	TokenList::iterator iter = lst.begin();
+	TokenList::iterator	end = lst.end();
+
+	Node*	output;
+	output = parseAllowedMethods(iter, end);
+	EXPECT_TRUE(output != nullptr);
 }
 
 TEST(parseLocation, locationPath)
@@ -23,6 +30,21 @@ TEST(parseLocation, locationPath)
 	EXPECT_TRUE(output != nullptr);
 }
 
+TEST(parseLocation, cgi_pass)
+{
+	TokenList	lst;
+	lst.push_back(new Token(T_CGI_PASS, "cgi_pass"));
+	lst.push_back(new Token(T_STRING, ".php"));
+	lst.push_back(new Token(T_STRING, "/usr/bin/php"));
+	lst.push_back(new Token(T_SEMICOLON, ";"));
+	TokenList::iterator iter = lst.begin();
+	TokenList::iterator ending = lst.end();
+
+	Node*	output;
+	output = parseCgiPass(iter, ending);
+	EXPECT_TRUE(output != nullptr);
+}
+
 TEST(parseLocation, alias)
 {
 	// setup
@@ -34,7 +56,7 @@ TEST(parseLocation, alias)
 	TokenList::iterator end = tList.end();
 
 	Node*	output;
-	output = parseLocationAlias(iter, end);
+	output = parseAlias(iter, end);
 	EXPECT_TRUE(output != nullptr);
 	if (output)
 		delete output;
@@ -47,19 +69,6 @@ TEST(parseLocation, alias)
 	lst.push_back(new Token(T_SEMICOLON, ";"));
 	iter = lst.begin();
 	end = lst.end();
-	output = parseLocationAlias(iter, end);
-}
-
-TEST(parseLocation, location)
-{
-	TokenList	tList;
-	TokenList::iterator	iter;
-	std::ifstream file("dummy_config/location_test.conf");
-
-	tList = tokenizer(file);
-	iter = tList.begin();
-
-	Node* output = parseLocation(iter, tList.end());
-	EXPECT_TRUE(output != nullptr);
+	output = parseAlias(iter, end);
 }
 
