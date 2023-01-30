@@ -12,6 +12,28 @@
 #include <string.h>
 
 
+/* #################################################################################################### */
+/* #################################################################################################### */
+/* #################################################################################################### */
+/* ###########																				###########	*/
+/* ###########																				###########	*/
+/* ###########																				###########	*/
+/* ###########		Voordat we runnen moet het max aantal open file descriptors van 		###########	*/
+/* ###########		het OS gecheckt worden (wij hebben per connectie een file descriptor 	###########	*/
+/* ###########		nodig).																 	###########	*/
+/* ###########																				###########	*/
+/* ###########		Dit doe je door in terminal 'ulimit -n' in te typen.					###########	*/
+/* ###########																				###########	*/
+/* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/
+/* ###########																				###########	*/
+/* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/
+/* ###########																				###########	*/
+/* #################################################################################################### */
+/* #################################################################################################### */
+/* #################################################################################################### */	
+
+
+
 #define QUEU_LIMIT_LISTEN 20
 
 using namespace std;
@@ -135,7 +157,7 @@ void TcpServer::startListen()
 		log("\n====== Waiting for a new connection ======\n");
 
 
-		sleep(1);
+		// sleep(1);	// tmp
 
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
@@ -168,6 +190,22 @@ void	TcpServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
+
+/*	POLLERR, POLLHUP, or POLLNVAL. Deze worden altijd gecheckt door POLL, ongeacht 	*/
+/*	de waarde van .events															*/
+/*	POLLER = Error condition (only returned in revents; ignored in
+              events).  This bit is also set for a file descriptor
+              referring to the write end of a pipe when the read end has
+              been closed.															*/
+/*	POLLHUP = Hang up (only returned in revents; ignored in events).
+              Note that when reading from a channel such as a pipe or a
+              stream socket, this event merely indicates that the peer
+              closed its end of the channel.  Subsequent reads from the
+              channel will return 0 (end of file) only after all
+              outstanding data in the channel has been consumed.					*/
+/*	POLLNVAL = Invalid request: fd not open (only returned in revents;
+              ignored in events).	*/
+
 	// cout << "i in lookupacitvesocket " << i << endl;
 
 	// cout << (_pollFds.size() - _nbListeningSockets) << endl << endl;
@@ -181,7 +219,13 @@ void	TcpServer::lookupActiveSocket()
 		} else if (_pollFds[i].revents & POLLOUT) {
 			// printf("POLLOUT with i = %i\n", i);		
 			sendResponse(i);
-		}
+		} else if (_pollFds[i].revents & POLLHUP) {		// tmp?
+			closeClientConnection(i);
+		} else if (_pollFds[i].revents & POLLNVAL) {	// tmp?
+			cout << "socket fd " << _pollFds[i].fd << " ##########invalid! (POLLNVAL event) needs handler" << endl;
+		} else if (_pollFds[i].revents & POLLERR) {	// tmp?
+			cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
+		}	
 	}  													 		
 }
 
@@ -204,15 +248,28 @@ void TcpServer::newConnection(int active_socket_idx)
 	_pollFds.push_back(new_pollfd);
 	_socketInfo.push_back(new_socket);
 
-	std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
-			<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
+	// cout << "socket # " << _pollFds[active_socket_idx].fd << " is new" << endl;				// tmp											
+	// cout << "idx = " << active_socket_idx << endl;											// tmp		
+	// cout << "_socketinfo.size = " << _socketInfo.size() << endl;								// tmp					
+	// cout << "_pollFds.size = " << _pollFds.size() << endl;									// tmp				
+	// cout << "listeningsockets # " << _nbListeningSockets << endl;							// tmp						
+	
+	// std::cout << "Server accepted incoming connection from ADDRESS: "
+	// 		<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
+	// 		<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
-void	TcpServer::closeClientConnection(int close)
+void	TcpServer::closeClientConnection(int idx)
 {
-											////////////////////////// remove both _socketInfo en _pollFDs!!!!!
+	close(_pollFds[idx].fd);
+	_pollFds.erase(_pollFds.begin() + idx);						
+	_socketInfo.erase(_socketInfo.begin() + idx);
 
+
+	// cout << "idx = " << close << endl;												// tmp							
+	// cout << "_socketinfo.size = " << _socketInfo.size() << endl;						// tmp				
+	// cout << "_pollFds.size = " << _pollFds.size() << endl;							// tmp				
+	// cout << "_nbListeningsockets # " << _nbListeningSockets << endl << endl;			// tmp							
 }
 
 // idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
@@ -227,7 +284,7 @@ void TcpServer::receiveRequest(int idx)
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																							// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
 
-	cout << "receivereq with i = " << idx << endl;
+	// cout << "receivereq with i = " << idx << endl;
 
 	// std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;
 
@@ -236,9 +293,8 @@ void TcpServer::receiveRequest(int idx)
 			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		else
 			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TcpServer::startListen()" << std::endl;		
-		close (_pollFds[idx].fd);
-		_socketInfo.erase(_socketInfo.begin() + idx);
-		_pollFds.erase(_pollFds.begin() + idx);  // needs testing, en: moet een socket closen als hij een recv error geeft?
+		closeClientConnection(idx);
+		return ;
 	} 
 		
 
@@ -263,10 +319,10 @@ void TcpServer::receiveRequest(int idx)
 	// if (!_request.isValidMethod())
 	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
 	std::ostringstream ss;
-	ss	<< "Received request: Method = " << _request.getMethod()
-		<< " URI = " 					 << _request.getURI()
-		<< " HTTP Version = " 			 << _request.getHTTPVersion();
-	log(ss.str());
+	// ss	<< "Received request: Method = " << _request.getMethod()
+	// 	<< " URI = " 					 << _request.getURI()
+	// 	<< " HTTP Version = " 			 << _request.getHTTPVersion();
+	// log(ss.str());
 }
 
 // idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
@@ -278,8 +334,8 @@ void TcpServer::sendResponse(int idx)
 	// _unsendServerMessage = _socketInfo[idx].server_message;
 	message = (char *) _socketInfo[idx].server_message.c_str();
 
-	printf("length of message = %lu\n", ft_strlen(message));
-	printf("message = %s\n", message);
+	// printf("length of message = %lu\n", ft_strlen(message));			// tmp
+	// printf("message = %s\n", message);									// tmp
 
 
 	// _unsendServerMessage = "testing purpose"; 	// tmp
@@ -294,7 +350,7 @@ void TcpServer::sendResponse(int idx)
 	if (bytes_send < 0)
 		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 
-	cout << bytes_send << " bytes are send" << endl;
+	// cout << bytes_send << " bytes are send" << endl;   			// tmp
 
 	_socketInfo[idx].server_message = message;
 	_socketInfo[idx].server_message.erase(0, bytes_send);

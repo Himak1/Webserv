@@ -10,7 +10,6 @@
 # include <stdlib.h>
 # include <string>
 
-
 #include <poll.h>
 
 namespace http
@@ -44,7 +43,6 @@ private:
 	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
-
 	class Configuration			_config;
 	class Request				_request;
 
@@ -52,8 +50,6 @@ private:
 	// std::vector<t_socket>		_clientSockets;
 	// unsigned int				_nbListeningSockets;
 	// std::vector<Client *>		_clients;
-
-
 
 	// std::vector<int>		_socketFdsServer;			
 	// unsigned int			_nbOfServerSocketFds;

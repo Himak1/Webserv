@@ -1,7 +1,7 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Isrc# -Wall -Wextra -Werror -std=c++98 -pedantic
-SANIT			:=	#-g -fsanitize=address
+CFLAGS			:=	-Isrc -std=c++98 #-Wall -Wextra -Werror  -pedantic
+SANIT			:=	#-fsanitize=address -g
 CC				:=	c++
 
 # STATIC
