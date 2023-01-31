@@ -46,9 +46,19 @@ std::ostream&	operator<<( std::ostream& o, Node const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-int		Node::getNodeType() const
+const int&	Node::getNodeType() const
 {
 	return (_nodeType);
+}
+
+const std::string&	Node::getTerminal() const
+{
+	return (_terminal);
+}
+
+NodeList::const_iterator	Node::getChildrenBegin() const
+{
+	return (_children.begin());
 }
 
 int		Node::addChild( Node* newNode )

@@ -7,8 +7,6 @@
 
 class Node;
 
-typedef std::list<Node*>	NodeList;
-
 Node*	parser( TokenList tList );
 
 bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token );

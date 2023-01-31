@@ -16,6 +16,10 @@ TEST(parseLocation, AllowedMethods)
 	Node*	output;
 	output = parseAllowedMethods(iter, end);
 	ASSERT_TRUE(output != nullptr);
+	NodeList::const_iterator i = output->getChildrenBegin();
+
+	ASSERT_EQ((*i)->getNodeType(), TERMINAL);
+	ASSERT_EQ((*i)->getTerminal(), "GET");
 }
 
 TEST(parseLocation, locationPath)

@@ -20,8 +20,12 @@ enum NodeTypes
 	N_ALLOWED_METHODS,
 	N_CGI_PASS,
 	N_ALIAS,
+	N_DIRECTORY_LISTING,
 	TERMINAL
 };
+
+class Node;
+typedef std::list<Node*> NodeList;
 
 class Node
 {
@@ -30,14 +34,16 @@ class Node
 		Node( int nodeType, std::string terminal);
 		~Node();
 
-		int		getNodeType() const;
-		int		addChild( Node* newNode );
+		const int&			getNodeType() const;
+		const std::string&	getTerminal() const;
+		NodeList::const_iterator	getChildrenBegin() const;
+		int					addChild( Node* newNode );
 	private:
 		Node();
 
 		int					_nodeType;
 		std::string			_terminal;
-		std::list<Node*>	_children;
+		NodeList			_children;
 };
 
 std::ostream&	operator<<( std::ostream& o, Node const& i );
