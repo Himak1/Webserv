@@ -33,6 +33,18 @@ Node*   parseAlias( TokenList::iterator& currentToken, const TokenList::iterator
 	return (newNode);
 }
 
+Node*	parseRoot( TokenList::iterator& currentToken, const TokenList::iterator& ending )
+{
+	Node*	newNode;
+
+	accept(currentToken, ending, T_ROOT);
+	newNode = new Node(N_ROOT);
+	if (!(accept(currentToken, ending, T_STRING)
+		&& accept(currentToken, ending, T_SEMICOLON)))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
 Node*	parseAllowedMethods( TokenList::iterator& currentToken, const TokenList::iterator& ending )
 {
 	Node*	newNode;
@@ -94,6 +106,9 @@ Node*	parseLocation( TokenList::iterator& currentToken, const TokenList::iterato
 		{
 			case T_ALIAS:
 				status = newNode->addChild(parseAlias(currentToken, ending));
+				break;
+			case T_ROOT:
+				status = newNode->addChild(parseRoot(currentToken, ending));
 				break;
 			case T_ALLOWED_METHODS:
 				status = newNode->addChild(parseAllowedMethods(currentToken, ending));

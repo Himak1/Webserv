@@ -21,6 +21,7 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	tokenMap["allowed_methods"]	= T_ALLOWED_METHODS;
 	tokenMap["cgi_pass"]		= T_CGI_PASS;
 	tokenMap["alias"]			= T_ALIAS;
+	tokenMap["autoindex"]		= T_AUTOINDEX;
 	// Punctuation and Seperators
 	tokenMap["{"]				= T_BRACKET_OPEN;
 	tokenMap["}"]				= T_BRACKET_CLOSE;

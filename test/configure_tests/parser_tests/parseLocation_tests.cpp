@@ -15,7 +15,7 @@ TEST(parseLocation, AllowedMethods)
 
 	Node*	output;
 	output = parseAllowedMethods(iter, end);
-	EXPECT_TRUE(output != nullptr);
+	ASSERT_TRUE(output != nullptr);
 }
 
 TEST(parseLocation, locationPath)
@@ -27,7 +27,21 @@ TEST(parseLocation, locationPath)
 
 	Node*	output;
 	output = parseLocationPath(iter, end);
-	EXPECT_TRUE(output != nullptr);
+	ASSERT_TRUE(output != nullptr);
+}
+
+TEST(parseLocation, root)
+{
+	TokenList	lst;
+	lst.push_back(new Token(T_ROOT, "/usr/share/"));
+	lst.push_back(new Token(T_STRING, "/files/data"));
+	lst.push_back(new Token(T_SEMICOLON, ";"));
+	TokenList::iterator iter = lst.begin();
+	TokenList::iterator ending = lst.end();
+
+	Node*	output;
+	output = parseRoot(iter, ending);
+	ASSERT_TRUE(output != nullptr);
 }
 
 TEST(parseLocation, cgi_pass)
@@ -42,7 +56,7 @@ TEST(parseLocation, cgi_pass)
 
 	Node*	output;
 	output = parseCgiPass(iter, ending);
-	EXPECT_TRUE(output != nullptr);
+	ASSERT_TRUE(output != nullptr);
 }
 
 TEST(parseLocation, alias)
@@ -57,7 +71,7 @@ TEST(parseLocation, alias)
 
 	Node*	output;
 	output = parseAlias(iter, end);
-	EXPECT_TRUE(output != nullptr);
+	ASSERT_TRUE(output != nullptr);
 	if (output)
 		delete output;
 	tList.clear();

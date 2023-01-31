@@ -21,6 +21,7 @@ enum TokenTypes
 	T_ALLOWED_METHODS,
 	T_CGI_PASS,
 	T_ALIAS,
+	T_AUTOINDEX,
 	// Punctuation and Seperators
 	T_BRACKET_OPEN,
 	T_BRACKET_CLOSE,
