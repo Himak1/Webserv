@@ -4,103 +4,102 @@
 #include "Token.hpp"
 #include "Node.hpp"
 
-bool	checkTokenSequence(int* sequence, int seqLength, TokenList::iterator pos, const TokenList::iterator& ending)
+bool	checkTokenSequence(int* sequence, int seqLength, TokenList::iterator currentToken, const TokenList::iterator& ending)
 {
 	int	i = 0;
 
-	while (i < seqLength && pos != ending)
+	while (i < seqLength && currentToken != ending)
 	{
-		if (sequence[i] != (*pos)->getTokenType())
+		if (sequence[i] != (*currentToken)->getTokenType())
 			return (0);
 		i++;
-		++pos;
+		++currentToken;
 	}
 	return (1);
 }
 
-Node*   parseAlias( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*   parseAlias( TokenList::iterator& currentToken, const TokenList::iterator& ending )
 {
 	Node*	newNode;
 	int		tokenSequence[] = {T_STRING, T_SEMICOLON};
 
-	if (!accept(pos, T_ALIAS))
+	if (!accept(currentToken, ending, T_ALIAS))
 		return (NULL);
 	newNode = new Node(N_ALIAS);
-	if (checkTokenSequence(tokenSequence, sizeof(tokenSequence), pos, ending))
-		newNode->addChild(new Node(TERMINAL, (*pos)->getToken()));
-	++pos;
-	++pos;
+	if (checkTokenSequence(tokenSequence, sizeof(tokenSequence), currentToken, ending))
+		newNode->addChild(new Node(TERMINAL, (*currentToken)->getToken()));
+	++currentToken;
+	++currentToken;
 	return (newNode);
 }
 
-Node*	parseAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*	parseAllowedMethods( TokenList::iterator& currentToken, const TokenList::iterator& ending )
 {
 	Node*	newNode;
 
-	accept(pos, T_ALLOWED_METHODS);
+	accept(currentToken, ending, T_ALLOWED_METHODS);
 	newNode = new Node(N_ALLOWED_METHODS);
-	while (pos != ending && (*pos)->getTokenType() == T_STRING)
+	while (currentToken != ending && (*currentToken)->getTokenType() == T_STRING)
 	{
-		newNode->addChild(new Node(TERMINAL, (*pos)->getToken()));
-		++pos;
+		newNode->addChild(new Node(TERMINAL, (*currentToken)->getToken()));
+		++currentToken;
 	}
-	if (pos != ending && !accept(pos, T_SEMICOLON))
-		return (deleteNewNode(newNode));
-	if (pos != ending && !accept(pos, T_BRACKET_CLOSE))
+	if (!accept(currentToken, ending, T_SEMICOLON))
 		return (deleteNewNode(newNode));
 	return (newNode);
 }
 
-Node*	parseCgiPass( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*	parseCgiPass( TokenList::iterator& currentToken, const TokenList::iterator& ending )
 {
 	Node*	newNode;
 
-	accept(pos, T_CGI_PASS);
-	if (!accept(pos, T_STRING))
+	accept(currentToken, ending, T_CGI_PASS);
+	newNode = new Node(N_CGI_PASS);
+	if (!accept(currentToken, ending, T_STRING)
+		|| !accept(currentToken, ending, T_STRING)
+		|| !accept(currentToken, ending, T_SEMICOLON))
 		return (deleteNewNode(newNode));
-	if (!accept(pos, T_STRING))
-		return (deleteNewNode(newNode));
-	if (!accept(pos, T_SEMICOLON))
-		return (deleteNewNode(newNode));
-}
-
-Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& ending )
-{
-	Node*	newNode;
-
-	if (pos == ending)
-		return (NULL);
-	if ((*pos)->getTokenType() != T_STRING)
-		return (NULL);
-	newNode = new Node(T_STRING, (*pos)->getToken());
 	return (newNode);
 }
 
-Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& ending )
+Node*	parseLocationPath( TokenList::iterator& currentToken, const TokenList::iterator& ending )
+{
+	Node*	newNode;
+
+	if (currentToken == ending)
+		return (NULL);
+	if ((*currentToken)->getTokenType() != T_STRING)
+		return (NULL);
+	newNode = new Node(T_STRING, (*currentToken)->getToken());
+	++currentToken;
+	return (newNode);
+}
+
+Node*	parseLocation( TokenList::iterator& currentToken, const TokenList::iterator& ending )
 {
 	Node*	newNode;
 	int		status;
 
-	if (!accept(pos, T_LOCATION))
+	if (!accept(currentToken, ending, T_LOCATION))
 		return (NULL);
-	newNode = new Node(123);
-	status = newNode->addChild(parseLocationPath(pos, ending));
+	newNode = new Node(N_LOCATION);
+	status = newNode->addChild(parseLocationPath(currentToken, ending));
 	if (status == 0)
 		return (deleteNewNode(newNode));
-	if (!accept(pos, T_BRACKET_OPEN))
+	if (!accept(currentToken, ending, T_BRACKET_OPEN))
 		return (deleteNewNode(newNode));
-	while (pos != ending && !accept(pos, T_BRACKET_CLOSE) && status != 0)
+	while (!accept(currentToken, ending, T_BRACKET_CLOSE) && status != 0)
 	{
-		switch ((*pos)->getTokenType())
+		switch ((*currentToken)->getTokenType())
 		{
 			case T_ALIAS:
-				status = newNode->addChild(parseAlias(pos, ending));
+				status = newNode->addChild(parseAlias(currentToken, ending));
 				break;
 			case T_ALLOWED_METHODS:
-				status = newNode->addChild(parseAllowedMethods(pos, ending));
+				status = newNode->addChild(parseAllowedMethods(currentToken, ending));
 				break;
 			case T_CGI_PASS:
-				status = newNode->addChild(parseCgiPass(pos, ending));
+				status = newNode->addChild(parseCgiPass(currentToken, ending));
 				break;
 			default:
 				status = 0;

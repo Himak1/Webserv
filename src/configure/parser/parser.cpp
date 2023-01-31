@@ -5,20 +5,20 @@
 
 // Node*	parser( TokenList tList )
 // {
-// 	TokenList::iterator			pos = tokenList.begin();
+// 	TokenList::iterator			currentToken = tokenList.begin();
 // 	const TokenList::iterator	ending = tokenList.end();
 // 	Node*						ast = new Node();
 
-// 	while (pos != ending && status != -1)
+// 	while (currentToken != ending && status != -1)
 // 	{
 // 		ast.addNewNode();
-// 		ast._nodes() = server(pos, ending);
+// 		ast._nodes() = server(currentToken, ending);
 // 		iter++;
 // 	}
 // 	return (status);
 // }
 
-// NodeList	server( TokenList::iterator& pos, const TokenList::iterator& end );
+// NodeList	server( TokenList::iterator& currentToken, const TokenList::iterator& end );
 // {
 // 	while ()
 // 	{
@@ -46,11 +46,11 @@ Node*	deleteNewNode( Node* newNode )
 	return (NULL);
 }
 
-bool	accept( TokenList::iterator& pos, int expected_token )
+bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token )
 {
-	if ((*pos)->getTokenType() == expected_token)
+	if (currentToken != ending && (*currentToken)->getTokenType() == expected_token)
 	{
-		pos++;
+		++currentToken;
 		return (true);
 	}
 	return (false);

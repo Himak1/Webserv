@@ -11,16 +11,16 @@ typedef std::list<Node*>	NodeList;
 
 Node*	parser( TokenList tList );
 
-bool	accept( TokenList::iterator& pos, int expected_token );
+bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token );
 Node*	deleteNewNode( Node* newNode );
 
-Node*	parseLocation( TokenList::iterator& pos, const TokenList::iterator& ending );
-Node*	parseLocationPath( TokenList::iterator& pos, const TokenList::iterator& ending );
-Node*   parseAlias( TokenList::iterator& pos, const TokenList::iterator& ending );
-Node*	parseAllowedMethods( TokenList::iterator& pos, const TokenList::iterator& ending );
-Node*	parseCgiPass( TokenList::iterator& pos, const TokenList::iterator& ending );
+Node*	parseLocation( TokenList::iterator& currentToken, const TokenList::iterator& ending );
+Node*	parseLocationPath( TokenList::iterator& currentToken, const TokenList::iterator& ending );
+Node*   parseAlias( TokenList::iterator& currentToken, const TokenList::iterator& ending );
+Node*	parseAllowedMethods( TokenList::iterator& currentToken, const TokenList::iterator& ending );
+Node*	parseCgiPass( TokenList::iterator& currentToken, const TokenList::iterator& ending );
 
-void    parseSingleParameter( TokenList::iterator& pos, const TokenList::iterator& ending );
+void    parseSingleParameter( TokenList::iterator& currentToken, const TokenList::iterator& ending );
 
 
 #endif
