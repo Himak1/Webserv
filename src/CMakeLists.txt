@@ -6,6 +6,7 @@ set(SRC_FILES
     configure/Token.cpp
     configure/Node.cpp
     configure/Location.cpp
+    configure/TokenStream.cpp
     configure/tokenizer.cpp
     #configure/AST.cpp
     configure/parser/parser.cpp

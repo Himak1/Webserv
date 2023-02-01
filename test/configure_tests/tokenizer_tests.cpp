@@ -8,11 +8,12 @@ bool	string_eq(std::string a, std::string b)
 	return (a == b);
 }
 
-TEST(tokenizer_tests, double_quotes)
+TEST(createTokenList_tests, double_quotes)
 {
 	std::ifstream	file("dummy_config/comments.conf");
+	std::list<Token*>	tokenList = createTokenList(file);
 
-	std::list<Token*>	tokenList = tokenizer(file);
+
 	std::list<Token*>::iterator	iter = tokenList.begin();
 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "server");
 	iter++;
@@ -40,90 +41,44 @@ TEST(tokenizer_tests, checkTokenType)
 TEST(splitLine_tests, basic_string)
 {
 	std::string	input("this is a line");
+	std::list<std::string>	expected_words = {"this", "is", "a", "line"};
 
-	std::list<std::string>	words = splitLine(input);
-	std::list<std::string>::iterator it = words.begin();
-	EXPECT_EQ(*it, "this");
-	++it;
-	EXPECT_EQ(*it, "is");
-	++it;
-	EXPECT_EQ(*it, "a");
-	++it;
-	EXPECT_EQ(*it, "line");
+	std::list<std::string>	words = splitLineByDelimiters(input);
+	EXPECTED_EQ(words, expected_words);
 }
 
 TEST(splitLine_tests, line_with_comment)
 {
 	std::string	input("line { } #comment");
+	std::list<std::string>	expected_words = {"line", "{", "}"};
 
-	std::list<std::string>	words = splitLine(input);
-	std::list<std::string>::iterator it = words.begin();
-	EXPECT_EQ(*it, "line");
-	++it;
-	EXPECT_EQ(*it, "{");
-	++it;
-	EXPECT_EQ(*it, "}");
-	++it;
-	EXPECT_EQ(it, words.end());
+	std::list<std::string>	words = splitLineByDelimiters(input);
+	EXPECT_EQ(words, expected_words);
 }
 
 TEST(splitLine_tests, multiple_delimiters_in_a_row)
 {
 	std::string	input("line 	{  }#comment");
+	std::list<std::string> expected_words = {"line", "{", "}"};
 
-	std::list<std::string>	words = splitLine(input);
-	std::list<std::string>::iterator it = words.begin();
-	EXPECT_EQ(*it, "line");
-	++it;
-	EXPECT_EQ(*it, "{");
-	++it;
-	EXPECT_EQ(*it, "}");
-	++it;
-	EXPECT_EQ(it, words.end());
+	std::list<std::string>	words = splitLineByDelimiters(input);
+	EXPECT_EQ(words, expected_words);
 }
 
 TEST(splitLine_tests, semicolons)
 {
 	std::string	input("alias /usr/bin/; allowed_methods GET;");
+	std::list<std::string>	expected_words = {"alias", "/usr/bin/", ";", "allowed_methods", "GET", ";"};
 
-	std::list<std::string>	words = splitLine(input);
-	std::list<std::string>::iterator it = words.begin();
-	EXPECT_EQ(*it, "alias");
-	++it;
-	EXPECT_EQ(*it, "/usr/bin/");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(*it, "allowed_methods");
-	++it;
-	EXPECT_EQ(*it, "GET");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(it, words.end());
+	std::list<std::string>	words = splitLineByDelimiters(input);
+	EXPECT_EQ(words, expected_words);
 }
 
 TEST(splitLine_tests, semicolons_in_a_row)
 {
 	std::string	input("alias /usr/bin/;;; allowed_methods GET;");
+	std::list<std::string>	expected_words = {"alias", "/usr/bin/", ";", ";", ";", "allowed_methods", "GET", ";"};
 
-	std::list<std::string>	words = splitLine(input);
-	std::list<std::string>::iterator it = words.begin();
-	EXPECT_EQ(*it, "alias");
-	++it;
-	EXPECT_EQ(*it, "/usr/bin/");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(*it, "allowed_methods");
-	++it;
-	EXPECT_EQ(*it, "GET");
-	++it;
-	EXPECT_EQ(*it, ";");
-	++it;
-	EXPECT_EQ(it, words.end());
+	std::list<std::string>	words = splitLineByDelimiters(input);
+	EXPECT_EQ(words, expected_words);
 }

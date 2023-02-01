@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include "tokenizer.hpp"
+#include "TokenStream.hpp"
 #include "Token.hpp"
 
 void	initMap( std::map<std::string, int>& tokenMap )
@@ -53,7 +54,7 @@ bool	isEnd(std::string::iterator it)
 	return false;
 }
 
-std::list<std::string>	splitLine( std::string line )
+std::list<std::string>	splitLineByDelimiters( std::string line )
 {
 	std::list<std::string>	words;
 	size_t	start = 0;
@@ -79,7 +80,44 @@ std::list<std::string>	splitLine( std::string line )
 	return (words);
 }
 
-std::list<Token*>	tokenizer( std::ifstream& file )
+std::list<Token*>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap )
+{
+	std::list<Token*>	tokensFromLine;
+	for (std::list<std::string>::iterator it = splitStrings.begin(); it != splitStrings.end(); ++it)
+	{
+		if ((*it)[0] == '#')
+			break ;
+		tokensFromLine.push_back(new Token(checkTokenType(tokenMap, *it), *it));
+	}
+	return (tokensFromLine);
+}
+
+std::list<Token*>	createTokenList( std::ifstream& file, TokenMap tokenMap )
+{
+	std::list<Token*>	tokenList;
+	std::string			line;
+
+	while (std::getline(file, line))
+	{
+		std::list<std::string>	splitStrings = splitLineByDelimiters(line);
+		std::list<Token*> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap);
+		tokenList.splice(tokenList.end(), tokensFromLine);
+	}
+	return (tokenList);
+}
+
+TokenStream	tokenizer( std::ifstream& file )
+{
+	TokenMap				tokenMap;
+
+	initMap(tokenMap);
+	std::list<Token*>	tokenList = createTokenList(file, tokenMap);
+	TokenStream	tokenStream(tokenList);
+	return (tokenStream);
+}
+
+/*
+TokenStream	tokenizer( std::ifstream& file )
 {
 	std::list<Token*>		output;
 	std::list<std::string>	words;
@@ -89,7 +127,7 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 	initMap(tokenMap);
 	while (std::getline(file, line))
 	{
-		words = splitLine(line);
+		words = splitLineByDelimiters(line);
 		for (std::list<std::string>::iterator it = words.begin(); it != words.end(); ++it)
 		{
 			if ((*it)[0] == '#')
@@ -97,7 +135,6 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 			output.push_back(new Token(checkTokenType(tokenMap, *it), *it));
 		}
 	}
-
-	return (output);
+	return (TokenStream(output));
 }
-
+*/
