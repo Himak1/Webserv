@@ -97,35 +97,7 @@ std::list<Token*>	tokenizer( std::ifstream& file )
 			output.push_back(new Token(checkTokenType(tokenMap, *it), *it));
 		}
 	}
-	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
-	// {
-	// 	std::cout << **iter << std::endl;
-	// }
+
 	return (output);
 }
 
-// std::list<Token*>	tokenizer( std::ifstream& file )
-// {
-// 	std::list<Token*>	output;
-// 	TokenMap			tokenMap;
-// 	std::string			line;
-// 	std::string			word;
-
-// 	initMap(tokenMap);
-// 	while (std::getline(file, line))
-// 	{
-// 		std::istringstream	stream(line);
-// 		while (!stream.eof())
-// 		{
-// 			stream >> word;
-// 			output.push_back(new Token(checkTokenType(tokenMap, word), word));
-// 			if (output.back()->getTokenType() == HASHTAG)
-// 				break ;
-// 		}
-// 	}
-// 	// for (std::list<Token*>::iterator iter = output.begin(); iter != output.end(); iter++)
-// 	// {
-// 	// 	std::cout << **iter << std::endl;
-// 	// }
-// 	return (output);
-// }
