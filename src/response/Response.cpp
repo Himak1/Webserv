@@ -122,6 +122,7 @@ int		Response::setStatus()
 
 string Response::deleteFile()
 {
+	// cout << "delete: " << _filepath << endl;
 	if (remove(_filepath.c_str()) != 0) {
 		_status = NOT_FOUND;
 		return createErrorHTML();
@@ -129,7 +130,8 @@ string Response::deleteFile()
 	return "File " + _filepath + " has been deleted";
 }
 
-void Response::uploadFile() {
+void Response::uploadFile()
+{
 	_request.setUploadSucces(false);
 
 	string input_path;
@@ -159,7 +161,8 @@ void Response::uploadFile() {
 	}
 }
 
-string Response::getCGI() {
+string Response::getCGI()
+{
 	class CGI CGI(_request, _config, _filepath);
 	string cgi = CGI.ExecuteCGI();
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));

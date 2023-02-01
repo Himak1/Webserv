@@ -99,7 +99,7 @@ void Request::parseEnv()
 	if (_cookies.find("sessionID") != _cookies.end())
 		_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
 
-	if (_method == "GET") {
+	if (_uri.find("?") != string::npos) {
 		string value;
 		istringstream ss(safe_substr(_uri, _uri.find("?") + 1, -1));
 		while (getline(ss, line, '&')) {
@@ -116,7 +116,7 @@ void Request::parseEnv()
 	}
 	// TO DO? will not work if input fields are empty. 
 	// Currently solved with 'required' tag in html form
-	else if (_method == "POST") {
+	if (_method == "POST") {
 		string query = _headers;
 
 		istringstream ss(safe_substr(_headers, _headers.find("Content-Disposition:"), -1));

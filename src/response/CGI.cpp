@@ -112,7 +112,7 @@ char**	CGI::createEnv()
 	_env[i] = strcpy(_env[i], directory_listing.c_str());
 
 	string temp_define_2 = UPLOAD_FOLDER;
-	string upload_directory = "upload_directory=" + temp_define_2;
+	string upload_directory = "_POST=upload_directory=" + temp_define_2;
 	_env[++i] = new char[upload_directory.length() + 1];
 	_env[i] = strcpy(_env[i], upload_directory.c_str());
 

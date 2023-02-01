@@ -1,13 +1,13 @@
 #include "Configuration.hpp"
-
+#include "../defines.hpp"
 #include <iostream>
 
 // CONSTRUCTOR
 Configuration::Configuration()
 {
-	this->_pathRoot = "www";
-	this->_ipAddress = "0.0.0.0";
-	this->_port = 8000;
+	this->_pathRoot = PATH_ROOT;
+	this->_ipAddress = IP_ADDRESS;
+	this->_port = PORT_NO;
 	// this->_errorPage404 = "/templates/404.html";
 	// this->_errorPage404 = "default";
 }
