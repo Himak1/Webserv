@@ -3,6 +3,7 @@
 
 # include "../request/Request.hpp"
 # include "../server/Configuration.hpp"
+# include "Socket.hpp"
 
 # include <stdio.h>
 # include <sys/socket.h>
@@ -31,20 +32,51 @@ public:
 	void				startListen();
 
 private:
-	/****************************************************************/
-	/* 	_pollFds loopt gelijk met _socketInfo, dus de socket info	*/
-	/*	van _pollFds[i] staat in _socketInfo[i]						*/
-	/*	deze kunnen niet in 1 class of struct komen omdat _pollFds	*/
-	/*	een array moet zijn (poll() heeft deze nodig)				*/
-	/****************************************************************/
+
+
+	// houden
 	std::vector<struct pollfd>	_pollFds;			// alle structs moeten hierin voor poll
-	std::vector<t_socket>		_socketInfo;
+	std::vector<Socket>			_sockets;   
 
 	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
 	class Configuration			_config;
 	class Request				_request;
+	/****************************************************************/
+	/* 	_pollFds loopt gelijk met _socketInfo, dus de socket info	*/
+	/*	van _pollFds[i] staat in _socketInfo[i]						*/
+	/*	deze kunnen niet in 1 class of struct komen omdat _pollFds	*/
+	/*	een array moet zijn (poll() heeft deze nodig)				*/
+	/****************************************************************/
+	
+	
+	std::vector<t_socket>		_socketInfo;   /// = Socket
+
+
+
+	std::string					_serverMessage;
+	std::string					_unsendServerMessage;
+
+
+
+
+
+
+
+
+
+
+
+
+	void						newConnection(int);
+	void						closeClientConnection(int);
+	void						closeServer();
+	void						receiveRequest(int);
+	void						sendResponse(int);
+	int 						startServer();
+	void						setUpListeningSockets();
+	void						lookupActiveSocket();
 
 	// std::vector<t_socket>		_listeningSockets;
 	// std::vector<t_socket>		_clientSockets;
@@ -56,50 +88,7 @@ private:
 	// int					_new_socket;
 	// std::vector<struct sockaddr_in>	_socketAddressServer;		
 	// std::vector<unsigned int>		_socketAddressLenServer;
-	std::string					_serverMessage;
-	std::string					_unsendServerMessage;
-
-	// std::vector<int>			_socketFds;				
-	// nfds_t						_nbOfClientSocketFds;		// take _socketFds.size();
-	void						newConnection(int);
-	void						closeClientConnection(int);
-	void						closeServer();
-	void						receiveRequest(int);
-	void						sendResponse(int);
-	int 						startServer();
-	void						setUpListeningSockets();
-	void						lookupActiveSocket();
 };
-
-
-
-// class Client
-// {
-// friend class TcpServer;
-
-// private:
-// 	t_socket			_sock;			
-// public:
-// 	Client(int);
-
-
-
-// 	// void				setSocketEvent(int);
-
-// };
-
-// Client::Client(int socketNb) : _socketNb(socketNb)
-// {
-	
-// }
-
-// void	Client::setSocketEvent(int event)
-// {
-	// _socketFd.events = event;
-// }
-
-
-
 
 } // namespace http
 
