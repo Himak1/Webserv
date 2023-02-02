@@ -46,12 +46,17 @@ Node*	deleteNewNode( Node* newNode )
 	return (NULL);
 }
 
-bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token )
+bool	accept( TokenStream& tokensToParse )
 {
-	if (currentToken != ending && (*currentToken)->getTokenType() == expected_token)
-	{
-		++currentToken;
-		return (true);
-	}
-	return (false);
+	if (tokensToParse.
 }
+
+/* bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token ) */
+/* { */
+/* 	if (currentToken != ending && (*currentToken)->getTokenType() == expected_token) */
+/* 	{ */
+/* 		++currentToken; */
+/* 		return (true); */
+/* 	} */
+/* 	return (false); */
+/* } */

@@ -13,6 +13,7 @@ class TokenStream
 
 		const Token*	getToken() const;
 		bool			moveToNextToken();
+		bool			isEmpty() const;
 	private:
 		std::list<Token*>			_tokenList;
 		std::list<Token*>::iterator	_currentToken;

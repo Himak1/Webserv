@@ -7,13 +7,13 @@
 
 class Node;
 
-Node*	parser( TokenList tList );
+Node*	parser( TokenStream& tokensToParse );
 
 bool	accept( TokenStream& tokensToParse, int expected_token );
 Node*	deleteNewNode( Node* newNode );
 
 Node*	parseLocation( TokenStream& tokensToParse );
-Node*	parseLocationPath( TokenStream& TokensToParse );
+Node*	parseLocationPath( TokenStream& tokensToParse );
 Node*   parseAlias( TokenStream& tokensToParse );
 Node*	parseRoot( TokenStream& tokensToParse );
 Node*	parseAllowedMethods( TokenStream& tokensToParse );

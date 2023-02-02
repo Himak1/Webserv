@@ -25,3 +25,8 @@ bool	TokenStream::moveToNextToken()
 	++_currentToken;
 	return (true);
 }
+
+bool	TokenStream::isEmpty() const
+{
+	return (_currentToken == _tokenList.end());
+}
