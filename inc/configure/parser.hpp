@@ -12,6 +12,7 @@ Node*	parser( TokenStream& tokensToParse );
 
 bool	accept( TokenStream& tokensToParse, int expected_token );
 bool	expect( TokenStream& tokensToParse, int expected_token );
+void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node );
 Node*	deleteNewNode( Node* newNode );
 
 Node*	parseLocation( TokenStream& tokensToParse );

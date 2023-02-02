@@ -21,26 +21,6 @@ TEST(parseLocation, AllowedMethods)
 	EXPECT_EQ((*i)->getTerminal(), "GET");
 }
 
-
-/* TEST(parseLocation, AllowedMethods) */
-/* { */
-/* 	TokenList	lst; */
-/* 	lst.push_back(new Token(T_ALLOWED_METHODS, "allowed_methods")); */
-/* 	lst.push_back(new Token(T_STRING, "GET")); */
-/* 	lst.push_back(new Token(T_STRING, "POST")); */
-/* 	lst.push_back(new Token(T_SEMICOLON, ";")); */
-/* 	TokenList::iterator iter = lst.begin(); */
-/* 	TokenList::iterator	end = lst.end(); */
-
-/* 	Node*	output; */
-/* 	output = parseAllowedMethods(iter, end); */
-/* 	ASSERT_TRUE(output != nullptr); */
-/* 	NodeList::const_iterator i = output->getChildrenBegin(); */
-
-/* 	ASSERT_EQ((*i)->getNodeType(), TERMINAL); */
-/* 	ASSERT_EQ((*i)->getTerminal(), "GET"); */
-/* } */
-
 /* TEST(parseLocation, locationPath) */
 /* { */
 /* 	TokenList	tList; */

@@ -55,10 +55,7 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse )
 	for (int i = 0; i < HTTP_METHODS; i++)
 	{
 		if (expect(tokensToParse, T_STRING))
-		{
-			newNode->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
-			tokensToParse.moveToNextToken();
-		}
+			acceptAndCreateNewNode(tokensToParse, newNode);
 		else
 			break;
 	}

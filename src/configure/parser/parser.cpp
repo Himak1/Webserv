@@ -41,6 +41,12 @@
 // 	}
 // }
 
+void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node )
+{
+	node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
+	tokensToParse.moveToNextToken();
+}
+
 Node*	deleteNewNode( Node* newNode )
 {
 	delete newNode;
@@ -65,13 +71,3 @@ bool	expect( TokenStream& tokensToParse, int expectedToken )
 	}
 	return (false);
 }
-
-/* bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token ) */
-/* { */
-/* 	if (currentToken != ending && (*currentToken)->getTokenType() == expected_token) */
-/* 	{ */
-/* 		++currentToken; */
-/* 		return (true); */
-/* 	} */
-/* 	return (false); */
-/* } */
