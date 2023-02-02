@@ -2,6 +2,7 @@
 #include <list>
 #include "parser.hpp"
 #include "Node.hpp"
+#include "TokenStream.hpp"
 
 // Node*	parser( TokenList tList )
 // {
@@ -46,9 +47,23 @@ Node*	deleteNewNode( Node* newNode )
 	return (NULL);
 }
 
-bool	accept( TokenStream& tokensToParse )
+bool	accept( TokenStream& tokensToParse, int expectedToken )
 {
-	if (tokensToParse.
+	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
+	{
+		tokensToParse.moveToNextToken();
+		return (true);
+	}
+	return (false);
+}
+
+bool	expect( TokenStream& tokensToParse, int expectedToken )
+{
+	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
+	{
+		return (true);
+	}
+	return (false);
 }
 
 /* bool	accept( TokenList::iterator& currentToken, const TokenList::iterator& ending, int expected_token ) */

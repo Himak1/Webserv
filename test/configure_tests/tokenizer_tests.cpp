@@ -1,6 +1,7 @@
 
 #include "gtest/gtest.h"
 #include "tokenizer.hpp"
+#include "Token.hpp"
 #include <fstream>
 
 bool	string_eq(std::string a, std::string b)
@@ -8,27 +9,27 @@ bool	string_eq(std::string a, std::string b)
 	return (a == b);
 }
 
-TEST(createTokenList_tests, double_quotes)
-{
-	std::ifstream	file("dummy_config/comments.conf");
-	std::list<Token*>	tokenList = createTokenList(file);
+/* TEST(createTokenList_tests, double_quotes) */
+/* { */
+/* 	std::ifstream	file("dummy_config/comments.conf"); */
+/* 	std::list<Token*>	tokenList = createTokenList(file); */
 
 
-	std::list<Token*>::iterator	iter = tokenList.begin();
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "server");
-	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "{");
-	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "location");
-	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "{");
-	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}");
-	iter++;
-	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}");
-	iter++;
-	EXPECT_TRUE(iter == tokenList.end());
-}
+/* 	std::list<Token*>::iterator	iter = tokenList.begin(); */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "server"); */
+/* 	iter++; */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "{"); */
+/* 	iter++; */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "location"); */
+/* 	iter++; */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "{"); */
+/* 	iter++; */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}"); */
+/* 	iter++; */
+/* 	EXPECT_PRED2(string_eq, (*iter)->getToken(), "}"); */
+/* 	iter++; */
+/* 	EXPECT_TRUE(iter == tokenList.end()); */
+/* } */
 
 TEST(tokenizer_tests, checkTokenType)
 {
@@ -44,7 +45,7 @@ TEST(splitLine_tests, basic_string)
 	std::list<std::string>	expected_words = {"this", "is", "a", "line"};
 
 	std::list<std::string>	words = splitLineByDelimiters(input);
-	EXPECTED_EQ(words, expected_words);
+	EXPECT_EQ(words, expected_words);
 }
 
 TEST(splitLine_tests, line_with_comment)

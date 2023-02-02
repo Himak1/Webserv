@@ -3,13 +3,15 @@
 # define PARSER_HPP
 
 # include <list>
-# include "tokenizer.hpp"
+# define HTTP_METHODS 3
 
+class TokenStream;
 class Node;
 
 Node*	parser( TokenStream& tokensToParse );
 
 bool	accept( TokenStream& tokensToParse, int expected_token );
+bool	expect( TokenStream& tokensToParse, int expected_token );
 Node*	deleteNewNode( Node* newNode );
 
 Node*	parseLocation( TokenStream& tokensToParse );

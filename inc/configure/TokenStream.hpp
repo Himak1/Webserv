@@ -11,9 +11,10 @@ class TokenStream
 		TokenStream( std::list<Token*> tokenList );
 		~TokenStream();
 
-		const Token*	getToken() const;
-		bool			moveToNextToken();
-		bool			isEmpty() const;
+		std::string	getTokenString();
+		int			getTokenType();
+		bool		moveToNextToken();
+		bool		isEmpty() const;
 	private:
 		std::list<Token*>			_tokenList;
 		std::list<Token*>::iterator	_currentToken;

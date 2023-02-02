@@ -13,14 +13,19 @@ TokenStream::~TokenStream()
 	_tokenList.clear();
 }
 
-const Token*	TokenStream::getToken() const
+std::string	TokenStream::getTokenString()
 {
-	return (*_currentToken);
+	return ((*_currentToken)->getToken());
+}
+
+int	TokenStream::getTokenType()
+{
+	return ((*_currentToken)->getTokenType());
 }
 
 bool	TokenStream::moveToNextToken()
 {
-	if (_currentToken == _tokenList.end())
+	if (isEmpty())
 		return (false);
 	++_currentToken;
 	return (true);

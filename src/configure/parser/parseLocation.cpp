@@ -2,6 +2,7 @@
 #include <vector>
 #include "parser.hpp"
 #include "Token.hpp"
+#include "TokenStream.hpp"
 #include "Node.hpp"
 
 /* bool	checkTokenSequence(int* sequence, int seqLength, TokenList::iterator currentToken, const TokenList::iterator& ending) */
@@ -49,17 +50,21 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse )
 {
 	Node*	newNode;
 
-	
-	/* accept(currentToken, ending, T_ALLOWED_METHODS); */
-	/* newNode = new Node(N_ALLOWED_METHODS); */
-	/* while (currentToken != ending && (*currentToken)->getTokenType() == T_STRING) */
-	/* { */
-	/* 	newNode->addChild(new Node(TERMINAL, (*currentToken)->getToken())); */
-	/* 	++currentToken; */
-	/* } */
-	/* if (!accept(currentToken, ending, T_SEMICOLON)) */
-	/* 	return (deleteNewNode(newNode)); */
-	/* return (newNode); */
+	accept(tokensToParse, T_ALLOWED_METHODS);
+	newNode = new Node(N_CGI_PASS);
+	for (int i = 0; i < HTTP_METHODS; i++)
+	{
+		if (expect(tokensToParse, T_STRING))
+		{
+			newNode->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
+			tokensToParse.moveToNextToken();
+		}
+		else
+			break;
+	}
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
 }
 
 /* Node*	parseCgiPass( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
