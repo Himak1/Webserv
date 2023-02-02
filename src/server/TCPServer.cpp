@@ -13,25 +13,24 @@
 
 
 /* #################################################################################################### */
-/* #################################################################################################### */
-/* #################################################################################################### */
-/* ###########																				###########	*/
-/* ###########																				###########	*/
-/* ###########																				###########	*/
-/* ###########		Voordat we runnen moet het max aantal open file descriptors van 		###########	*/
-/* ###########		het OS gecheckt worden (wij hebben per connectie een file descriptor 	###########	*/
-/* ###########		nodig).																 	###########	*/
-/* ###########																				###########	*/
-/* ###########		Dit doe je door in terminal 'ulimit -n' in te typen.					###########	*/
-/* ###########																				###########	*/
-/* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/
-/* ###########																				###########	*/
-/* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/
-/* ###########																				###########	*/
-/* #################################################################################################### */
+/* #################################################################################################### */	//		TMP		
+/* #################################################################################################### */	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########		Voordat we runnen moet het max aantal open file descriptors van 		###########	*/	//		TMP
+/* ###########		het OS gecheckt worden (wij hebben per connectie een file descriptor 	###########	*/	//		TMP
+/* ###########		nodig).																 	###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########		Dit doe je door in terminal 'ulimit -n' in te typen.					###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* #################################################################################################### */	//		TMP
 /* #################################################################################################### */
 /* #################################################################################################### */	
-
 
 
 #define QUEU_LIMIT_LISTEN 20
@@ -86,22 +85,13 @@ TcpServer::~TcpServer()
 }
 
 			// PRIVATE FUNCTIONS
-// int TcpServer::startServer()
-// {
-// 	return 0;
-// }
 
 void	TcpServer::setUpListeningSockets()
 {
 	t_socket		listening_socket;
 	struct pollfd	listener;
 	int				re_use = 1;
-
-
-
 	int test_port = 8000;	// tmp variable
-
-
 
 	/*************************************************************/
 	/* Moet loopen door het aantal poorten uit config            */
@@ -112,11 +102,10 @@ void	TcpServer::setUpListeningSockets()
 	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {								
 		memset(&listening_socket, 0, sizeof(listening_socket));
 		listening_socket.socket_info.sin_family = AF_INET;
-		// listening_socket.socket_info.sin_port = htons(_config.getPort());
+		// listening_socket.socket_info.sin_port = htons(_config.getPort());		// port from itterator
 
 		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
-		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
-		
+		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str()); 	// ook van ittertor
 		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
 		_socketInfo.push_back(listening_socket);
 
@@ -136,7 +125,7 @@ void	TcpServer::setUpListeningSockets()
 		}	
 		fcntl(listener.fd, F_SETFL, O_NONBLOCK);			
 		listener.events = POLLIN;
-		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len) < 0) {		/// we casten van sockaddr_in -> sock_addr waarom?
+		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len) < 0) {
 			exitWithError("Cannot bind() socket to address");
 		}
 		_pollFds.push_back(listener);
@@ -156,9 +145,6 @@ void TcpServer::startListen()
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 
-
-		// sleep(1);	// tmp
-
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
 		/*	write request) en houdt dit bij in de array van structs 	*/
@@ -170,54 +156,46 @@ void TcpServer::startListen()
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
-		// cout << "Poll count = " << poll_count << endl;	// tmp   shows number of active sockets
 		lookupActiveSocket();
 	}	
 }
 
 // Finds the socket where poll() found activity. It first loops through the listening sockets
 // to see if there is a new connection. If not it loops through the rest of the sockets to see
-// it there is any write or read activity. 
+// it there is any write or read activity. revents == 0 means nothing happened
 void	TcpServer::lookupActiveSocket()
 {
 	int i = 0;
 
 	for (; i < _nbListeningSockets; i++)
 	{
-		if (_pollFds[i].revents == 0)			// nothing happened on this socket
+		if (_pollFds[i].revents == 0)
 			continue ;
 		else
 			newConnection(i);	
 	}
 
-
 /*	POLLERR, POLLHUP, or POLLNVAL. Deze worden altijd gecheckt door POLL, ongeacht 	*/
 /*	de waarde van .events															*/
-/*	POLLER = Error condition (only returned in revents; ignored in
-              events).  This bit is also set for a file descriptor
-              referring to the write end of a pipe when the read end has
-              been closed.															*/
-/*	POLLHUP = Hang up (only returned in revents; ignored in events).
-              Note that when reading from a channel such as a pipe or a
-              stream socket, this event merely indicates that the peer
-              closed its end of the channel.  Subsequent reads from the
-              channel will return 0 (end of file) only after all
-              outstanding data in the channel has been consumed.					*/
-/*	POLLNVAL = Invalid request: fd not open (only returned in revents;
-              ignored in events).	*/
-
-	// cout << "i in lookupacitvesocket " << i << endl;
-
-	// cout << (_pollFds.size() - _nbListeningSockets) << endl << endl;
+/*	POLLER = Error condition (only returned in revents; ignored in					*/
+/*             events).  This bit is also set for a file descriptor					*/
+/*              referring to the write end of a pipe when the read end has			*/	
+/*              been closed.														*/
+/*	POLLHUP = Hang up (only returned in revents; ignored in events).				*/				
+/*            Note that when reading from a channel such as a pipe or a				*/			
+/*            stream socket, this event merely indicates that the peer				*/			
+/*            closed its end of the channel.  Subsequent reads from the				*/			
+/*            channel will return 0 (end of file) only after all					*/			
+/*            outstanding data in the channel has been consumed.					*/
+/*	POLLNVAL = Invalid request: fd not open (only returned in revents;				*/			
+/*              ignored in events).													*/
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if (_pollFds[i].revents == 0)
 			continue;
 		if (_pollFds[i].revents & POLLIN) {
-			// printf("POLLIN with i = %i\n", i);		
 			receiveRequest(i);
 		} else if (_pollFds[i].revents & POLLOUT) {
-			// printf("POLLOUT with i = %i\n", i);		
 			sendResponse(i);
 		} else if (_pollFds[i].revents & POLLHUP) {		// tmp?
 			closeClientConnection(i);

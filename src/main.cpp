@@ -12,7 +12,5 @@ int main(int argc, char **argv)
 
 	TcpServer server8000 = TcpServer(configuration);
 
-
-
 	return 0;
 }
