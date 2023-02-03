@@ -77,6 +77,17 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse )
 /* 	return (newNode); */
 /* } */
 
+Node*	parseLocationPath( TokenStream& tokensToParse )
+{
+	if (expect(tokensToParse, T_STRING))
+	{
+		Node* newNode = new Node(TERMINAL, tokensToParse.getTokenString());
+		return (newNode);
+	}
+	else
+		return (NULL);
+}
+
 /* Node*	parseLocationPath( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
 /* { */
 /* 	Node*	newNode; */

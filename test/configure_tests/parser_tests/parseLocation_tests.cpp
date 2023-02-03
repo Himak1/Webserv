@@ -4,8 +4,6 @@
 #include "Node.hpp"
 #include "parser.hpp"
 
-
-
 TEST(parseLocation, AllowedMethods)
 {
 	std::list<Token*> lst = {	new Token(T_ALLOWED_METHODS, "allowed_methods"),
@@ -15,10 +13,20 @@ TEST(parseLocation, AllowedMethods)
 	TokenStream	testInput(lst);
 
 	Node*	output = parseAllowedMethods(testInput);
-	ASSERT_TRUE(output != nullptr);
+	ASSERT_FALSE(output == nullptr);
 	NodeList::const_iterator i = output->getChildrenBegin();
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "GET");
+}
+
+TEST(parseLocation, locationPath)
+{
+	std::list<Token*> lst = {	new Token(T_STRING, "/usr/share/")};
+	TokenStream	testInput(lst);
+
+	Node*	output = parseLocationPath(testInput);
+	ASSERT_FALSE(output == nullptr);
+	EXPECT_EQ(output->getTerminal(), "/usr/share/");
 }
 
 /* TEST(parseLocation, locationPath) */
