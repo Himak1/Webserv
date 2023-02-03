@@ -34,17 +34,20 @@
 /* 	return (newNode); */
 /* } */
 
-/* Node*	parseRoot( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
-/* { */
-/* 	Node*	newNode; */
+Node*	parseRoot( TokenStream& tokensToParse )
+{
+	Node*	newNode;
 
-/* 	accept(currentToken, ending, T_ROOT); */
-/* 	newNode = new Node(N_ROOT); */
-/* 	if (!(accept(currentToken, ending, T_STRING) */
-/* 		&& accept(currentToken, ending, T_SEMICOLON))) */
-/* 		return (deleteNewNode(newNode)); */
-/* 	return (newNode); */
-/* } */
+	accept(tokensToParse, T_ROOT);
+	if (expect(tokensToParse, T_STRING))
+	{
+		newNode = new Node(N_ROOT);
+		acceptAndCreateNewNode(tokensToParse, newNode);
+	}
+	else
+		return (NULL);
+	return (newNode);
+}
 
 Node*	parseAllowedMethods( TokenStream& tokensToParse )
 {
@@ -87,19 +90,6 @@ Node*	parseLocationPath( TokenStream& tokensToParse )
 	else
 		return (NULL);
 }
-
-/* Node*	parseLocationPath( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
-/* { */
-/* 	Node*	newNode; */
-
-/* 	if (currentToken == ending) */
-/* 		return (NULL); */
-/* 	if ((*currentToken)->getTokenType() != T_STRING) */
-/* 		return (NULL); */
-/* 	newNode = new Node(T_STRING, (*currentToken)->getToken()); */
-/* 	++currentToken; */
-/* 	return (newNode); */
-/* } */
 
 /* Node*	parseLocation( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
 /* { */

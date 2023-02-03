@@ -13,7 +13,7 @@ TEST(parseLocation, AllowedMethods)
 	TokenStream	testInput(lst);
 
 	Node*	output = parseAllowedMethods(testInput);
-	ASSERT_FALSE(output == nullptr);
+	ASSERT_TRUE(output != NULL);
 	NodeList::const_iterator i = output->getChildrenBegin();
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "GET");
@@ -25,35 +25,24 @@ TEST(parseLocation, locationPath)
 	TokenStream	testInput(lst);
 
 	Node*	output = parseLocationPath(testInput);
-	ASSERT_FALSE(output == nullptr);
+	ASSERT_TRUE(output != NULL);
 	EXPECT_EQ(output->getTerminal(), "/usr/share/");
 }
 
-/* TEST(parseLocation, locationPath) */
-/* { */
-/* 	TokenList	tList; */
-/* 	tList.push_back(new Token(T_STRING, "/usr/share/")); */
-/* 	TokenList::iterator iter = tList.begin(); */
-/* 	TokenList::iterator end = tList.end(); */
+TEST(parseLocation, root)
+{
+	std::list<Token*> lst = {
+		new Token(T_ROOT, "root"),
+		new Token(T_STRING, "/files/data"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream	testInput(lst);
 
-/* 	Node*	output; */
-/* 	output = parseLocationPath(iter, end); */
-/* 	ASSERT_TRUE(output != nullptr); */
-/* } */
-
-/* TEST(parseLocation, root) */
-/* { */
-/* 	TokenList	lst; */
-/* 	lst.push_back(new Token(T_ROOT, "/usr/share/")); */
-/* 	lst.push_back(new Token(T_STRING, "/files/data")); */
-/* 	lst.push_back(new Token(T_SEMICOLON, ";")); */
-/* 	TokenList::iterator iter = lst.begin(); */
-/* 	TokenList::iterator ending = lst.end(); */
-
-/* 	Node*	output; */
-/* 	output = parseRoot(iter, ending); */
-/* 	ASSERT_TRUE(output != nullptr); */
-/* } */
+	Node*	output = parseRoot(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "/files/data");
+}
 
 /* TEST(parseLocation, cgi_pass) */
 /* { */
