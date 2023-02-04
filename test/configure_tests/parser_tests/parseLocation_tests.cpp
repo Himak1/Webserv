@@ -44,20 +44,23 @@ TEST(parseLocation, root)
 	EXPECT_EQ((*i)->getTerminal(), "/files/data");
 }
 
-/* TEST(parseLocation, cgi_pass) */
-/* { */
-/* 	TokenList	lst; */
-/* 	lst.push_back(new Token(T_CGI_PASS, "cgi_pass")); */
-/* 	lst.push_back(new Token(T_STRING, ".php")); */
-/* 	lst.push_back(new Token(T_STRING, "/usr/bin/php")); */
-/* 	lst.push_back(new Token(T_SEMICOLON, ";")); */
-/* 	TokenList::iterator iter = lst.begin(); */
-/* 	TokenList::iterator ending = lst.end(); */
+TEST(parseLocation, cgi_pass)
+{
+	std::list<Token*> lst = {
+		new Token(T_CGI_PASS, "cgi_pass"),
+		new Token(T_STRING, ".php"),
+		new Token(T_STRING, "/usr/bin/php")};
+	TokenStream testInput(lst);
 
-/* 	Node*	output; */
-/* 	output = parseCgiPass(iter, ending); */
-/* 	ASSERT_TRUE(output != nullptr); */
-/* } */
+	Node*	output = parseCgiPass(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), ".php");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "/usr/bin/php");
+}
 
 /* TEST(parseLocation, alias) */
 /* { */

@@ -67,18 +67,22 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse )
 	return (newNode);
 }
 
-/* Node*	parseCgiPass( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
-/* { */
-/* 	Node*	newNode; */
+Node*	parseCgiPass( TokenStream& tokensToParse )
+{
+	Node*	newNode;
 
-/* 	accept(currentToken, ending, T_CGI_PASS); */
-/* 	newNode = new Node(N_CGI_PASS); */
-/* 	if (!accept(currentToken, ending, T_STRING) */
-/* 		|| !accept(currentToken, ending, T_STRING) */
-/* 		|| !accept(currentToken, ending, T_SEMICOLON)) */
-/* 		return (deleteNewNode(newNode)); */
-/* 	return (newNode); */
-/* } */
+	accept(tokensToParse, T_CGI_PASS);
+	newNode = new Node(N_CGI_PASS);
+	if (expect(tokensToParse, T_STRING))
+		acceptAndCreateNewNode(tokensToParse, newNode);
+	else
+		return (deleteNewNode(newNode));
+	if (expect(tokensToParse, T_STRING))
+		acceptAndCreateNewNode(tokensToParse, newNode);
+	else
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
 
 Node*	parseLocationPath( TokenStream& tokensToParse )
 {
