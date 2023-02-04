@@ -81,6 +81,8 @@ Node*	parseCgiPass( TokenStream& tokensToParse )
 		acceptAndCreateNewNode(tokensToParse, newNode);
 	else
 		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
 	return (newNode);
 }
 

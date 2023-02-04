@@ -49,7 +49,8 @@ TEST(parseLocation, cgi_pass)
 	std::list<Token*> lst = {
 		new Token(T_CGI_PASS, "cgi_pass"),
 		new Token(T_STRING, ".php"),
-		new Token(T_STRING, "/usr/bin/php")};
+		new Token(T_STRING, "/usr/bin/php"),
+		new Token(T_SEMICOLON, ";")};
 	TokenStream testInput(lst);
 
 	Node*	output = parseCgiPass(testInput);
@@ -60,7 +61,19 @@ TEST(parseLocation, cgi_pass)
 	++i;
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "/usr/bin/php");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
+
+/*
+TEST(parseLocation, alias)
+{
+	std::list<Token*> lst = {
+		new Token(T_ALIAS, "alias"),
+		new Token(T_STRING, "/usr/bin/"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream testInput(lst);
+}
+*/
 
 /* TEST(parseLocation, alias) */
 /* { */
