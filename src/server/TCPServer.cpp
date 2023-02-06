@@ -102,7 +102,7 @@ void	TcpServer::setUpListeningSockets()
 	/* ports	staan in the config class, in een list of vector */
 	/* we kunnen dus itteraten op de ports				     	 */
 	/*************************************************************/
-	for (int i = 0; i < 6; i++) {								
+	// for (int i = 0; i < 6; i++) {								
 	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {								
 		memset(&listening_socket, 0, sizeof(listening_socket));
 		
@@ -130,14 +130,15 @@ void	TcpServer::setUpListeningSockets()
 		}	
 		fcntl(listening_pollFd.fd, F_SETFL, O_NONBLOCK);			
 		listening_pollFd.events = POLLIN;
-		int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[i].socket_info, _sockets[i].getSocketAddressLen());
+		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[i].socket_info, _sockets[i].getSocketAddressLen());
+		int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[0].socket_info, _sockets[0].getSocketAddressLen());
 		if (rc < 0)
 		{
 			exitWithError("Cannot bind() socket to address");
 		}
 		_pollFds.push_back(listening_pollFd);
 		_nbListeningSockets++;
-	}
+	// }
 }
 
 void TcpServer::startListen()
@@ -303,16 +304,8 @@ void TcpServer::receiveRequest(int idx)
 		
 	*/
 	
-	class Response respons(_request, _config);
+	
 
-	_sockets[idx].setServerMessage(respons.getMessage());
-	if (_sockets[idx].getServerMessage().empty())
-		cout << "Emtpy message on idx " << idx << endl;
-	else
-		_pollFds[idx].events = POLLOUT;	
-
-	// if (!_request.isValidMethod())
-	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
 	std::ostringstream ss;
 	ss	<< "Received request: Method = " << _request.getMethod()
 		<< " URI = " 					 << _request.getURI()
@@ -326,13 +319,22 @@ void TcpServer::sendResponse(int idx)
 	size_t		bytes_send;
 	std::string	message;
 
+
+	class Response respons(_request, _config);
+
+	_sockets[idx].setServerMessage(respons.getMessage());
+	if (_sockets[idx].getServerMessage().empty())
+		cout << "Emtpy message on idx " << idx << endl;
+	else
+		_pollFds[idx].events = POLLOUT;	
+
 	// _unsendServerMessage = _socketInfo[idx].server_message;
 	// message = (char *) _sockets[idx].getServerMessage().c_str();
 
+	// cout << "msg = " << _sockets[idx].getServerMessage().c_str() << " port " << ntohs(_sockets[idx].socket_info.sin_port) << endl;
 
 	// printf("length of message = %lu\n", ft_strlen(message));										// tmp
 	// printf("message = %s\n", message);															// tmp
-
 	// _unsendServerMessage = "testing purpose"; 													// tmp
 	// cout << "sendResponse idx = " << idx << endl;												// tmp 
 	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp 
