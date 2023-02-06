@@ -17,6 +17,10 @@ TEST(parseLocation, AllowedMethods)
 	NodeList::const_iterator i = output->getChildrenBegin();
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "GET");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "POST");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
 TEST(parseLocation, locationPath)
@@ -27,6 +31,7 @@ TEST(parseLocation, locationPath)
 	Node*	output = parseLocationPath(testInput);
 	ASSERT_TRUE(output != NULL);
 	EXPECT_EQ(output->getTerminal(), "/usr/share/");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
 TEST(parseLocation, root)
@@ -42,6 +47,7 @@ TEST(parseLocation, root)
 	NodeList::const_iterator i = output->getChildrenBegin();
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "/files/data");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
 TEST(parseLocation, cgi_pass)
@@ -77,5 +83,21 @@ TEST(parseLocation, alias)
 	ASSERT_TRUE(output != NULL);
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
 	EXPECT_EQ((*i)->getTerminal(), "/usr/bin/");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
+TEST(parseLocation, autoindex)
+{
+	std::list<Token*> lst = {
+		new Token(T_AUTOINDEX, "autoindex"),
+		new Token(T_STRING, "on"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream testInput(lst);
+
+	Node*	output = parseAutoIndex(testInput);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	ASSERT_TRUE(output != NULL);
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "on");
+	EXPECT_EQ(testInput.isEmpty(), true);
+}

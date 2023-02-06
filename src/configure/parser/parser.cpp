@@ -41,6 +41,28 @@
 // 	}
 // }
 
+/*
+bool	checkTokenAndCreateNewNode( TokenStream& tokensToParse, Node* node, int expectedToken )
+{
+	if (expect(tokensToParse, expectedToken))
+	{
+		node->addChild(new Node(TERMINAL, tokensToParse`
+	}
+	return (
+}
+*/
+
+bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node, int expectedToken )
+{
+	if (expect(tokensToParse, expectedToken))
+	{
+		node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
+		tokensToParse.moveToNextToken();
+		return (true);
+	}
+	return (false);
+}
+
 void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node )
 {
 	node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
