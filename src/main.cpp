@@ -1,5 +1,5 @@
-#include "server/TcpServer.hpp"
-#include "server/Configuration.hpp"
+# include "server/TcpServer.hpp"
+# include "server/Configuration.hpp"
 
 
 int main(int argc, char **argv)
@@ -11,8 +11,5 @@ int main(int argc, char **argv)
 		configuration.parseConfiguration(argv[1]);
 
 	TcpServer server8000 = TcpServer(configuration);
-
-
-
 	return 0;
 }

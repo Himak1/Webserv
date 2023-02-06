@@ -1,15 +1,16 @@
-#include "TcpServer.hpp"
-#include "../response/Response.hpp"
-#include "../utils/strings.hpp"
-
-#include <errno.h>
-#include <poll.h>
-#include <fcntl.h>
-#include <iostream>
-#include <sstream>
-#include <unistd.h>
-#include <fstream>
-#include <string.h>
+# include "TcpServer.hpp"
+# include "../response/Response.hpp"
+# include "../utils/strings.hpp"
+ 
+# include <sys/socket.h>
+# include <errno.h>
+# include <poll.h>
+# include <fcntl.h>
+# include <iostream>
+# include <sstream>
+# include <unistd.h>
+# include <fstream>
+# include <string.h>
 
 
 /* #################################################################################################### */
@@ -86,43 +87,31 @@ TcpServer::~TcpServer()
 }
 
 			// PRIVATE FUNCTIONS
-// int TcpServer::startServer()
-// {
-// 	return 0;
-// }
-
 void	TcpServer::setUpListeningSockets()
 {
 
 	struct pollfd	listening_pollFd;
 	int				re_use = 1;
-
+	Socket 			listening_socket;
 
 
 	int test_port = 8000;	// tmp variable
-
-
 
 	/*************************************************************/
 	/* Moet loopen door het aantal poorten uit config            */
 	/* ports	staan in the config class, in een list of vector */
 	/* we kunnen dus itteraten op de ports				     	 */
 	/*************************************************************/
-	for (Socket listening_socket, int i = 0; i < 6; i++) {								
+	for (int i = 0; i < 6; i++) {								
 	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {								
-
-		// memset(&listening_socket, 0, sizeof(listening_socket));
-		
+		memset(&listening_socket, 0, sizeof(listening_socket));
 		
 		listening_socket.socket_info.sin_family = AF_INET;
 		// listening_socket.socket_info.sin_port = htons(_config.getPort());
 
 		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
 		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
-		
-		// listening_socket.setSocketAddressLen(size)
-
-		// listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
+		listening_socket.setSocketAddressLen(sizeof(listening_socket.socket_info));
 		_sockets.push_back(listening_socket);
 
 		/*************************************************************/
@@ -141,7 +130,9 @@ void	TcpServer::setUpListeningSockets()
 		}	
 		fcntl(listening_pollFd.fd, F_SETFL, O_NONBLOCK);			
 		listening_pollFd.events = POLLIN;
-		if (bind(listening_pollFd.fd, (sockaddr *)&_sockets[i].socket_info, _sockets[i].getAddressLen()) < 0) {
+		int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[i].socket_info, _sockets[i].getSocketAddressLen());
+		if (rc < 0)
+		{
 			exitWithError("Cannot bind() socket to address");
 		}
 		_pollFds.push_back(listening_pollFd);
@@ -161,8 +152,7 @@ void TcpServer::startListen()
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
 
-
-		sleep(1);	// tmp
+		sleep(1);												// tmp
 
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
@@ -175,7 +165,7 @@ void TcpServer::startListen()
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
-		// cout << "Poll count = " << poll_count << endl;	// tmp   shows number of active sockets
+		// cout << "Poll count = " << poll_count << endl;		// tmp   
 		lookupActiveSocket();
 	}	
 }
@@ -192,7 +182,7 @@ void	TcpServer::lookupActiveSocket()
 		if (_pollFds[i].revents == 0)			// nothing happened on this socket
 			continue ;
 		else
-			newConnection(i);	
+			newClientConnection(i);	
 	}
 
 
@@ -211,17 +201,11 @@ void	TcpServer::lookupActiveSocket()
 /*	POLLNVAL = Invalid request: fd not open (only returned in revents;
               ignored in events).	*/
 
-	// cout << "i in lookupacitvesocket " << i << endl;
+	// cout << "i in lookupacitvesocket " << i << endl;							// tmp
 
-	// cout << (_pollFds.size() - _nbListeningSockets) << endl << endl;
+	// cout << (_pollFds.size() - _nbListeningSockets) << endl << endl;			// tmp
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
-
-
-	
-
-
-
 		if (_pollFds[i].revents == 0)
 			continue;
 		if (_pollFds[i].revents & POLLIN) {
@@ -230,7 +214,7 @@ void	TcpServer::lookupActiveSocket()
 		} else if (_pollFds[i].revents & POLLOUT) {
 			printf("revents = %i POLLOUT with i = %i\n", _pollFds[i].revents, i);		
 			sendResponse(i);
-		} else if (_pollFds[i].revents & POLLHUP) {		// tmp?
+		} else if (_pollFds[i].revents & POLLHUP) {								// ??tmp?? bij hangup van client wordt revent 17. dus POLLIN wordt dan opgeroepen en die ontvangt geen bytes (en sluit de client connection)
 			cout << "revents = %i " << _pollFds[i].revents << "with i = " << i << endl;
 			closeClientConnection(i);
 		} 
@@ -240,19 +224,22 @@ void	TcpServer::lookupActiveSocket()
 
 // 	Accepts new connections. These don't need to be set to non-blocking since they inherit from the listeningsocket
 // 	(which is already non-blocking)
-void TcpServer::newConnection(int active_socket_idx)
+void TcpServer::newClientConnection(int active_socket_idx)
 {
 	struct pollfd	new_pollfd;
 	Socket			new_socket;
+	int				socket_len;
 	// t_socket		new_socket;
 
 	memset(&new_pollfd, 0, sizeof(struct pollfd));
 	// memset(&new_socket, 0, sizeof(t_socket));
 	// new_socket.socket_address_len = sizeof(new_socket.socket_info);
-	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, &new_socket.getSocketAddressLen());	
+	socket_len = sizeof(new_socket.socket_info);
+	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, (socklen_t *)&socket_len);	
 	if (new_pollfd.fd == -1) {
-		exitWithError("ERROR: accept() (TcpServer::newConnection");
+		exitWithError("ERROR: accept() (TcpServer::newClientConnection");
 	}
+	new_socket.setSocketAddressLen(socket_len);
 	new_pollfd.events = POLLIN;
 	_pollFds.push_back(new_pollfd);
 	_sockets.push_back(new_socket);
@@ -293,9 +280,8 @@ void TcpServer::receiveRequest(int idx)
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																							// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
 
-	// cout << "receivereq with i = " << idx << endl;
 
-	// std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;
+	// std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;		// tmp
 
 	if (bytes_received <= 0) {
 		if (bytes_received == 0)
@@ -337,40 +323,34 @@ void TcpServer::receiveRequest(int idx)
 // idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
 void TcpServer::sendResponse(int idx)
 {
-	size_t	bytes_send;
-	char	*message;
+	size_t		bytes_send;
+	std::string	message;
 
 	// _unsendServerMessage = _socketInfo[idx].server_message;
-	message = (char *) _sockets[idx].getServerMessage().c_str();
+	// message = (char *) _sockets[idx].getServerMessage().c_str();
 
 
+	// printf("length of message = %lu\n", ft_strlen(message));										// tmp
+	// printf("message = %s\n", message);															// tmp
 
-
-	HIIIIEEEERRRR met converten naar Socket class
-
-
-
-
-	// printf("length of message = %lu\n", ft_strlen(message));			// tmp
-	// printf("message = %s\n", message);									// tmp
-
-
-	// _unsendServerMessage = "testing purpose"; 	// tmp
-	// cout << "sendResponse idx = " << idx << endl;		// tmp test
-	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp test
-	// cout << "sendResponse to fd " << _pollFds[idx].fd << endl;				// tmp test
+	// _unsendServerMessage = "testing purpose"; 													// tmp
+	// cout << "sendResponse idx = " << idx << endl;												// tmp 
+	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp 
+	// cout << "sendResponse to fd " << _pollFds[idx].fd << endl;									// tmp 
 
 	// while (!_unsendServerMessage.empty())
 	// {
 	// bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
-	bytes_send = send(_pollFds[idx].fd, message, ft_strlen(message), 0);
+	bytes_send = send(_pollFds[idx].fd, _sockets[idx].getServerMessage().c_str(), message.size(), 0);
 	if (bytes_send < 0)
 		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 
-	// cout << bytes_send << " bytes are send" << endl;   			// tmp
+	// cout << bytes_send << " bytes are send" << endl;   											// tmp
 
-	_socketInfo[idx].server_message = message;
-	_socketInfo[idx].server_message.erase(0, bytes_send);
+	message.erase(0, bytes_send);
+	_sockets[idx].setServerMessage(message);
+
+	// _socketInfo[idx].server_message.erase(0, bytes_send);
 	// _unsendServerMessage.erase(0, bytes_send);
 	// }
 	
@@ -382,7 +362,7 @@ void TcpServer::sendResponse(int idx)
 	/* Als wel alles is verstuurd gaat hij op POLLIN		     */
 	/*************************************************************/
 
-	if (_socketInfo[idx].server_message.empty())
+	if (message.empty())
 		_pollFds[idx].events = POLLIN;
 }
 

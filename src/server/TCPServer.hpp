@@ -17,8 +17,6 @@ namespace http
 {;
 
 typedef struct s_socket {
-	// const unsigned int	socket_idx;
-	// int					socket_address;		// is ook een struct?
 	unsigned int		socket_address_len;
 	struct sockaddr_in	socket_info;
 	std::string			server_message;
@@ -33,9 +31,13 @@ public:
 
 private:
 
-
-	// houden
-	std::vector<struct pollfd>	_pollFds;			// alle structs moeten hierin voor poll
+	/****************************************************************/
+	/* 	_pollFds loopt gelijk met _socketInfo, dus de socket info	*/
+	/*	van _pollFds[i] staat in _socketInfo[i]						*/
+	/*	deze kunnen niet in 1 class of struct komen omdat _pollFds	*/
+	/*	een array moet zijn (poll() heeft deze nodig)				*/
+	/****************************************************************/
+	std::vector<struct pollfd>	_pollFds;
 	std::vector<Socket>			_sockets;   
 
 	unsigned int				_nbListeningSockets;
@@ -43,33 +45,9 @@ private:
 
 	class Configuration			_config;
 	class Request				_request;
-	/****************************************************************/
-	/* 	_pollFds loopt gelijk met _socketInfo, dus de socket info	*/
-	/*	van _pollFds[i] staat in _socketInfo[i]						*/
-	/*	deze kunnen niet in 1 class of struct komen omdat _pollFds	*/
-	/*	een array moet zijn (poll() heeft deze nodig)				*/
-	/****************************************************************/
 	
-	
-	std::vector<t_socket>		_socketInfo;   /// = Socket
 
-
-
-	std::string					_serverMessage;
-	std::string					_unsendServerMessage;
-
-
-
-
-
-
-
-
-
-
-
-
-	void						newConnection(int);
+	void						newClientConnection(int);
 	void						closeClientConnection(int);
 	void						closeServer();
 	void						receiveRequest(int);
@@ -77,6 +55,9 @@ private:
 	int 						startServer();
 	void						setUpListeningSockets();
 	void						lookupActiveSocket();
+
+	// std::string					_serverMessage;
+	// std::string					_unsendServerMessage;
 
 	// std::vector<t_socket>		_listeningSockets;
 	// std::vector<t_socket>		_clientSockets;
