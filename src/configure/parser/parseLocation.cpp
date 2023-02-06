@@ -26,7 +26,7 @@ Node*	parseRoot( TokenStream& tokensToParse )
 
 	accept(tokensToParse, T_ROOT);
 	newNode = new Node(N_ROOT);
-	if (!acceptAndCreateTerminal(tokensToParse, newNode, T_STRING))
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_SEMICOLON))
 		return (deleteNewNode(newNode));
@@ -76,7 +76,7 @@ Node*	parseAutoIndex( TokenStream& tokensToParse )
 
 	accept(tokensToParse, T_AUTOINDEX);
 	newNode = new Node(N_AUTOINDEX);
-	if (!acceptAndCreateTerminal(tokensToParse, newNode, T_STRING))
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_SEMICOLON))
 		return (deleteNewNode(newNode));
@@ -103,7 +103,7 @@ Node*	parseLocation( TokenStream& tokensToParse )
 	if (!accept(tokensToParse, T_LOCATION))
 		return (NULL);
 	newNode = new Node(N_LOCATION);
-	if (!acceptAndCreateTerminal(tokensToParse, newNode, T_STRING))
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
 		deleteNewNode(newNode);

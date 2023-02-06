@@ -2,6 +2,7 @@
 #include <list>
 #include "parser.hpp"
 #include "Node.hpp"
+#include "Token.hpp"
 #include "TokenStream.hpp"
 
 // Node*	parser( TokenList tList )
@@ -41,55 +42,54 @@
 // 	}
 // }
 
-/*
-bool	checkTokenAndCreateNewNode( TokenStream& tokensToParse, Node* node, int expectedToken )
+Node*	parseServerName( TokenStream& tokensToParse )
 {
-	if (expect(tokensToParse, expectedToken))
-	{
-		node->addChild(new Node(TERMINAL, tokensToParse`
-	}
-	return (
-}
-*/
+	Node*	newNode;
 
-bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node, int expectedToken )
-{
-	if (expect(tokensToParse, expectedToken))
-	{
-		node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
-		tokensToParse.moveToNextToken();
-		return (true);
-	}
-	return (false);
-}
-
-void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node )
-{
-	node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
 	tokensToParse.moveToNextToken();
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
 }
 
-Node*	deleteNewNode( Node* newNode )
+Node*	parseServer( TokenStream& tokensToParse )
 {
-	delete newNode;
-	return (NULL);
-}
+	Node*	newNode;
+	int		status;
 
-bool	accept( TokenStream& tokensToParse, int expectedToken )
-{
-	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
+	tokensToParse.moveToNextToken();
+	if (!accept(tokensToParse, T_BRACKET_OPEN))
+		return (deleteNewNode(newNode));
+	while (!accept(tokensToParse, T_BRACKET_CLOSE))
 	{
-		tokensToParse.moveToNextToken();
-		return (true);
+		switch (tokensToParse.getTokenType())
+		{
+			case T_SERVER_NAME:
+				status = newNode->addChild(parseServerName(tokensToParse));
+				break;
+			case T_LISTEN:
+				status = newNode->addChild(parseListen(tokensToParse));
+				break;
+			case T_LOCATION:
+				status = newNode->addChild(parseLocation(tokensToParse));
+				break;
+			case T_ERROR_PAGE:
+				status = newNode->addChild(parseErrorPage(tokensToParse));
+				break;
+		}
 	}
-	return (false);
+	return (newNode);
 }
 
-bool	expect( TokenStream& tokensToParse, int expectedToken )
-{
-	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
-	{
-		return (true);
-	}
-	return (false);
-}
+/* Node*	parser( TokenStream& tokensToParse ) */
+/* { */
+/* 	Node*	ast; */
+
+/* 	while (!accept(tokensToParse, T_SERVER)) */
+/* 	{ */
+		
+/* 	} */
+/* 	return (ast); */
+/* } */

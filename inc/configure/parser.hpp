@@ -9,11 +9,10 @@ class Node;
 
 Node*	parser( TokenStream& tokensToParse );
 
-bool	accept( TokenStream& tokensToParse, int expected_token );
-bool	expect( TokenStream& tokensToParse, int expected_token );
-bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node, int expectedToken);
-void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node );
-Node*	deleteNewNode( Node* newNode );
+Node*	parseServer( TokenStream& tokensToParse );
+Node*	parseServerName( TokenStream& tokensToParse );
+Node*	parseListen( TokenStream& tokensToParse );
+Node*	parseErrorPage( TokenStream& tokensToParse );
 
 Node*	parseLocation( TokenStream& tokensToParse );
 Node*	parseLocationPath( TokenStream& tokensToParse );
@@ -23,6 +22,9 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse );
 Node*	parseCgiPass( TokenStream& tokensToParse );
 Node*	parseAutoIndex( TokenStream& tokensToParse );
 
-void    parseSingleParameter( TokenStream& tokensToParse );
-
+bool	accept( TokenStream& tokensToParse, int expected_token );
+bool	expect( TokenStream& tokensToParse, int expected_token );
+bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node );
+void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node );
+Node*	deleteNewNode( Node* newNode );
 #endif
