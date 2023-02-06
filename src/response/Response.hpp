@@ -30,7 +30,7 @@ class Response
 
 		void						initStatusCodes();
 		void						initContentTypes();
-		bool						isExistingFile();
+		bool						isExistingFile(string filename);
 		int							setStatus();
 		string 						deleteFile();
 		void 						uploadFile();

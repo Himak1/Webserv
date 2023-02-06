@@ -32,17 +32,17 @@ CGI::CGI(class Request request, class Configuration config, string filepath)
 
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
-	if (_request.getExtension() == ".php") 
-		_path[2] = &_argument[0];
-	else
+	// if (_request.getExtension() == ".php") 
+		// _path[2] = &_argument[0];
+	// else
 		_path[2] = NULL;
 	_path[3] = NULL;
 	_env = createEnv();
 
 	// cout << "_filepath = " << _filepath << endl;
 	// cout << "_path_to_cgi = " << _path_to_cgi << endl;
-	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
 	// cout << "_path_to_script = " << _path_to_script << endl;
+	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
 }
 
 // DESTRUCTOR
@@ -56,11 +56,6 @@ char** 	CGI::getFormEnv() const { return _env; }
 
 string CGI::ExecuteCGI()
 {
-	// save stdin and stdout so we can restore them later
-	int	saveStdin = dup(STDIN_FILENO);
-	int	saveStdout = dup(STDOUT_FILENO);
-	
-	// execute script
 	int		fd[2];
 	dup2(fd[0], STDIN_FILENO);
 	close(fd[0]);
@@ -81,13 +76,9 @@ string CGI::ExecuteCGI()
 	char	buffer[CGI_BUFSIZE] = {0};
 	read(fd[0], buffer, CGI_BUFSIZE);
 
-	// revert stdin and stdout
-	dup2(saveStdin, STDIN_FILENO);
-	dup2(saveStdout, STDOUT_FILENO);
 	close(fd[1]);
-	string message(buffer);
 
-	return message;
+	return buffer;
 }
 
 // convert list to char**
@@ -112,7 +103,7 @@ char**	CGI::createEnv()
 	_env[i] = strcpy(_env[i], directory_listing.c_str());
 
 	string temp_define_2 = UPLOAD_FOLDER;
-	string upload_directory = "_POST=upload_directory=" + temp_define_2;
+	string upload_directory = "upload_directory=" + temp_define_2;
 	_env[++i] = new char[upload_directory.length() + 1];
 	_env[i] = strcpy(_env[i], upload_directory.c_str());
 

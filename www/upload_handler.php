@@ -4,7 +4,7 @@
 			<?php
 				$file_to_upload = getenv("file_to_upload");
 				$upload_succes = getenv("upload_succes");
-				if($file_to_upload !== NULL && $upload_succes !== NULL)
+				if($file_to_upload !== NULL && $upload_succes == "true")
 					echo "file succesfully uploaded!";
 				else
 					echo "Upload failed";

@@ -2,7 +2,10 @@
 	
 		<div id="middle">
 			<h3 class="">TELNET</h3>
-			The Telnet syntax for testing open ports is:
+			Check if telnet is installed, and install it in case it's not installed:
+			</br>which telnet || brew install telnet
+			</br>
+			</br>			The Telnet syntax for testing open ports is:
 			</br>telnet < address > < port number >
 			</br>
 			</br>for example:

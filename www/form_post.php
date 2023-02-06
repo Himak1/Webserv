@@ -10,5 +10,3 @@
 		</div>
 
 <?php include("templates/bottom.php");?>
-
-<!-- <div class="item_active">form (post)</div> -->
