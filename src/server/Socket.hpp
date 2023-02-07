@@ -10,6 +10,9 @@
 class Socket 
 {
 public :
+	int					_socketIndex;
+
+
     Socket();
 	~Socket();
 

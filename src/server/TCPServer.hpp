@@ -30,7 +30,7 @@ public:
 	void				startListen();
 
 private:
-
+	
 	/****************************************************************/
 	/* 	_pollFds loopt gelijk met _socketInfo, dus de socket info	*/
 	/*	van _pollFds[i] staat in _socketInfo[i]						*/
@@ -51,6 +51,7 @@ private:
 	void						closeClientConnection(int);
 	void						closeServer();
 	void						receiveRequest(int);
+	void 						createServerMessage(int);
 	void						sendResponse(int);
 	int 						startServer();
 	void						setUpListeningSockets();
