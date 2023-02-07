@@ -56,8 +56,26 @@ TEST(parseServer, errorPage)
 	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
-/* TEST(parseServer, parseServer) */
-/* { */
-/* 	std::list<Token*> lst = { */
-/* 		new Token(T_ */
-/* } */
+TEST(parseServer, parseServer)
+{
+	std::list<Token*> lst = {
+		new Token(T_SERVER, "server"),
+		new Token(T_BRACKET_OPEN, "{"),
+		new Token(T_SERVER_NAME, "server_name"),
+		new Token(T_STRING, "www.test.org"),
+		new Token(T_SEMICOLON, ";"),
+		new Token(T_LISTEN, "listen"),
+		new Token(T_STRING, "80"),
+		new Token(T_SEMICOLON, ";"),
+		new Token(T_BRACKET_CLOSE, "}")};
+	TokenStream testInput(lst);
+
+	Node*	output = parseServer(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), N_SERVER_NAME);
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), N_LISTEN);
+	EXPECT_EQ(testInput.isEmpty(), true);
+}
+
