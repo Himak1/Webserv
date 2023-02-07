@@ -11,6 +11,7 @@ set(SRC_FILES
     #configure/AST.cpp
     configure/parser/parser.cpp
     configure/parser/parseLocation.cpp
+    configure/parser/parser_utils.cpp
     BuildResponse.cpp
     HTTPRequest.cpp
     main.cpp

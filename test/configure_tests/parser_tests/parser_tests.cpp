@@ -8,7 +8,7 @@ TEST(parseServer, serverName)
 {
 	std::list<Token*> lst = {
 		new Token(T_SERVER_NAME, "server_name"),
-		new Token(T_STRING, "www.website.org");
+		new Token(T_STRING, "www.website.org"),
 		new Token(T_SEMICOLON, ";")};
 	TokenStream	testInput(lst);
 
@@ -26,10 +26,34 @@ TEST(parseServer, listen)
 		new Token(T_LISTEN, "listen"),
 		new Token(T_STRING, "80"),
 		new Token(T_SEMICOLON, ";")};
-	TokenStream(lst);
+	TokenStream testInput(lst);
 
-	Node*	output;
-	
+	Node*	output = parseListen(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "80");
+	EXPECT_EQ(testInput.isEmpty(), true);
+}
+
+TEST(parseServer, errorPage)
+{
+	std::list<Token*> lst = {
+		new Token(T_ERROR_PAGE, "error_page"),
+		new Token(T_STRING, "404"),
+		new Token(T_STRING, "/custom_404.html"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream testInput(lst);
+
+	Node*	output = parseErrorPage(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "404");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "/custom_404.html");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
 /* TEST(parseServer, parseServer) */
