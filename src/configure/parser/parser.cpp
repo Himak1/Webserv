@@ -4,6 +4,8 @@
 #include "Token.hpp"
 #include "TokenStream.hpp"
 
+
+
 Node*	parseErrorPage( TokenStream& tokensToParse )
 {
 	Node*	newNode;

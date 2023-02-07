@@ -4,6 +4,11 @@
 #include "parser.hpp"
 #include "TokenStream.hpp"
 
+TEST(parseServer, index)
+{
+
+}
+
 TEST(parseServer, serverName)
 {
 	std::list<Token*> lst = {

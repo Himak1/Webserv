@@ -5,6 +5,21 @@
 #include "TokenStream.hpp"
 #include "Node.hpp"
 
+Node*	parseReturn( TokenStream& tokensToParse )
+{
+	Node*	newNode;
+
+	tokensToParse.moveToNextToken();
+	newNode = new Node(N_RETURN);
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));	
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
 Node*	parseAlias( TokenStream& tokensToParse )
 {
 	Node*	newNode;
@@ -135,41 +150,3 @@ Node*	parseLocation( TokenStream& tokensToParse )
 		return (deleteNewNode(newNode));
 	return (newNode);
 }
-
-/* Node*	parseLocation( TokenList::iterator& currentToken, const TokenList::iterator& ending ) */
-/* { */
-/* 	Node*	newNode; */
-/* 	int		status; */
-
-/* 	if (!accept(currentToken, ending, T_LOCATION)) */
-/* 		return (NULL); */
-/* 	newNode = new Node(N_LOCATION); */
-/* 	status = newNode->addChild(parseLocationPath(currentToken, ending)); */
-/* 	if (status == 0) */
-/* 		return (deleteNewNode(newNode)); */
-/* 	if (!accept(currentToken, ending, T_BRACKET_OPEN)) */
-/* 		return (deleteNewNode(newNode)); */
-/* 	while (!accept(currentToken, ending, T_BRACKET_CLOSE) && status != 0) */
-/* 	{ */
-/* 		switch ((*currentToken)->getTokenType()) */
-/* 		{ */
-/* 			case T_ALIAS: */
-/* 				status = newNode->addChild(parseAlias(currentToken, ending)); */
-/* 				break; */
-/* 			case T_ROOT: */
-/* 				status = newNode->addChild(parseRoot(currentToken, ending)); */
-/* 				break; */
-/* 			case T_ALLOWED_METHODS: */
-/* 				status = newNode->addChild(parseAllowedMethods(currentToken, ending)); */
-/* 				break; */
-/* 			case T_CGI_PASS: */
-/* 				status = newNode->addChild(parseCgiPass(currentToken, ending)); */
-/* 				break; */
-/* 			default: */
-/* 				status = 0; */
-/* 				break; */
-/* 		} */
-/* 	} */
-/* 	return (newNode); */
-/* } */
-

@@ -4,6 +4,25 @@
 #include "Node.hpp"
 #include "parser.hpp"
 
+TEST(parseLocation, parseReturn)
+{
+	std::list<Token*> lst = {	new Token(T_RETURN, "return"),
+								new Token(T_STRING, "301"),
+								new Token(T_STRING, "localhost/"),
+								new Token(T_SEMICOLON, ";")};
+	TokenStream	testInput(lst);
+
+	Node*	output = parseReturn(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "301");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "localhost/");	
+	EXPECT_EQ(testInput.isEmpty(), true);
+}
+
 TEST(parseLocation, AllowedMethods)
 {
 	std::list<Token*> lst = {	new Token(T_ALLOWED_METHODS, "allowed_methods"),

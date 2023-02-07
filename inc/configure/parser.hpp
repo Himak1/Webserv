@@ -21,6 +21,7 @@ Node*	parseRoot( TokenStream& tokensToParse );
 Node*	parseAllowedMethods( TokenStream& tokensToParse );
 Node*	parseCgiPass( TokenStream& tokensToParse );
 Node*	parseAutoIndex( TokenStream& tokensToParse );
+Node*	parseReturn( TokenStream& tokensToParse );
 
 bool	accept( TokenStream& tokensToParse, int expected_token );
 bool	expect( TokenStream& tokensToParse, int expected_token );
