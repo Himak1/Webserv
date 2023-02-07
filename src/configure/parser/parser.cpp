@@ -77,13 +77,16 @@ Node*	parseServer( TokenStream& tokensToParse )
 	return (newNode);
 }
 
-/* Node*	parser( TokenStream& tokensToParse ) */
-/* { */
-/* 	Node*	ast; */
+Node*	parser( TokenStream& tokensToParse )
+{
+	Node*	ast;
 
-/* 	while (!accept(tokensToParse, T_SERVER)) */
-/* 	{ */
-		
-/* 	} */
-/* 	return (ast); */
-/* } */
+	ast = new Node(AST);
+	while (expect(tokensToParse, T_SERVER) && tokensToParse.isEmpty() == false)
+	{
+		if (ast->addChild(parseServer(tokensToParse)) == 0)
+			return (deleteNewNode(ast));
+	}
+	return (ast);
+}
+

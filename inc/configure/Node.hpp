@@ -21,7 +21,8 @@ enum NodeTypes
 	N_CGI_PASS,
 	N_ALIAS,
 	N_AUTOINDEX,
-	TERMINAL
+	TERMINAL,
+	AST
 };
 
 class Node;
