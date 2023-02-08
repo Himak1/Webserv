@@ -13,7 +13,6 @@ enum NodeTypes
 	N_LISTEN,
 	N_INDEX,
 	N_CLIENT_MAX_BODY,
-	N_PORT,
 	N_LOCATION,
 	N_ROOT,
 	N_EXPIRES,
