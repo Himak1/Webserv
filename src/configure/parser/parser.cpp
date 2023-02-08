@@ -92,6 +92,9 @@ Node*	parseServer( TokenStream& tokensToParse )
 			case T_LISTEN:
 				status = newNode->addChild(parseListen(tokensToParse));
 				break;
+			case T_ROOT:
+				status = newNode->addChild(parseRoot(tokensToParse));
+				break;
 			case T_INDEX:
 				status = newNode->addChild(parseIndex(tokensToParse));
 				break;

@@ -28,8 +28,8 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	// Punctuation and Seperators
 	tokenMap["{"]				= T_BRACKET_OPEN;
 	tokenMap["}"]				= T_BRACKET_CLOSE;
-	tokenMap["/"]				= T_FORWARD_SLASH;
-	tokenMap["\\"]				= T_BACK_SLASH;
+	//tokenMap["/"]				= T_FORWARD_SLASH;
+	//tokenMap["\\"]				= T_BACK_SLASH;
 	tokenMap[";"]				= T_SEMICOLON;
 	tokenMap["#"]				= T_HASHTAG;
 	tokenMap["$"]				= T_DOLLAR;

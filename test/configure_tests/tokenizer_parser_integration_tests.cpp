@@ -18,3 +18,14 @@ TEST(tokenizer_parser, valid_server_all_params)
 	EXPECT_EQ((*i)->getNodeType(), N_SERVER);
 	EXPECT_EQ(testInput.isEmpty(), true);
 }
+
+
+TEST(tokenizer_parser, syntax_error)
+{
+	std::ifstream file("dummy_config/complete_syntax_error.conf");
+
+	TokenStream	testInput = tokenizer(file);
+	Node*	output = parser(testInput);
+
+	ASSERT_TRUE(output == NULL);
+}

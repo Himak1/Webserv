@@ -27,8 +27,8 @@ enum TokenTypes
 	// Punctuation and Seperators
 	T_BRACKET_OPEN,
 	T_BRACKET_CLOSE,
-	T_FORWARD_SLASH,
-	T_BACK_SLASH,
+	//T_FORWARD_SLASH,
+	//T_BACK_SLASH,
 	T_SEMICOLON,
 	T_HASHTAG,
 	T_DOLLAR,

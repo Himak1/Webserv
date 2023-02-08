@@ -131,6 +131,7 @@ Node*	parseLocation( TokenStream& tokensToParse )
 				break;
 			case T_RETURN:
 				status = newNode->addChild(parseReturn(tokensToParse));
+				break;
 			case T_ALIAS:
 				status = newNode->addChild(parseAlias(tokensToParse));
 				break;
