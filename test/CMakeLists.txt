@@ -7,6 +7,7 @@ set(TEST_FILES
 	configure_tests/parser_tests/parser_tests.cpp
 	configure_tests/parser_tests/parseLocation_tests.cpp
 	configure_tests/parser_tests/parseLocation_integration_tests.cpp
+	configure_tests/tokenizer_parser_integration_tests.cpp
 )
 
 ### Create Test Executables ###

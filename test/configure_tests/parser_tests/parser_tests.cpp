@@ -4,9 +4,43 @@
 #include "parser.hpp"
 #include "TokenStream.hpp"
 
+TEST(parseServer, client_max_body_size)
+{
+	std::list<Token*> lst = {
+		new Token(T_CLIENT_MAX_BODY, "client_max_body_size"),
+		new Token(T_STRING, "22"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream testInput(lst);
+
+	Node*	output = parseClientMaxBodySize(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "22");
+}
+
 TEST(parseServer, index)
 {
+	std::list<Token*> lst = {
+		new Token(T_INDEX, "index"),
+		new Token(T_STRING, "index.html"),
+		new Token(T_STRING, "index.htm"),
+		new Token(T_STRING, "index.php"),
+		new Token(T_SEMICOLON, ";")};
+	TokenStream	testInput(lst);
 
+	Node*	output = parseIndex(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "index.html");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "index.htm");
+	++i;
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "index.php");
+	EXPECT_EQ(testInput.isEmpty(), true);
 }
 
 TEST(parseServer, serverName)

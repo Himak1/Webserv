@@ -126,6 +126,11 @@ Node*	parseLocation( TokenStream& tokensToParse )
 	{
 		switch (tokensToParse.getTokenType())
 		{
+			case T_INDEX:
+				status = newNode->addChild(parseIndex(tokensToParse));
+				break;
+			case T_RETURN:
+				status = newNode->addChild(parseReturn(tokensToParse));
 			case T_ALIAS:
 				status = newNode->addChild(parseAlias(tokensToParse));
 				break;

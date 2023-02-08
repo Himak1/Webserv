@@ -12,6 +12,8 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	tokenMap["server"]			= T_SERVER;
 	tokenMap["server_name"]		= T_SERVER_NAME;
 	tokenMap["listen"] 			= T_LISTEN;
+	tokenMap["index"]			= T_INDEX;
+	tokenMap["client_max_body_size"] = T_CLIENT_MAX_BODY;
 	tokenMap["port"] 			= T_PORT;
 	tokenMap["access_log"]		= T_ACCESS_LOG;
 	tokenMap["location"]		= T_LOCATION;

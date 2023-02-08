@@ -4,7 +4,33 @@
 #include "Token.hpp"
 #include "TokenStream.hpp"
 
+Node*	parseClientMaxBodySize( TokenStream& tokensToParse )
+{
+	Node*	newNode;
 
+	tokensToParse.moveToNextToken();
+	newNode = new Node(N_CLIENT_MAX_BODY);
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
+Node*	parseIndex( TokenStream& tokensToParse )
+{
+	Node*	newNode;
+
+	tokensToParse.moveToNextToken();
+	newNode = new Node(N_INDEX);
+	while (expect(tokensToParse, T_STRING))
+	{
+		acceptAndCreateTerminal(tokensToParse, newNode);
+	}
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
 
 Node*	parseErrorPage( TokenStream& tokensToParse )
 {
@@ -65,6 +91,12 @@ Node*	parseServer( TokenStream& tokensToParse )
 				break;
 			case T_LISTEN:
 				status = newNode->addChild(parseListen(tokensToParse));
+				break;
+			case T_INDEX:
+				status = newNode->addChild(parseIndex(tokensToParse));
+				break;
+			case T_CLIENT_MAX_BODY:
+				status = newNode->addChild(parseIndex(tokensToParse));
 				break;
 			case T_LOCATION:
 				status = newNode->addChild(parseLocation(tokensToParse));
