@@ -1,15 +1,16 @@
-#include "TcpServer.hpp"
-#include "../response/Response.hpp"
-#include "../utils/strings.hpp"
-
-#include <errno.h>
-#include <poll.h>
-#include <fcntl.h>
-#include <iostream>
-#include <sstream>
-#include <unistd.h>
-#include <fstream>
-#include <string.h>
+# include "TcpServer.hpp"
+# include "../response/Response.hpp"
+# include "../utils/strings.hpp"
+ 
+# include <sys/socket.h>
+# include <errno.h>
+# include <poll.h>
+# include <fcntl.h>
+# include <iostream>
+# include <sstream>
+# include <unistd.h>
+# include <fstream>
+# include <string.h>
 
 
 /* #################################################################################################### */
@@ -48,7 +49,10 @@ namespace
 
 	void logStartupMessage(struct sockaddr_in _socketAddress)
 	{
+
+
 		std::ostringstream ss;
+
 		ss	<< "\n*** Listening on ADDRESS: "
 			<< inet_ntoa(_socketAddress.sin_addr) 
 			<< " PORT: "
@@ -88,62 +92,91 @@ TcpServer::~TcpServer()
 
 void	TcpServer::setUpListeningSockets()
 {
-	t_socket		listening_socket;
-	struct pollfd	listener;
+
+	struct pollfd	listening_pollFd;
 	int				re_use = 1;
+	Socket 			listening_socket;
+
 	int test_port = 8000;	// tmp variable
 
-	/*************************************************************/
-	/* Moet loopen door het aantal poorten uit config            */
-	/* ports	staan in the config class, in een list of vector */
-	/* we kunnen dus itteraten op de ports				     	 */
-	/*************************************************************/
-	for (int i = 0; i < 6; i++) {								
-	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {								
-		memset(&listening_socket, 0, sizeof(listening_socket));
+
+		// loop
+		
+		
+		/*													TOOO DOOOOO
+		
+		The inet_addr() function converts the Internet host address cp from IPv4 numbers-and-dots notation into binary data 
+		in network byte order. If the input is invalid, INADDR_NONE (usually -1) is returned. Use of this function is
+		 problematic because -1 is a valid address (255.255.255.255). Avoid its use in favor of inet_aton(), 
+		 inet_pton(3), or getaddrinfo(3) which provide a cleaner way to indicate error return
+
+
+
+
+
+
+
+
+
+		to check
+			- I had a similar problem which was caused by calling an https only api endpoint using http
+
+
+
+
+		*/
+
+
 		listening_socket.socket_info.sin_family = AF_INET;
-		// listening_socket.socket_info.sin_port = htons(_config.getPort());		// port from itterator
-
 		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
-		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str()); 	// ook van ittertor
-		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
-		_socketInfo.push_back(listening_socket);
+		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+		_sockets.push_back(listening_socket);
 
-		/*************************************************************/
-		/* setup van de pollfd struct					            */
-		/* setsocktopt() zorgt ervoor dat we ingeval van een restart
-			de socket kunnen hergebruiken                            */
 
-		/*************************************************************/
-		memset(&listener, 0, sizeof(listener));
-		listener.fd = socket(AF_INET, SOCK_STREAM, 0);		
-		if (listener.fd < 0) {
+
+		// memset(&listening_pollFd, 0, sizeof(listening_pollFd));
+
+		listening_pollFd.fd = socket(AF_INET, SOCK_STREAM, 0);		
+		if (listening_pollFd.fd < 0) {
 			exitWithError("Cannot create listening socket");
 		}
-		if (setsockopt(listener.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
-			exitWithError("setsockopt error\n");
-		}	
-		fcntl(listener.fd, F_SETFL, O_NONBLOCK);			
-		listener.events = POLLIN;
-		if (bind(listener.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len) < 0) {
+		fcntl(listening_pollFd.fd, F_SETFL, O_NONBLOCK);			
+		
+		listening_pollFd.events = POLLIN;
+		_pollFds.push_back(listening_pollFd);
+		_nbListeningSockets++;
+		
+		// if (setsockopt(listening_pollFd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
+		// 	exitWithError("setsockopt error\n");
+		// }	
+
+		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[i].socket_info, _sockets[i].getSocketAddressLen());
+		int rc = bind(listening_pollFd.fd, (sockaddr *)&_sockets[0].socket_info, _sockets[0].getSocketAddressLen());
+		if (rc < 0)
+		{
 			exitWithError("Cannot bind() socket to address");
 		}
-		_pollFds.push_back(listener);
-		_nbListeningSockets++;
-	}
+	// }
 }
 
 void TcpServer::startListen()
 {
 	int	poll_count;
-	
-	for (int i = 0; i < _nbListeningSockets; i++) {
+	int i;
+
+
+	for ( i = 0; i < _nbListeningSockets; i++) {
 		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
 			exitWithError("Socket listen failed");
-		logStartupMessage(_socketInfo[i].socket_info);
+		logStartupMessage(_sockets[i].socket_info);
 	}
+
+	// cout << i << endl;
+
 	while (_isServerRunning) {
 		log("\n====== Waiting for a new connection ======\n");
+
+		sleep(1);												// tmp
 
 		/****************************************************************/
 		/* 	Poll checkt elke socket of er iets gebeurt (read / 			*/		
@@ -172,74 +205,79 @@ void	TcpServer::lookupActiveSocket()
 		if (_pollFds[i].revents == 0)
 			continue ;
 		else
-			newConnection(i);	
+			newClientConnection(i);	
 	}
 
 /*	POLLERR, POLLHUP, or POLLNVAL. Deze worden altijd gecheckt door POLL, ongeacht 	*/
 /*	de waarde van .events															*/
-/*	POLLER = Error condition (only returned in revents; ignored in					*/
-/*             events).  This bit is also set for a file descriptor					*/
-/*              referring to the write end of a pipe when the read end has			*/	
-/*              been closed.														*/
-/*	POLLHUP = Hang up (only returned in revents; ignored in events).				*/				
-/*            Note that when reading from a channel such as a pipe or a				*/			
-/*            stream socket, this event merely indicates that the peer				*/			
-/*            closed its end of the channel.  Subsequent reads from the				*/			
-/*            channel will return 0 (end of file) only after all					*/			
-/*            outstanding data in the channel has been consumed.					*/
-/*	POLLNVAL = Invalid request: fd not open (only returned in revents;				*/			
-/*              ignored in events).													*/
+/*	POLLER = Error condition (only returned in revents; ignored in
+              events).  This bit is also set for a file descriptor
+              referring to the write end of a pipe when the read end has
+              been closed.															*/
+/*	POLLHUP = Hang up (only returned in revents; ignored in events).
+              Note that when reading from a channel such as a pipe or a
+              stream socket, this event merely indicates that the peer
+              closed its end of the channel.  Subsequent reads from the
+              channel will return 0 (end of file) only after all
+              outstanding data in the channel has been consumed.					*/
+/*	POLLNVAL = Invalid request: fd not open (only returned in revents;
+              ignored in events).	*/
+
+	// cout << "i in lookupacitvesocket " << i << endl;							// tmp
+
+	// cout << endl << (_pollFds.size() - _nbListeningSockets) << endl << endl;			// tmp
+	// cout << "pollfd size " << _pollFds.size() << endl;
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
-		switch(_pollFds[i].revents) {
-			case (POLLIN) :
-				receiveRequest(i);
-				break;
-			case (POLLOUT) :
-				sendResponse(i);
-				break;
-			case (POLLHUP) :
-				closeClientConnection(i);
-				break;
-		}	
+		if (_pollFds[i].revents == 0)
+			continue;
+		if (_pollFds[i].revents & POLLIN) {
+			// printf("revents = %i POLLIN with i = %i\n", _pollFds[i].revents, i);		
+			receiveRequest(i);
+		} else if (_pollFds[i].revents & POLLOUT) {
+			// printf("revents = %i POLLOUT with i = %i\n", _pollFds[i].revents, i);		
+			sendResponse(i);
+		} else if (_pollFds[i].revents & POLLHUP) {								// ??tmp?? bij hangup van client wordt revent 17. dus POLLIN wordt dan opgeroepen en die ontvangt geen bytes (en sluit de client connection)
+			// cout << "revents = %i " << _pollFds[i].revents << "with i = " << i << endl;
+			closeClientConnection(i);
+		} 
 	}  													 		
 }
 
 
 // 	Accepts new connections. These don't need to be set to non-blocking since they inherit from the listeningsocket
 // 	(which is already non-blocking)
-void TcpServer::newConnection(int active_socket_idx)
+void TcpServer::newClientConnection(int idx)
 {
 	struct pollfd	new_pollfd;
-	t_socket		new_socket;
+	Socket			new_socket;
+	socklen_t		socket_len;
 
-	memset(&new_pollfd, 0, sizeof(struct pollfd));
-	memset(&new_socket, 0, sizeof(t_socket));
-	new_socket.socket_address_len = sizeof(new_socket.socket_info);
-	new_pollfd.fd = accept(_pollFds[active_socket_idx].fd, (sockaddr *)&new_socket.socket_info, &new_socket.socket_address_len);	// moet het laatste argument niet sizeof(socketinfo) zijn?
+	// memset(&new_socket, 0, sizeof(t_socket));
+	// new_socket.socket_address_len = sizeof(new_socket.socket_info);
+	socket_len = new_socket.getSocketAddressLen();
+	new_pollfd.fd = accept(_pollFds[idx].fd, (sockaddr *)&new_socket.socket_info, &socket_len);	
 	if (new_pollfd.fd == -1) {
-		exitWithError("ERROR: accept() (TcpServer::newConnection");
+		exitWithError("ERROR: accept() (TcpServer::newClientConnection");
 	}
+	new_socket.setSocketAddressLen(socket_len);
+
 	new_pollfd.events = POLLIN;
 	_pollFds.push_back(new_pollfd);
-	_socketInfo.push_back(new_socket);
+	_sockets.push_back(new_socket);
 
-	// cout << "socket # " << _pollFds[active_socket_idx].fd << " is new" << endl;				// tmp											
-	// cout << "idx = " << active_socket_idx << endl;											// tmp		
-	// cout << "_socketinfo.size = " << _socketInfo.size() << endl;								// tmp					
-	// cout << "_pollFds.size = " << _pollFds.size() << endl;									// tmp				
-	// cout << "listeningsockets # " << _nbListeningSockets << endl;							// tmp						
+	// cout << "_pollFds.size = " << _pollFds.size() << " 	zou gelijk moeten zijn aan _sockets.size = " << _sockets.size() << endl;
 	
-	// std::cout << "Server accepted incoming connection from ADDRESS: "
-	// 		<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
-	// 		<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
+	std::cout << "Server accepted incoming connection from ADDRESS: "
+			<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
+			<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
 void	TcpServer::closeClientConnection(int idx)
 {
 	close(_pollFds[idx].fd);
 	_pollFds.erase(_pollFds.begin() + idx);						
-	_socketInfo.erase(_socketInfo.begin() + idx);
+	_sockets.erase(_sockets.begin() + idx);
 
 
 	// cout << "idx = " << close << endl;												// tmp							
@@ -257,12 +295,8 @@ void TcpServer::receiveRequest(int idx)
 	char	buff[BUFFER_SIZE];
 	size_t	bytes_received;
 
-	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
+	bytes_received = read(_pollFds[idx].fd, buff, sizeof(buff));		// only difference between recv and read is dat recv als laatste argument flags heeft (flag == null, dan is recv == read)
 																							// evt kan je met deze flag bepaalde errors opvangen die in de socket gebeuren 
-
-	// cout << "receivereq with i = " << idx << endl;
-
-	// std::cout << "receiveRequest heeft " << bytes_received << " ontvangen: " << buff << std::endl;
 
 	if (bytes_received <= 0) {
 		if (bytes_received == 0)
@@ -272,8 +306,6 @@ void TcpServer::receiveRequest(int idx)
 		closeClientConnection(idx);
 		return ;
 	} 
-		
-
 	_request.initRequest(std::string(buff));
 	/*
 	
@@ -283,53 +315,82 @@ void TcpServer::receiveRequest(int idx)
 		servermessage daar kunnen versturen.
 		
 	*/
-	
-	class Response respons(_request, _config);
 
-	_socketInfo[idx].server_message = respons.getMessage();
-	if (_socketInfo[idx].server_message.empty())
-		cout << "Emtpy message on idx " << idx << endl;
-	else
-		_pollFds[idx].events = POLLOUT;	
+	_pollFds[idx].events = POLLIN | POLLOUT;
 
-	// if (!_request.isValidMethod())
-	// 	exitWithError("Invalid method, only GET, POST and DELETED are supported");
+
+
 	std::ostringstream ss;
-	// ss	<< "Received request: Method = " << _request.getMethod()
-	// 	<< " URI = " 					 << _request.getURI()
-	// 	<< " HTTP Version = " 			 << _request.getHTTPVersion();
-	// log(ss.str());
+	ss	<< "Received request: Method = " << _request.getMethod()
+		<< " URI = " 					 << _request.getURI()
+		<< " HTTP Version = " 			 << _request.getHTTPVersion();
+	log(ss.str());
+	createServerMessage(idx);
+}
+
+void TcpServer::createServerMessage(int idx)
+{
+	// class Response respons(_request, _config);
+
+	// _sockets[idx].setServerMessage(respons.getMessage());
+	// if (_sockets[idx].getServerMessage().empty())
+	// 	cout << "Emtpy message on idx " << idx << endl;
+	// else
+	// 	_pollFds[idx].events = POLLIN | POLLOUT;	
 }
 
 // idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
 void TcpServer::sendResponse(int idx)
 {
-	size_t	bytes_send;
-	char	*message;
+	size_t		bytes_send;
+	std::string	message;
+
+
+		class Response respons(_request, _config);
+
+	_sockets[idx].setServerMessage(respons.getMessage());
+	if (_sockets[idx].getServerMessage().empty())
+		cout << "Emtpy message on idx " << idx << endl;
+	// else
+	// 	_pollFds[idx].events = POLLIN | POLLOUT;	
+
 
 	// _unsendServerMessage = _socketInfo[idx].server_message;
-	message = (char *) _socketInfo[idx].server_message.c_str();
+	// message = (char *) _sockets[idx].getServerMessage().c_str();
 
-	// printf("length of message = %lu\n", ft_strlen(message));			// tmp
-	// printf("message = %s\n", message);									// tmp
+	cout << "socket fd          = " << _pollFds[idx].fd << endl;
+	cout << "socket addres len  = " << _sockets[idx].getSocketAddressLen() << endl;
+	cout << "socket sin_addr	= " << inet_ntoa(_sockets[idx].socket_info.sin_addr) << endl;
+	cout << "socket sin_family	= " << _sockets[idx].socket_info.sin_family << endl;
+	cout << "socket sin_len		= " << _sockets[idx].socket_info.sin_len << endl;
+	cout << "socket port		= " << ntohs(_sockets[idx].socket_info.sin_port) << endl;
 
 
-	// _unsendServerMessage = "testing purpose"; 	// tmp
-	// cout << "sendResponse idx = " << idx << endl;		// tmp test
-	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp test
-	// cout << "sendResponse to fd " << _pollFds[idx].fd << endl;				// tmp test
+	cout << " msg = " << _sockets[idx].getServerMessage().c_str() << endl;
+
+	// printf("length of message = %lu\n", ft_strlen(message));										// tmp
+	// printf("message = %s\n", message);															// tmp
+	// _unsendServerMessage = "testing purpose"; 													// tmp
+	// cout << "sendResponse idx = " << idx << endl;												// tmp 
+	// cout << "sendResponse to port # " << ntohs(_socketInfo[idx].socket_info.sin_port) << endl;	// tmp 
+	// cout << "sendResponse to fd " << _pollFds[idx].fd << endl;									// tmp 
 
 	// while (!_unsendServerMessage.empty())
 	// {
 	// bytes_send = send(_pollFds[idx].fd, &_unsendServerMessage, _unsendServerMessage.size(), 0);
-	bytes_send = send(_pollFds[idx].fd, message, ft_strlen(message), 0);
+
+
+
+	bytes_send = write(_pollFds[idx].fd, _sockets[idx].getServerMessage().c_str(), message.size());
 	if (bytes_send < 0)
 		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 
-	// cout << bytes_send << " bytes are send" << endl;   			// tmp
+	// cout << bytes_send << " bytes are send" << endl;   											// tmp
 
-	_socketInfo[idx].server_message = message;
-	_socketInfo[idx].server_message.erase(0, bytes_send);
+	message.erase(0, bytes_send);
+	_sockets[idx].setServerMessage(message);
+
+	// _socketInfo[idx].server_message.erase(0, bytes_send);
 	// _unsendServerMessage.erase(0, bytes_send);
 	// }
 	
@@ -341,8 +402,9 @@ void TcpServer::sendResponse(int idx)
 	/* Als wel alles is verstuurd gaat hij op POLLIN		     */
 	/*************************************************************/
 
-	if (_socketInfo[idx].server_message.empty())
-		_pollFds[idx].events = POLLIN;
+	if (message.empty())
+		closeClientConnection(idx);
+		// _pollFds[idx].events = POLLIN;
 }
 
 
