@@ -113,7 +113,20 @@ void	TcpServer::setUpListeningSockets()
 
 		listening_socket.socket_info.sin_family = AF_INET;
 		listening_socket.socket_info.sin_port = htons(test_port++); 			// tmp
+		
+		
+		/*													TOOO DOOOOO
+		
+		The inet_addr() function converts the Internet host address cp from IPv4 numbers-and-dots notation into binary data 
+		in network byte order. If the input is invalid, INADDR_NONE (usually -1) is returned. Use of this function is
+		 problematic because -1 is a valid address (255.255.255.255). Avoid its use in favor of inet_aton(), 
+		 inet_pton(3), or getaddrinfo(3) which provide a cleaner way to indicate error return
+		*/
+		
 		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+
+
+
 		listening_socket.setSocketAddressLen(sizeof(listening_socket.socket_info));
 		_sockets.push_back(listening_socket);
 
