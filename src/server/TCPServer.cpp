@@ -218,20 +218,20 @@ void	TcpServer::lookupActiveSocket()
 
 	// cout << "i in lookupacitvesocket " << i << endl;							// tmp
 
-	cout << endl << (_pollFds.size() - _nbListeningSockets) << endl << endl;			// tmp
-	cout << "pollfd size " << _pollFds.size() << endl;
+	// cout << endl << (_pollFds.size() - _nbListeningSockets) << endl << endl;			// tmp
+	// cout << "pollfd size " << _pollFds.size() << endl;
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if (_pollFds[i].revents == 0)
 			continue;
 		if (_pollFds[i].revents & POLLIN) {
-			printf("revents = %i POLLIN with i = %i\n", _pollFds[i].revents, i);		
+			// printf("revents = %i POLLIN with i = %i\n", _pollFds[i].revents, i);		
 			receiveRequest(i);
 		} else if (_pollFds[i].revents & POLLOUT) {
-			printf("revents = %i POLLOUT with i = %i\n", _pollFds[i].revents, i);		
+			// printf("revents = %i POLLOUT with i = %i\n", _pollFds[i].revents, i);		
 			sendResponse(i);
 		} else if (_pollFds[i].revents & POLLHUP) {								// ??tmp?? bij hangup van client wordt revent 17. dus POLLIN wordt dan opgeroepen en die ontvangt geen bytes (en sluit de client connection)
-			cout << "revents = %i " << _pollFds[i].revents << "with i = " << i << endl;
+			// cout << "revents = %i " << _pollFds[i].revents << "with i = " << i << endl;
 			closeClientConnection(i);
 		} 
 	}  													 		
@@ -351,7 +351,6 @@ void TcpServer::sendResponse(int idx)
 	// _unsendServerMessage = _socketInfo[idx].server_message;
 	// message = (char *) _sockets[idx].getServerMessage().c_str();
 
-	cout << " port " << ntohs(_sockets[idx].socket_info.sin_port) << endl;
 	cout << "socket fd          = " << _pollFds[idx].fd << endl;
 	cout << "socket addres len  = " << _sockets[idx].getSocketAddressLen() << endl;
 	cout << "socket sin_addr	= " << inet_ntoa(_sockets[idx].socket_info.sin_addr) << endl;
@@ -360,7 +359,7 @@ void TcpServer::sendResponse(int idx)
 	cout << "socket port		= " << ntohs(_sockets[idx].socket_info.sin_port) << endl;
 
 
-	// cout " msg = " << _sockets[idx].getServerMessage().c_str() << endl;
+	cout << " msg = " << _sockets[idx].getServerMessage().c_str() << endl;
 
 	// printf("length of message = %lu\n", ft_strlen(message));										// tmp
 	// printf("message = %s\n", message);															// tmp
@@ -397,7 +396,8 @@ void TcpServer::sendResponse(int idx)
 	/*************************************************************/
 
 	if (message.empty())
-		_pollFds[idx].events = POLLIN;
+		closeClientConnection(idx);
+		// _pollFds[idx].events = POLLIN;
 }
 
 
