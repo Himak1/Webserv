@@ -22,7 +22,6 @@ public :
 
 	struct sockaddr_in	socket_info;
 
-	void				setSocketAddressLen(unsigned int);
 private :
 
 	// std::vector<pollfd>	_pollFd;
