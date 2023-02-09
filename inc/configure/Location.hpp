@@ -11,6 +11,7 @@ enum HTTPMethods
 	DELETE
 };
 
+/*
 class Location
 {
 	public:
@@ -34,7 +35,33 @@ class Location
 		std::string	_cgiExtension;
 		std::string	_cgiPath;
 };
+*/
 
-std::ostream &			operator<<( std::ostream & o, Location const & i );
+class Location
+{
+	public:
+		Location();
+		~Location();
+
+		std::string	getRoot() const;
+		std::string	getPath() const;
+		std::string	getDefaultFile() const;
+		std::string	getAlias() const;
+		std::string	getCgiExtension() const;
+		std::string	getCgiPath() const;
+		bool		isMethodAccepted( int httpMethod ) const;
+		bool		autoIndexingOn() const;	
+	private:
+		std::string	_root;
+		std::string	_path;
+		std::string	_defaultFile;
+		std::string	_alias;
+		std::string	_cgiExtension;
+		std::string	_cgiPath;
+		bool		_acceptedMethods[4];
+		bool		_autoIndex;
+};
+
+/* std::ostream &			operator<<( std::ostream & o, Location const & i ); */
 
 #endif
