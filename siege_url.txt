@@ -1,0 +1,8 @@
+127.0.0.1:8000/index.html
+127.0.0.1:8000/inc/
+127.0.0.1:8000/inc/bg.jpg
+127.0.0.1:8000/inc/gif.gif
+127.0.0.1:8000/inc/jpg.jpg
+127.0.0.1:8000/inc/png.png
+127.0.0.1:8000/inc/text.txt
+127.0.0.1:8000/uploads/notes.txt

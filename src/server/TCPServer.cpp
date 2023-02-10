@@ -12,6 +12,27 @@
 # include <fstream>
 # include <string.h>
 
+/////////// TOOO DOOOOO
+/*
+
+	Sockets moeten goed closen. Dit zou er voor meoten zorgen dat 'siege -b localhost:8000' werkt?
+
+
+	siege -c100 -f siege_url.txt      100 concurrent users die website uit de file bezoeken
+
+	fix vastlopers: 
+
+unable to write to socket sock.c:733: Broken pipe
+[error] socket: read error Connection reset by peer sock.c:635: Connection reset by peer
+[error] socket: unable to connect sock.c:282: Connection refused
+
+
+socket fd 0 ##########invalid! (POLLNVAL event) needs handler, voor nu callt deze de closeConnection()
+
+*/
+
+
+
 
 /* #################################################################################################### */
 /* #################################################################################################### */	//		TMP		
@@ -28,6 +49,12 @@
 /* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																					###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* #################################################################################################### */	//		TMP
 /* #################################################################################################### */
@@ -123,9 +150,9 @@ void	TcpServer::setUpListeningSockets()
 		_pollFds.push_back(listening_pollFd);
 		_nbListeningSockets++;
 		
-		// if (setsockopt(listening_pollFd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
-		// 	exitWithError("setsockopt error\n");
-		// }	
+		if (setsockopt(listening_pollFd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
+			exitWithError("setsockopt error\n");
+		}	
 
 		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[0].socket_info, _socketInfo[0].socket_address_len);
 		int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
@@ -144,7 +171,7 @@ void TcpServer::startListen()
 	for ( i = 0; i < _nbListeningSockets; i++) {
 		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
 			exitWithError("Socket listen failed");
-		logStartupMessage(_socketInfo[i].socket_info);
+		// logStartupMessage(_socketInfo[i].socket_info);
 	}
 
 	// cout << i << endl;
@@ -185,17 +212,16 @@ void	TcpServer::lookupActiveSocket()
 	}
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
-		if (_pollFds[i].revents == 0)
-			continue;
-		if (_pollFds[i].revents & POLLIN) 			receiveRequest(i);
+		if 	    (_pollFds[i].revents == 0)			continue;
+		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i);
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);			// tmp?
-		else if (_pollFds[i].revents & POLLNVAL) {	// tmp?
-			cout << "socket fd " << _pollFds[i].fd << " ##########invalid! (POLLNVAL event) needs handler" << endl;		
-		} else if (_pollFds[i].revents & POLLERR) {	// tmp?
-			cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
-		}	
-	}  													 		
+		else if (_pollFds[i].revents & POLLNVAL) {	
+		cout << " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
+		}
+		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
+	}	
+	  													 		
 }
 
 
@@ -219,9 +245,9 @@ void TcpServer::newConnection(int idx)
 	_pollFds.push_back(new_pollfd);
 	_socketInfo.push_back(new_socket);
 
-	std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
-			<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
+	// std::cout << "Server accepted incoming connection from ADDRESS: "
+	// 		<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
+	// 		<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
 void	TcpServer::closeConnection(int idx)
@@ -243,10 +269,10 @@ void TcpServer::receiveRequest(int idx)
 
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
 	if (bytes_received <= 0) {
-		if (bytes_received == 0)
-			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
-		else
+		if (bytes_received < 0)
 			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TcpServer::startListen()" << std::endl;		
+		// else
+		// 	std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
 		return ;
 	} 
@@ -255,10 +281,8 @@ void TcpServer::receiveRequest(int idx)
 	
 	class Response respons(_request, _config);
 
-	_pollFds[idx].events = POLLIN | POLLOUT;
-
-
-
+	_pollFds[idx].events = POLLOUT;
+	// _pollFds[idx].events = POLLIN | POLLOUT;
 	std::ostringstream ss;
 	ss	<< "Received request: Method = " << _request.getMethod()
 		<< " URI = " 					 << _request.getURI()
