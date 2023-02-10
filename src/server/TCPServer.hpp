@@ -29,20 +29,17 @@ public:
 	void				startListen();
 
 private:
+	class Configuration			_config;
+	class Request				_request;
 	
-	std::vector<struct pollfd>	_pollFds;
-	std::vector<Socket>			_sockets;   
-
+	std::vector<struct pollfd>	_pollFds;			
+	std::vector<t_socket>		_socketInfo;
 	unsigned int				_nbListeningSockets;
 
 	bool						_isServerRunning;
 
-	class Configuration			_config;
-	class Request				_request;
-	
-
-	void						newClientConnection(int);
-	void						closeClientConnection(int);
+	void						newConnection(int);
+	void						closeConnection(int);
 	void						closeServer();
 	void						receiveRequest(int);
 	void 						createServerMessage(int);
@@ -50,11 +47,8 @@ private:
 	int 						startServer();
 	void						setUpListeningSockets();
 	void						lookupActiveSocket();
-
-
 };
 
-} // namespace http
+}			// namespace http
 
-#endif
-
+# endif		// TCP_SERVER_HPP

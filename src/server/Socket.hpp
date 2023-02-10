@@ -1,38 +1,38 @@
-#ifndef SOCKET_HPP
-# define SOCKET_HPP
+// #ifndef SOCKET_HPP
+// # define SOCKET_HPP
 
-# include <vector>
-# include <poll.h>
-# include <string>
-# include <sys/socket.h>
-# include <arpa/inet.h>
+// # include <vector>
+// # include <poll.h>
+// # include <string>
+// # include <sys/socket.h>
+// # include <arpa/inet.h>
 
-class Socket 
-{
-public :
-	int					_socketIndex;
+// class Socket 
+// {
+// public :
+// 	int					_socketIndex;
 
 
-    Socket();
-	~Socket();
+//     Socket();
+// 	~Socket();
 
-	std::string			getServerMessage() const;
-	void 				setServerMessage(std::string);
-	unsigned int		getSocketAddressLen() const;
-	void				setSocketAddressLen(unsigned int);
+// 	std::string			getServerMessage() const;
+// 	void 				setServerMessage(std::string);
+// 	unsigned int		getSocketAddressLen() const;
+// 	void				setSocketAddressLen(unsigned int);
 
-	struct sockaddr_in	socket_info;
+// 	struct sockaddr_in	socket_info;
 
-private :
+// private :
 
-	// std::vector<pollfd>	_pollFd;
-   	// static nfds_t		_number_of_socketFds;
+// 	// std::vector<pollfd>	_pollFd;
+//    	// static nfds_t		_number_of_socketFds;
 
-	unsigned int		_socket_address_len;
-	// std::string			_server_message;
+// 	unsigned int		_socket_address_len;
+// 	// std::string			_server_message;
 
-	std::string			_serverMessage;
-	std::string			_unsendServerMessage;
-};
+// 	std::string			_serverMessage;
+// 	std::string			_unsendServerMessage;
+// };
 
-#endif          // SOCKET_HPP
+// #endif          // SOCKET_HPP
