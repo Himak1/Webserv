@@ -29,7 +29,7 @@ class Request
 		bool				isCGI() const;
 		bool				getUploadSucces() const;
 		void				setUploadSucces(bool result);
-
+ 
 	private:
 		string				_method;
 		string 				_uri;

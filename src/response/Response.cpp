@@ -15,11 +15,17 @@
 Response::Response(class Request request, class Configuration config)
 	: _request(request), _config(config)
 {
-	if (_request.getURI() == "/")
-		_filepath = _config.getPathRoot() +  "/index.html";
-	else if (_request.getMethod() != "DELETE"
-		&& _request.getURI().rfind('.') == string::npos)
-		_filepath = _config.getPathRoot() + _request.getURI() + ".php";
+	if (_request.getURI() == "/"
+		|| ((_request.getMethod() != "DELETE"
+		&& _request.getURI().rfind('.') == string::npos))) {
+		list<string> indexFiles = _config.indexFiles;
+		list<string>::iterator it;
+		for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
+			_filepath = _config.getPathRoot() + _request.getURI() + "/" + it->c_str();
+			if (isExistingFile(_filepath))
+				break;
+		}
+	}
 	else
 		_filepath = _config.getPathRoot() + _request.getURI();
 

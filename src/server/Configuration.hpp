@@ -2,6 +2,7 @@
 # define CONFIGURATION_HPP
 
 # include <string>
+# include <list>
 
 class Configuration
 {
@@ -15,6 +16,7 @@ class Configuration
 		std::string			getPathRoot() const;
 		std::string			getIP() const;
 		unsigned int		getPort() const;
+		std::list<std::string>		indexFiles;
 
 	private:
 		std::string			_pathRoot;

@@ -54,4 +54,7 @@
 // #define PATH_TO_PY_CGI "/usr/bin/python3"
 // #define PATH_TO_PY_CGI_LENGTH 16
 
+// TO DO:
+// - accepted methods (GET POST) moet per location gecheckt worden (geldt dan voor directories en subdirectories).
+
 #endif
