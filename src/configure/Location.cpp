@@ -1,17 +1,27 @@
 #include <exception>
 #include "Location.hpp"
+#include "Node.hpp"
 
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-Location::Location()
-	: _autoIndex(false);
+Location::Location( Node* locationNode )
+	: _autoIndex(false)
 {
-	_acceptedMethods[GET] = false;
-	_acceptedMethods[POST] = false;
-	_acceptedMethods[DELETE] = false;
+	try {
+		convertLocation(locationNode);
+	}
+	catch (std::exception& e) {
+		throw;
+	}
 }
+
+Location::Location( const Location& src )
+{
+	*this = src;
+}
+
 
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
@@ -25,23 +35,50 @@ Location::~Location()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
+Location&	Location::operator=( Location const& src )
+{
+	_path = src._path;
+	_alias = src._alias;
+	_cgiExtension = src._cgiExtension;
+	_cgiPath = src._cgiPath;
+	_autoIndex = src._autoIndex;
+	for (int i = 0; i < 4; i++)
+	{
+		_acceptedMethods[i] = src._acceptedMethods[i];
+	}
+}
+
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
 
-std::string	Location::getRoot() const
+void	Location::convertLocation( Node* locationNode )
 {
-	return (_root);
+	for (NodeList::const_iterator i = locationNode->getChildrenBegin(); ++i) {
+		try {
+			switch ((*i)->getNodeType())
+			{
+				case TERMINAL:
+					_path = convertNodeToString(*i);
+					break;
+				case N_ROOT:
+					_root = convertNodeToString(*i);
+					break;
+			}
+		}
+		catch (std::exception& e) {
+		
+		}
+	}
 }
+
+/*
+** --------------------------------- ACCESSOR ---------------------------------
+*/
 
 std::string	Location::getPath() const
 {
 	return (_path);
-}
-
-std::string	Location::getDefaultFile() const
-{
-	return (_defaultFile);
 }
 
 std::string	Location::getAlias() const
@@ -59,19 +96,14 @@ std::string	Location::getCgiPath() const
 	return (_cgiPath);
 }
 
-bool	Location::isMethodAccepted( int httpMethod ) const
+bool	Location::isMethodAccepted( std::string httpMethod ) const
 {
-	if (httpMethod < 0 || httpMethod > 3)
-		throw std::exception;
-	return (_acceptedMethods[httpMethod]);
+
+	return (false);
 }
 
 bool	Location::autoIndexingOn() const
 {
 	return (_autoIndex);
 }
-
-/*
-** --------------------------------- ACCESSOR ---------------------------------
-*/
 

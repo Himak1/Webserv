@@ -2,16 +2,18 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 ### Setting Source Files & Header Files ###
 set(SRC_FILES
+    configure/AConfig.cpp
     configure/Configuration.cpp
-    configure/Token.cpp
-    configure/Node.cpp
     configure/Location.cpp
-    configure/TokenStream.cpp
-    configure/tokenizer.cpp
-    #configure/AST.cpp
-    configure/parser/parser.cpp
-    configure/parser/parseLocation.cpp
-    configure/parser/parser_utils.cpp
+    configure/Node.cpp
+
+    configure/parsing/Token.cpp
+    configure/parsing/TokenStream.cpp
+    configure/parsing/tokenizer.cpp
+    configure/parsing/parser.cpp
+    configure/parsing/parseLocation.cpp
+    configure/parsing/parser_utils.cpp
+
     BuildResponse.cpp
     HTTPRequest.cpp
     main.cpp
@@ -29,6 +31,7 @@ add_library(${LIB_NAME} STATIC ${UNIT_SRC})
 target_include_directories(${LIB_NAME} PRIVATE
     ${PROJECT_SOURCE_DIR}/inc
     ${PROJECT_SOURCE_DIR}/inc/configure
+    ${PROJECT_SOURCE_DIR}/inc/configure/parsing
 )
 set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
@@ -37,5 +40,6 @@ add_executable(${BINARY} ${SRC_FILES})
 target_include_directories(${BINARY} PRIVATE
     ${PROJECT_SOURCE_DIR}/inc
     ${PROJECT_SOURCE_DIR}/inc/configure
+    ${PROJECT_SOURCE_DIR}/inc/configure/parsing
 )
 set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
