@@ -1,18 +1,18 @@
 #ifndef VALIDATOR_HPP
 # define VALIDATOR_HPP
 
-class Validator
-{
-	public:
-		Validator( Node* Server );
-		~Validator();
-	private:
-		Node*	server;
-		
-};
+# include <string>
+# include <list>
+
+
 
 /*
- * BaseClass Configure()
+
+	BaseClass Configure()
+		Validate
+		Root;
+		ErrorPage();
+
 	CreateServerConfig();
 		ValidateRoot();
 		ValidateErrorPage();
@@ -25,7 +25,9 @@ class Validator
 		ValidateAlias();
 		ValidateCgiPass();
 		Validate
-		ValidateReturn();
+		ValidateReturn();i
+	Common methods:
+		validateDirective
 */
 
 #endif

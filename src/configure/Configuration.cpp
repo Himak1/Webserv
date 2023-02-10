@@ -69,3 +69,32 @@ std::string 		Configuration::get404() const
 {
 	return (this->_errorPage404);
 }
+
+
+
+
+
+
+
+ErrorPage::ErrorPage( int codeArg, std::string pageArg )
+	: code(code), page(pageArg)
+{
+}
+
+ErrorPage::~ErrorPage()
+{
+}
+
+// AConfig
+
+
+
+bool	validatePath( std::string ex)
+{
+	
+}
+
+bool	validateNumberAndRange()
+{
+
+}
