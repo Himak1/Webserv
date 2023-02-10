@@ -278,14 +278,15 @@ void TcpServer::sendResponse(int idx)
 		_socketInfo[idx].server_message = respons.getMessage();
 
 
-	bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
+	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
+	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send < 0)
 		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 
 	if (bytes_send == (long)_socketInfo[idx].server_message.size())
 		log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
-	else
-		log("Error sending response to client");
+	// else
+	// 	log("Error sending response to client");
 
 
 	_socketInfo[idx].server_message.erase(0, bytes_send);
