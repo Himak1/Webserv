@@ -61,6 +61,11 @@ NodeList::const_iterator	Node::getChildrenBegin() const
 	return (_children.begin());
 }
 
+NodeList::const_iterator	Node::getChildrenEnd() const
+{
+	return (_children.end());
+}
+
 int		Node::addChild( Node* newNode )
 {
 	if (newNode == NULL)

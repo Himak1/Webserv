@@ -98,3 +98,20 @@ bool	validateNumberAndRange()
 {
 
 }
+
+
+std::list<Configuration>	createConfigurations(Node* ast)
+{
+	std::list<Configuration>	serverConfigs;
+
+	for (NodeList::iterator i = ast->getChildrenBegin(); i != ast->getChildrenEnd(); ++i) {
+		try {
+			serverConfigs.push_back(*i);
+		}
+		catch (std::exception& e) {
+			std::cout << "invalid values were found" << std::endl;
+			throw std::exception;
+		}
+	}
+	return (serverConfigs);
+}
