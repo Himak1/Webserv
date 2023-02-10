@@ -55,5 +55,6 @@ class Configuration
 		std::string			_pathWebsite; // dependency
 		std::string			_errorPage404; // dependency
 		std::list< std::pair<int, std::string> >	_errorPages;
+		friend class Validator;
 };
 #endif
