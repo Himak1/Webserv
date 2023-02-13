@@ -1,0 +1,253 @@
+/* VARIABLES */
+:root {
+	--main_color:#09477d;
+	--secundairy_color: #1f3a63;
+	--main_color_link:#9fb2c8;
+	--off_white: #bed7ed;
+  }
+  
+ /* BODY */
+body{
+	text-align: left;
+	font-family: Verdana;
+	font-size: 9pt;
+	color: var(--main_color);
+	margin:0px;
+	padding:0px;
+	display: flex;
+	justify-content: center;
+	background-image: url('../inc/bg.jpg');
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: cover;
+} html { 
+	overflow-y: scroll;
+} html, body {
+	height: 100%;
+	width: 100%;
+}
+
+/* LINKS */
+a:link{	
+	outline: none;
+	color: var(--main_color_link);
+	text-decoration:none;
+} a:visited{	
+	color: var(--main_color_link);
+	text-decoration:none;
+} a:hover{
+	color: var(--secundairy_color);
+	text-decoration:none;
+}
+
+a img {
+	border:none;
+}
+
+/* GENERAL MARKUP */
+b {
+	flex: 1;
+	margin:0px;
+	padding:0px;
+}
+br {
+	margin:0px;
+	padding:0px;
+}
+
+h1 {
+	font-size:18pt;
+	letter-spacing: 30px;
+	color: var(--off_white);
+	padding: 0px;
+	margin:0px;
+	font-weight:normal;
+	text-align:center;
+} h2 {
+	font-size:10pt;
+	color: var(--main_color);
+	padding: 0px;
+	padding-top: 20px;
+	margin:0px;
+	font-weight:bold;
+} h3 {
+	font-size:10pt;
+	color: var(--main_color);
+	padding: 0px;
+	margin:5px 0 5px 0;
+	font-weight:bold;
+} h4 {
+	font-size:10pt;
+	color: var(--main_color_link);
+	padding: 0px;
+	margin: 10px 0 0 0;
+	font-weight: 600;
+} p {
+	font-size: 10pt;
+	font-weight:normal;
+	margin:0px;
+	padding: 0px;
+	padding-bottom: 15px;
+	text-align: left;
+}
+
+/* LISTS */
+ul {
+	list-style-type: none;
+	margin:0px;
+	padding:0px;
+} ol {
+	margin:0px;
+} li {
+	margin:0px;
+	margin-top:0px;
+}
+
+table {
+	margin:0px;
+	padding:0px;
+	border-spacing: 0;
+	width:100%;
+} tr, td {
+	margin:0px;
+	padding:0px;	
+	border:0px;
+}
+
+/* STYLING */
+#content {
+	box-sizing: border-box;
+	width: 600px;
+	height: 100%;
+}
+
+#top {
+	background-color: white;
+	margin-bottom:15px;
+	padding: 35px;
+	border-radius: 0 0 5px 5px;
+}
+
+#middle {
+	background-color: white;
+	margin-bottom:15px;
+	padding: 35px;
+	border-radius: 5px;
+}
+
+#bottom {
+	background-color: white;
+	padding: 35px;
+	border-radius: 5px;
+}
+
+.column {
+	display: flex;
+	justify-content: space-between;
+}
+
+.item {
+	background-image: linear-gradient(var(--secundairy_color), var(--main_color)); 
+	/* var(--secundairy_color); */
+	border: none;
+	color:white;
+	width:120px;
+	height:50px;
+	margin:0 0 30px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	border-radius: 5px;
+	transition: 1s;
+}
+
+.item:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
+.item_active {
+	background-color: var(--secundairy_color);
+	border: none;
+	opacity: 0.6;
+	color:white;
+	width:120px;
+	height:50px;
+	margin:0 0 30px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	border-radius: 5px;
+}
+
+.form {
+	height:30px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.input_field {
+	width:120px;
+	height:19px;
+}
+
+.submit_button {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:var(--off_white);
+	width:120px;
+	height:25px;
+	text-decoration: none;
+	border-radius: 5px;
+	padding: 5px;
+	transition: 1s;
+}
+
+.submit_button:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
+.button_link {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:var(--off_white);
+	width:110px;
+	height:15px;
+	float:right;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 5px;
+	padding: 5px;
+	transition: 1s;
+	font-family: Verdana;
+	font-size: 9pt;
+	font-weight: normal;
+}
+
+.button_link:hover {
+	opacity: 0.8;
+	color:white;
+	/* background-color: var(--main_color); */
+	transition: 1s;
+}
+
+
+.choose_file {
+	background-color: var(--secundairy_color);
+	border: none;
+	color:white;
+	width:200px;
+	height:25px;
+	float:left;
+	text-decoration: none;
+	border-radius: 5px;
+	transition: 1s;
+}
+

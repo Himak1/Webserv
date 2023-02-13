@@ -3,7 +3,7 @@
 #include "parser.hpp"
 #include "Token.hpp"
 #include "TokenStream.hpp"
-#include "Node.hpp"
+#include "../Node.hpp"
 
 Node*	parseReturn( TokenStream& tokensToParse )
 {

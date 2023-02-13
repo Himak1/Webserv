@@ -1,13 +1,14 @@
 ### CPP Test Files ###
 set(TEST_FILES
-	# configuration_tests/config_test.cpp
-	# !Add new test files here!
-	configure_tests/Token_tests.cpp
-	configure_tests/tokenizer_tests.cpp
-	configure_tests/parser_tests/parser_tests.cpp
-	configure_tests/parser_tests/parseLocation_tests.cpp
-	configure_tests/parser_tests/parseLocation_integration_tests.cpp
-	configure_tests/tokenizer_parser_integration_tests.cpp
+	configure/Token_tests.cpp
+	configure/tokenizer_tests.cpp
+	configure/parser/parser_tests.cpp
+	configure/parser/parseLocation_tests.cpp
+	configure/parser/parseLocation_integration_tests.cpp
+	configure/tokenizer_parser_integration_tests.cpp
+	request/RequestTest.cpp
+	response/ResponseTest.cpp
+	response/CGITest.cpp
 )
 
 ### Create Test Executables ###
@@ -20,7 +21,6 @@ foreach(file ${TEST_FILES})
 	)
 	target_include_directories(${name} PRIVATE
 		${PROJECT_SOURCE_DIR}/inc
-		${PROJECT_SOURCE_DIR}/inc/configure
 	)
 	target_link_libraries(${name} ${CMAKE_BINARY_DIR}/lib/lib_unit.a gtest_main)
 	target_compile_options(${name} PRIVATE -Wextra -Wall -g)

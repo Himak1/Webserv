@@ -3,3 +3,5 @@ obj
 .vscode
 *.swp
 .ccls-cache
+webserv
+.DS_Store

@@ -1,6 +1,6 @@
 #include <list>
 #include "parser.hpp"
-#include "Node.hpp"
+#include "../Node.hpp"
 #include "Token.hpp"
 #include "TokenStream.hpp"
 

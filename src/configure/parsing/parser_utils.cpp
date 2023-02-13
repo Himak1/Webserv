@@ -1,7 +1,7 @@
 #include "parser.hpp"
 #include "Token.hpp"
 #include "TokenStream.hpp"
-#include "Node.hpp"
+#include "../Node.hpp"
 
 bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node)
 {

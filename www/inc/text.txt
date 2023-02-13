@@ -1,0 +1,23 @@
+An HTTP server is a computer (software) program (or even a software 
+component included in an other program) that plays the role of a server 
+in a client–server model by implementing the server part of the HTTP 
+and/or HTTPS network protocol(s).
+
+An HTTP server waits for the incoming client requests (sent by user 
+agents like browsers, web crawlers, etc.) and for each request it 
+answers by replying with requested information, including the sending 
+of the requested web resource, or with an HTTP error message.
+
+An HTTP server may also have bindings to manage protocol extensions to 
+HTTP (i.e. WebDAV, etc.) or messages of other protocols enveloped into 
+HTTP messages (i.e. SOAP, etc.) in order to allow program-to-program 
+communications.[citation needed]
+
+Implementations of an HTTP server may vary in complexity, from a 
+manageable tiny component to a full featured program implementation 
+of HTTP and other protocols, which maybe can run in background, 
+as one or more processes, etc.
+
+An HTTP server can be found in any kind of computer, including 
+embedded systems and super computers, also because it is a required 
+component to run web interfaces (web applications), etc.
