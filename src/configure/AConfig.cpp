@@ -6,6 +6,11 @@ ErrorPage::ErrorPage( int codeArg, std::string pageArg )
 {
 }
 
+ErrorPage::ErrorPage( const ErrorPage& src )
+	: code(src.code), page(src.page)
+{
+}
+
 ErrorPage::~ErrorPage()
 {
 }
@@ -14,6 +19,13 @@ ErrorPage::~ErrorPage()
 
 AConfig::AConfig()
 {
+}
+
+AConfig::AConfig( const AConfig& src )
+	: _errorPages(src._errorPages)
+{
+	_root = src._root;
+	/* _errorPages = src._errorPages; */
 }
 
 AConfig::~AConfig()

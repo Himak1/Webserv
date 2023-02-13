@@ -18,9 +18,9 @@ class Configuration : public AConfig
 		unsigned int	getPort() const;
 		unsigned int	getClientMaxBodySize() const;
 
-		std::list<Location>	locations;
+		std::list<Location*>	locations;
 	private:
-		bool					navigateNode( Node* serverNode );
+		void			navigateNode( Node* serverNode );
 
 		std::string				_ipAddress;
 		std::string				_host; // server_name

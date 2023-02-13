@@ -62,7 +62,7 @@ unsigned int	Configuration::getClientMaxBodySize() const
 //									Methods									//
 // ------------------------------------------------------------------------ //
 
-bool	Configuration::navigateNode( Node* serverNode )
+void	Configuration::navigateNode( Node* serverNode )
 {
 	for (NodeList::const_iterator i = serverNode->getChildrenBegin(); i != serverNode->getChildrenEnd(); ++i) {
 		try {
@@ -77,7 +77,8 @@ bool	Configuration::navigateNode( Node* serverNode )
 					_clientMaxBodySize = convertNodeToUInt(*i);
 					break;
 				case N_LOCATION:
-					locations.push_back(Location(*i));
+					/* locations.push_back(new Location(*i)); */
+					locations.push_back(new Location(*i));
 					break;
 			}
 		}

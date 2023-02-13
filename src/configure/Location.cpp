@@ -35,7 +35,7 @@ Location::~Location()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Location&	Location::operator=( Location const& src )
+Location&	Location::operator=( const Location& src )
 {
 	_path = src._path;
 	_alias = src._alias;
@@ -46,15 +46,50 @@ Location&	Location::operator=( Location const& src )
 	{
 		_acceptedMethods[i] = src._acceptedMethods[i];
 	}
+	return *this;
 }
 
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Location::convertLocation( Node* locationNode )
+void	Location::convertCgiPass( Node* cgiPass )
 {
-	for (NodeList::const_iterator i = locationNode->getChildrenBegin(); ++i) {
+	NodeList::const_iterator i = cgiPass->getChildrenBegin();
+
+	_cgiExtension = (*i)->getTerminal();
+	++i;
+	_cgiPath = (*i)->getTerminal();
+}
+
+void	Location::convertAcceptedMethods( Node* allowedMethods )
+{
+	NodeList::const_iterator iter = allowedMethods->getChildrenBegin();
+	int	i = 0;
+
+	while (iter != allowedMethods->getChildrenEnd())
+	{
+		_acceptedMethods[i] = (*iter)->getTerminal();
+		++iter;
+		i++;
+	}
+}
+
+void	Location::convertAutoIndex( Node* autoIndex )
+{
+	std::string	boolString = (*autoIndex->getChildrenBegin())->getTerminal();
+
+	if (boolString == "on")
+		_autoIndex = true;
+	else if (boolString == "off")
+		_autoIndex = false;
+	else
+		throw std::exception();
+}
+
+void	Location::convertLocation( Node* location )
+{
+	for (NodeList::const_iterator i = location->getChildrenBegin(); i != location->getChildrenEnd(); ++i) {
 		try {
 			switch ((*i)->getNodeType())
 			{
@@ -63,6 +98,18 @@ void	Location::convertLocation( Node* locationNode )
 					break;
 				case N_ROOT:
 					_root = convertNodeToString(*i);
+					break;
+				case N_ALIAS:
+					_alias = convertNodeToString(*i);
+					break;
+				case N_CGI_PASS:
+					convertCgiPass(*i);
+					break;
+				case N_ALLOWED_METHODS:
+					convertAcceptedMethods(*i);
+					break;
+				case N_AUTOINDEX:
+					convertAutoIndex(*i);
 					break;
 			}
 		}
@@ -96,9 +143,13 @@ std::string	Location::getCgiPath() const
 	return (_cgiPath);
 }
 
-bool	Location::isMethodAccepted( std::string httpMethod ) const
+bool	Location::isMethodAccepted( std::string& httpMethod ) const
 {
-
+	for (int i = 0; i < 4; i++)
+	{
+		if (httpMethod == _acceptedMethods[i])
+			return (true);
+	}
 	return (false);
 }
 
