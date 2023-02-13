@@ -50,11 +50,11 @@ socket fd 0 ##########invalid! (POLLNVAL event) needs handler, voor nu callt dez
 /* ###########																				###########	*/	//		TMP
 /* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
-/* ###########																					###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
+/* ###########		In siege.conf (root/.siege/)											###########	*/	//		TMP
+/* ###########		connection = keep-alive													###########	*/	//		TMP
+/* ###########		Siege set een port die gesloten wordt op TIMEOUT, die poort kan dan 	###########	*/	//		TMP
+/* ###########		een tijdje niet meer gebruikt worden. Door 'connection = keep-alive'	###########	*/	//		TMP
+/* ###########		kan dit wel. omdat wij poorten hergebruiken moet dit dus				###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* #################################################################################################### */	//		TMP
 /* #################################################################################################### */
@@ -167,39 +167,21 @@ void TcpServer::startListen()
 	int	poll_count;
 	int i;
 
-
 	for ( i = 0; i < _nbListeningSockets; i++) {
 		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
 			exitWithError("Socket listen failed");
 		// logStartupMessage(_socketInfo[i].socket_info);
 	}
 
-	// cout << i << endl;
-
 	while (_isServerRunning) {
-		poll_count = poll (&_pollFds[0], _pollFds.size(), -1);		
+		poll_count = poll (&_pollFds[0], _pollFds.size(), 100);		
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
 		lookupActiveSocket();
-		
 	}	
 }
 
-/*	POLLERR, POLLHUP, or POLLNVAL. Deze worden altijd gecheckt door POLL, ongeacht 	*/
-/*	de waarde van .events															*/
-/*	POLLER = Error condition (only returned in revents; ignored in
-              events).  This bit is also set for a file descriptor
-              referring to the write end of a pipe when the read end has
-              been closed.															*/
-/*	POLLHUP = Hang up (only returned in revents; ignored in events).
-              Note that when reading from a channel such as a pipe or a
-              stream socket, this event merely indicates that the peer
-              closed its end of the channel.  Subsequent reads from the
-              channel will return 0 (end of file) only after all
-              outstanding data in the channel has been consumed.					*/
-/*	POLLNVAL = Invalid request: fd not open (only returned in revents;
-              ignored in events).	*/
 void	TcpServer::lookupActiveSocket()
 {
 	int i;
@@ -217,21 +199,45 @@ void	TcpServer::lookupActiveSocket()
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);			// tmp?
 		else if (_pollFds[i].revents & POLLNVAL) {	
-		cout << " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
+		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; // closeConnection(i);
 		}
 		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
 	}	
 	  													 		
 }
 
+/*
 
-// 	Accepts new connections. These don't need to be set to non-blocking since they inherit from the listeningsocket
-// 	(which is already non-blocking)
+
+           SO_DEBUG        enables recording of debugging information
+           SO_REUSEADDR    enables local address reuse
+           SO_REUSEPORT    enables duplicate address and port bindings
+           SO_KEEPALIVE    enables keep connections alive
+           SO_DONTROUTE    enables routing bypass for outgoing messages
+           SO_LINGER       linger on close if data present
+           SO_BROADCAST    enables permission to transmit broadcast messages
+           SO_OOBINLINE    enables reception of out-of-band data in band
+           SO_SNDBUF       set buffer size for output
+           SO_RCVBUF       set buffer size for input
+           SO_SNDLOWAT     set minimum count for output
+           SO_RCVLOWAT     set minimum count for input
+           SO_SNDTIMEO     set timeout value for output
+           SO_RCVTIMEO     set timeout value for input
+           SO_TYPE         get the type of the socket (get only)
+           SO_ERROR        get and clear error on the socket (get only)
+           SO_NOSIGPIPE    do not generate SIGPIPE, instead return EPIPE
+           SO_NREAD        number of bytes to be read (get only)
+           SO_NWRITE       number of bytes written not yet sent by the
+                           protocol (get only)
+           SO_LINGER_SEC   linger on close if data present with timeout in
+                           seconds
+*/
 void TcpServer::newConnection(int idx)
 {
 	struct pollfd	new_pollfd;
 	t_socket		new_socket;
 	socklen_t		socket_len;
+	int				re_use = 1;
 
 	// memset(&new_socket, 0, sizeof(t_socket));
 	new_socket.socket_address_len = sizeof(new_socket.socket_info);
@@ -240,6 +246,13 @@ void TcpServer::newConnection(int idx)
 		exitWithError("ERROR: accept() (TcpServer::newConnection");
 	}
 	new_socket.socket_address_len = socket_len;
+
+	if (setsockopt(new_pollfd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) < 0) {		// tmp
+		exitWithError("setsockopt reuse address error\n");					
+	}
+	if (setsockopt(new_pollfd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {		// tmp
+		exitWithError("setsockopt reuse port error\n");
+	}
 
 	new_pollfd.events = POLLIN;
 	_pollFds.push_back(new_pollfd);
@@ -301,14 +314,18 @@ void TcpServer::sendResponse(int idx)
 	if (_socketInfo[idx].server_message.empty())
 		_socketInfo[idx].server_message = respons.getMessage();
 
+	// if (_socketInfo[idx].server_message == "1") {	// jbe
+	// 	closeConnection(idx);
+	// 	return;
+	// }
 
 	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send < 0)
 		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
 
-	if (bytes_send == (long)_socketInfo[idx].server_message.size())
-		log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
+	// if (bytes_send == (long)_socketInfo[idx].server_message.size())
+	// 	log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
 	// else
 	// 	log("Error sending response to client");
 
@@ -316,7 +333,8 @@ void TcpServer::sendResponse(int idx)
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 
 	if (_socketInfo[idx].server_message.empty())
-		closeConnection(idx);
+		_pollFds[idx].events = POLLIN;
+		// closeConnection(idx); 
 	else {
 		_pollFds[idx].events = POLLOUT;
 	}	
