@@ -23,9 +23,9 @@
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
 // TEMPORARY 
-#define PATH_ROOT "www"
-#define IP_ADDRESS "0.0.0.0"
-#define PORT_NO 4243
+// #define PATH_ROOT "www"
+// #define IP_ADDRESS "0.0.0.0"
+// #define PORT_NO 4243
 
 #define CGI_BUFSIZE 307200
 

@@ -6,6 +6,7 @@ set(TEST_FILES
 	configure/parser/parseLocation_tests.cpp
 	configure/parser/parseLocation_integration_tests.cpp
 	configure/tokenizer_parser_integration_tests.cpp
+	configure/configuration_integration.cpp
 	request/RequestTest.cpp
 	response/ResponseTest.cpp
 	response/CGITest.cpp
