@@ -77,7 +77,6 @@ void	Configuration::navigateNode( Node* serverNode )
 					_clientMaxBodySize = convertNodeToUInt(*i);
 					break;
 				case N_LOCATION:
-					/* locations.push_back(new Location(*i)); */
 					locations.push_back(new Location(*i));
 					break;
 			}
