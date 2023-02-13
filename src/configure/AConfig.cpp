@@ -34,6 +34,11 @@ AConfig::~AConfig()
 
 // ------
 
+std::string	AConfig::getRoot() const
+{
+	return (_root);
+}
+
 std::string	AConfig::convertNodeToString( Node* node )
 {
 	NodeList::const_iterator i = node->getChildrenBegin();

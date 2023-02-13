@@ -1,7 +1,7 @@
 #include "CGI.hpp"
 #include "Response.hpp"
 #include "../utils/log.hpp"
-#incou
+#include "../configure/Location.hpp"
 
 #include <list>
 #include <unistd.h>
@@ -14,7 +14,7 @@
 // CONSTRUCTOR
 // CGI::CGI(class Request request, class Configuration config, string filepath)
 CGI::CGI(class Request request, class Location& location, string filepath)
-	: _request(request), _config(config), _filepath(filepath)
+	: _request(request), _location(location), _filepath(filepath)
 {
 	_filepath = _filepath.substr(0, _filepath.find("?"));
 	// mogen we realpath() gebruiken? Is onderdeel van C POSIX library, waar bijv. unistd.h en stdlib.h ook onder vallen
@@ -23,18 +23,20 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 	_argument = new char[3];
 	_argument = strcpy(_argument, "-q");
 
-	if (_request.getExtension() == ".php") {
-		// _path_to_cgi = location.getCgiPath().c_str();
-		_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
-		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
-	}
-	else if (_request.getExtension() == ".py") {
-		// _config.g = 
-		_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
-		_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
-	}
+	// if (_request.getExtension() == ".php") {
+	// 	// _path_to_cgi = location.getCgiPath().c_str();
+	// 	_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
+	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
+	// }
+	// else if (_request.getExtension() == ".py") {
+	// 	// _config.g = 
+	// 	_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
+	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
+	// }
 
-	_path[0] = &_path_to_cgi[0];
+	_path[0] = const_cast<char*>(_location.getCgiPath().c_str());
+	// _path[1] = location.gt
+	// _path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
 	// if (_request.getExtension() == ".php") 
 		// _path[2] = &_argument[0];

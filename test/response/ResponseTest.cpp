@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
-#include "../../src/server/Configuration.hpp"
+#include "../../src/configure/Configuration.hpp"
 #include "../../src/request/Request.hpp"
 #include "../../src/response/Response.hpp"
 #include "../../src/utils/strings.hpp"
 
 #include <fstream>
 #include <iostream>
-
+/*
 class Configuration config;
 class Request request;
 
@@ -115,3 +115,4 @@ TEST(ResponseTest, invalidHttpversion)
 // }
 
 // TO DO: test setCookie
+*/

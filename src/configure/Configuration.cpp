@@ -127,5 +127,6 @@ std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
 	std::list<Configuration*>	serverConfigs;
 	if (!ast)
 		return (serverConfigs);
+	createConfigurations(serverConfigs, ast);
 	return (serverConfigs);
 }

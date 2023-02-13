@@ -1,7 +1,7 @@
 
 #include "gtest/gtest.h"
-#include "tokenizer.hpp"
-#include "Token.hpp"
+#include "../../src/configure/parsing/tokenizer.hpp"
+#include "../../src/configure/parsing/Token.hpp"
 #include <fstream>
 
 bool	string_eq(std::string a, std::string b)

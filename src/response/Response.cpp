@@ -2,6 +2,7 @@
 #include "CGI.hpp"
 #include "../utils/log.hpp"
 #include "../utils/strings.hpp"
+#include "../configure/Location.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -21,13 +22,13 @@ Response::Response(class Request request, class Configuration config)
 		list<string> indexFiles = _config.indexFiles;
 		list<string>::iterator it;
 		for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
-			_filepath = _config.getPathRoot() + _request.getURI() + "/" + it->c_str();
+			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
 			if (isExistingFile(_filepath))
 				break;
 		}
 	}
 	else
-		_filepath = _config.getPathRoot() + _request.getURI();
+		_filepath = _config.getRoot() + _request.getURI();
 
 	initStatusCodes();
 	initContentTypes();
@@ -159,7 +160,7 @@ void Response::uploadFile()
 
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
 	// write file_data to output_path
-	string upload_path = _config.getPathRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
+	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
 	ofstream fout(upload_path);
 	fout << file_data << endl;
     fout.close();
@@ -174,7 +175,13 @@ void Response::uploadFile()
 
 string Response::getCGI()
 {
-	class CGI CGI(_request, _config, _filepath);
+	list<Location*>::iterator i = _config.locations.begin();
+	while (i != _config.locations.end()) {
+		if ((*i)->getPath() == _filepath)
+			break;
+		++i;
+	}
+	class CGI CGI(_request, *(*i), _filepath);
 	string cgi = CGI.ExecuteCGI();
 	if (cgi.find("<!doctype html>") == string::npos)
 		return getCGI();
@@ -215,10 +222,10 @@ string Response::redirect()
 		return createErrorHTML();
 
 	if (_status == 301)
-		_filepath = _config.getPathRoot() + COSTUM_301;
+		_filepath = _config.getRoot() + COSTUM_301;
 
 	if (_status == 302)
-		_filepath = _config.getPathRoot() + COSTUM_302;
+		_filepath = _config.getRoot() + COSTUM_302;
 
 	return getFileContent();
 }
@@ -230,7 +237,7 @@ string Response::fileNotFound()
 	if (COSTUM_404 == "default")
 		return createErrorHTML();
 
-	_filepath = _config.getPathRoot() + COSTUM_404;
+	_filepath = _config.getRoot() + COSTUM_404;
 	return getFileContent();
 }
 

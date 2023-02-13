@@ -19,9 +19,8 @@ class CGI
 
 	private:
 		const class Request			_request;
-		const class Configuration	_config;
+		const class Location&		_location;
 		string						_filepath;
-		char*						_path_to_cgi;
 		char*						_path_to_script;
 		char*						_argument;
 		char*						_path[4];

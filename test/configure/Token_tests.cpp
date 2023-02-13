@@ -1,5 +1,5 @@
 
-#include "Token.hpp"
+#include "../../src/configure/parsing/Token.hpp"
 #include "gtest/gtest.h"
 
 TEST(Token_tests, getTokenType)

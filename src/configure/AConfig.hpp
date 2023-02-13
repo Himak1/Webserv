@@ -21,8 +21,8 @@ class AConfig
 	public:
 		~AConfig();
 
-		std::string	getRoot();
-		ErrorPage&	getErrorPage( int errorCode );
+		std::string	getRoot() const;
+		ErrorPage&	getErrorPage( int errorCode ) const;
 
 		std::list<std::string>	indexFiles;
 	protected:
@@ -38,6 +38,7 @@ class AConfig
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
+
 };
 
 #endif

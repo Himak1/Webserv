@@ -24,7 +24,7 @@ class Response
 		int							_status;
 		string						_content;
 		class Request				_request;
-		const class Configuration	_config;
+		class Configuration			_config;
 		map<int, string>			_status_codes;
 		map<string, string>			_content_types;
 

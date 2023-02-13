@@ -1,10 +1,10 @@
 #include <list>
 #include <vector>
-#include "parser.hpp"
-#include "Token.hpp"
-#include "tokenizer.hpp"
-#include "TokenStream.hpp"
-#include "Node.hpp"
+#include "../../../src/configure/parsing/parser.hpp"
+#include "../../../src/configure/parsing/Token.hpp"
+#include "../../../src/configure/parsing/tokenizer.hpp"
+#include "../../../src/configure/parsing/TokenStream.hpp"
+#include "../../../src/configure/Node.hpp"
 
 #include "gtest/gtest.h"
 

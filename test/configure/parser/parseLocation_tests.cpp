@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "Token.hpp"
-#include "TokenStream.hpp"
-#include "Node.hpp"
-#include "parser.hpp"
+#include "../../../src/configure/parsing/Token.hpp"
+#include "../../../src/configure/parsing/TokenStream.hpp"
+#include "../../../src/configure/Node.hpp"
+#include "../../../src/configure/parsing/parser.hpp"
 
 TEST(parseLocation, parseReturn)
 {

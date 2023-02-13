@@ -28,5 +28,5 @@ foreach(file ${TEST_FILES})
 endforeach()
 
 add_custom_target(copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/configure_tests/dummy_config ${CMAKE_CURRENT_BINARY_DIR}/dummy_config
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/configure/dummy_config ${CMAKE_CURRENT_BINARY_DIR}/dummy_config
 )
