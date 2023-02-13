@@ -12,6 +12,11 @@
 # include <fstream>
 # include <string.h>
 
+
+
+# define POLL_TIMEOUT 200	 // in ms
+
+
 /////////// TOOO DOOOOO
 /*
 
@@ -126,7 +131,7 @@ void	TcpServer::setUpListeningSockets()
 
 	int test_port = 8000;			// tmp
 
-	for (int i = 0; i < 6; i++) {								
+	for (int i = 0; i < 25; i++) {								
 	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {	// justin merge							
 		memset(&listening_socket, 0, sizeof(listening_socket));
 		memset(&listening_socket, 0, sizeof(listening_pollFd));
@@ -174,7 +179,7 @@ void TcpServer::startListen()
 	}
 
 	while (_isServerRunning) {
-		poll_count = poll (&_pollFds[0], _pollFds.size(), 100);		
+		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
 			exitWithError("Poll count = negative (TcpServer::startListen()");
 		}
@@ -314,15 +319,16 @@ void TcpServer::sendResponse(int idx)
 	if (_socketInfo[idx].server_message.empty())
 		_socketInfo[idx].server_message = respons.getMessage();
 
-	// if (_socketInfo[idx].server_message == "1") {	// jbe
-	// 	closeConnection(idx);
-	// 	return;
-	// }
-
+	
 	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
-	if (bytes_send < 0)
-		std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
+	if (bytes_send <= 0)
+		if (bytes_send < 0) {
+			std::cout << "Send error in TcpServer::sendResponse()" << std::endl;
+			closeConnection(idx);
+		}
+		else
+			cout << "Zero bytes send. Need handler?" << endl;
 
 	// if (bytes_send == (long)_socketInfo[idx].server_message.size())
 	// 	log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
