@@ -203,8 +203,8 @@ void	TcpServer::lookupActiveSocket()
 		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i);
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);			// tmp?
-		else if (_pollFds[i].revents & POLLNVAL) {	
-		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; // closeConnection(i);
+		else if (_pollFds[i].revents & POLLNVAL) {	// closeConnection(i);
+		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
 		}
 		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
 	}	
