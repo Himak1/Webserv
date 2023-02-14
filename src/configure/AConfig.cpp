@@ -62,20 +62,6 @@ std::string	AConfig::convertNodeToString( Node* node )
 	return ((*i)->getTerminal());
 }
 
-/* unsigned int	AConfig::convertNodeToUInt( Node* node ) */
-/* { */
-/* 	NodeList::const_iterator	i = node->getChildrenBegin(); */
-/* 	unsigned int				output = 0; */
-
-/* 	try { */
-/* 		output = std::stoul((*i)->getTerminal()); */
-/* 	} */
-/* 	catch (std::exception& e) { */
-/* 		throw; */
-/* 	} */
-/* 	return (output); */
-/* } */
-
 unsigned int	AConfig::convertNodeToUInt( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();

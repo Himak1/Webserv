@@ -147,6 +147,9 @@ Node*	parseLocation( TokenStream& tokensToParse )
 			case T_AUTOINDEX:
 				status = newNode->addChild(parseAutoIndex(tokensToParse));
 				break;
+			case T_ERROR_PAGE:
+				status = newNode->addChild(parseErrorPage(tokensToParse));
+				break;
 			default:
 				status = 0;
 				break;
