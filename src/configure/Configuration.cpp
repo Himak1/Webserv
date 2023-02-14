@@ -32,20 +32,7 @@ Configuration::~Configuration()
 {
 }
 
-/* Configuration &Configuration::operator = (const Configuration &src) */
-/* { */
-/* 	if (this != &src) { */
-/* 		this->_pathWebsite = src._pathWebsite; */
-/* 		this->_ipAddress = src._ipAddress; */
-/* 		this->_port = src._port; */
-/* 		this->_errorPage404 = src._errorPage404; */
-/* 	} */
-/* 	return (*this); */
-/* } */
-
-// ------------------------------------------------------------------------ //
 //									Accessors								//
-// ------------------------------------------------------------------------ //
 
 std::string 		Configuration::getIP() const
 {
@@ -63,9 +50,7 @@ unsigned int	Configuration::getClientMaxBodySize() const
 }
 
 
-// ------------------------------------------------------------------------ //
 //									Methods									//
-// ------------------------------------------------------------------------ //
 
 void	Configuration::navigateNode( Node* serverNode )
 {
@@ -101,9 +86,7 @@ void	Configuration::navigateNode( Node* serverNode )
 	}
 }
 
-// ------------------------------------------------------------------------ //
 //									External Functions						//
-// ------------------------------------------------------------------------ //
 
 static std::list<Configuration*>	createConfigurations(std::list<Configuration*>& serverConfigs, Node* ast)
 {
