@@ -94,7 +94,7 @@ void	Location::convertLocation( Node* location )
 			switch ((*i)->getNodeType())
 			{
 				case TERMINAL:
-					_path = convertNodeToString(*i);
+					_path = (*i)->getTerminal();
 					break;
 				case N_ROOT:
 					_root = convertNodeToString(*i);
@@ -110,6 +110,12 @@ void	Location::convertLocation( Node* location )
 					break;
 				case N_AUTOINDEX:
 					convertAutoIndex(*i);
+					break;
+				case N_ERROR_PAGE:
+					convertErrorPage(*i);
+					break;
+				case N_INDEX:
+					convertIndexFiles(*i);
 					break;
 			}
 		}

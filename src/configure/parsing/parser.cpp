@@ -99,7 +99,7 @@ Node*	parseServer( TokenStream& tokensToParse )
 				status = newNode->addChild(parseIndex(tokensToParse));
 				break;
 			case T_CLIENT_MAX_BODY:
-				status = newNode->addChild(parseIndex(tokensToParse));
+				status = newNode->addChild(parseClientMaxBodySize(tokensToParse));
 				break;
 			case T_LOCATION:
 				status = newNode->addChild(parseLocation(tokensToParse));

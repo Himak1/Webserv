@@ -21,8 +21,8 @@ class AConfig
 	public:
 		~AConfig();
 
-		std::string	getRoot() const;
-		ErrorPage&	getErrorPage( int errorCode ) const;
+		std::string				getRoot() const;
+		const std::string&		getErrorPage( int errorCode ) const;
 
 		std::list<std::string>	indexFiles;
 	protected:
@@ -32,13 +32,14 @@ class AConfig
 		std::string				convertNodeToString( Node* node );
 		std::list<std::string>	convertMultiNodesToStrings( Node* node );
 		unsigned int			convertNodeToUInt( Node* node );
+		void					convertIndexFiles( Node* node );
+		void					convertErrorPage( Node* node );
 	
-		bool	validatePath();
-		bool	validateNumberAndRange( int min, int max );	
+		bool					validatePath();
+		bool					validateNumberAndRange( int min, int max );	
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
-
 };
 
 #endif

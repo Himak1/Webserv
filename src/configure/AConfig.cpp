@@ -32,12 +32,28 @@ AConfig::~AConfig()
 {
 }
 
-// ------
+// ------------------------------------------------------------------------ //
+//								Public Methods								//
+// ------------------------------------------------------------------------ //
 
 std::string	AConfig::getRoot() const
 {
 	return (_root);
 }
+
+const std::string&	AConfig::getErrorPage( int errorCode ) const
+{
+	std::list<ErrorPage>::const_iterator i = _errorPages.begin();
+
+	while (i != _errorPages.end())
+	{
+		if ((*i).code == errorCode)
+			return ((*i).page);
+		++i;
+	}
+	throw std::exception();
+}
+
 
 std::string	AConfig::convertNodeToString( Node* node )
 {
@@ -46,16 +62,56 @@ std::string	AConfig::convertNodeToString( Node* node )
 	return ((*i)->getTerminal());
 }
 
+/* unsigned int	AConfig::convertNodeToUInt( Node* node ) */
+/* { */
+/* 	NodeList::const_iterator	i = node->getChildrenBegin(); */
+/* 	unsigned int				output = 0; */
+
+/* 	try { */
+/* 		output = std::stoul((*i)->getTerminal()); */
+/* 	} */
+/* 	catch (std::exception& e) { */
+/* 		throw; */
+/* 	} */
+/* 	return (output); */
+/* } */
+
 unsigned int	AConfig::convertNodeToUInt( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
-	unsigned int				output = 0;
+	std::string					numberString;
+	unsigned int				output;
 
-	try {
-		output = std::stoul((*i)->getTerminal());
-	}
-	catch (std::exception& e) {
-		throw;
-	}
+	numberString = (*i)->getTerminal();
+	output = strtoul(numberString.c_str(), NULL, 10);
+	if (output == 0 && numberString != "0")
+		throw std::exception();
 	return (output);
+}
+
+// ------------------------------------------------------------------------ //
+//								Protected Methods							//
+// ------------------------------------------------------------------------ //
+
+void	AConfig::convertIndexFiles( Node* node )
+{
+	NodeList::const_iterator i = node->getChildrenBegin();
+
+	while (i != node->getChildrenEnd())
+	{
+		indexFiles.push_back((*i)->getTerminal());
+		++i;
+	}
+}
+
+void	AConfig::convertErrorPage( Node* node )
+{
+	NodeList::const_iterator i = node->getChildrenBegin();
+
+	unsigned int code = strtoul((*i)->getTerminal().c_str(), NULL, 10);
+	if (code == 0 && (*i)->getTerminal()[0] != '0')
+		throw std::exception();
+	++i;
+	std::string	page = (*i)->getTerminal();
+	_errorPages.push_back(ErrorPage(code, page));
 }

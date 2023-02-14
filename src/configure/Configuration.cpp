@@ -13,6 +13,7 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
+	: _ipAddress("0.0.0.0")
 {
 	try {
 		navigateNode(serverNode);
@@ -80,6 +81,15 @@ void	Configuration::navigateNode( Node* serverNode )
 				case N_CLIENT_MAX_BODY:
 					_clientMaxBodySize = convertNodeToUInt(*i);
 					break;
+				case N_ROOT:
+					_root = convertNodeToString(*i);
+					break;
+				case N_INDEX:
+					convertIndexFiles(*i);
+					break;
+				case N_ERROR_PAGE:
+					convertErrorPage(*i);
+					break;
 				case N_LOCATION:
 					locations.push_back(new Location(*i));
 					break;
@@ -119,6 +129,7 @@ std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
 		configFile.open("default.conf");
 	if (!configFile) {
 		std::cerr << "invalid config file" << std::endl;
+		throw std::exception();
 	}
 
 	TokenStream	tokens = tokenizer(configFile);
