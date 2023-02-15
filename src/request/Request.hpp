@@ -36,7 +36,6 @@ class Request
 		string				_http_version;
 		string				_extension;
 		string				_headers;
-		bool				_isCGI;
 		map<string, string>	_env;
 		map<string, string>	_cookies;
 		bool				_is_succesfull_uploaded;

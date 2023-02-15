@@ -130,7 +130,6 @@ string	Response::getContent()
 	if (_status == NOT_FOUND)				return fileNotFound();
 	if (_status != OK)						return createErrorHTML();
 	if (_request.isCGI())					return getCGI();
-
 	return(streamFileDataToString(_filepath));
 }
 
@@ -155,7 +154,7 @@ void	Response::uploadFile()
 		input_path = env["file_to_upload"];
 
 	if (!isExistingFile(input_path)) {
-		cout << "FILE DOES NOT EXIST" << endl;
+		_content = fileNotFound();
 		return;
 	}
 
@@ -164,71 +163,9 @@ void	Response::uploadFile()
 	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
 	writeStringToFile(file_data, upload_path);
 
-	if (isExistingFile(filename))
+	if (isExistingFile(filename)
+		&& streamFileDataToString(filename) == file_data)
 		_request.setUploadSucces(true);
-}
-
-string Response::getCGI()
-{
-	string target = _request.getURI();
-	list<Location*>::iterator it = findConfigLocation(target);
-	if (it == _config.locations.end()) {
-		_status = INTERNAL_SERVER_ERROR;
-		return createErrorHTML();
-	}
-	class CGI CGI(_request, *(*it), _filepath);
-	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
-		return getCGI();
-	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
-}
-
-list<Location*>::iterator Response::findConfigLocation(string target) {
-	if (target.rfind("/") == 0)
-		return searchLocations("/");
-
-	list<Location*>::iterator it = _config.locations.begin();
-	it = searchLocations(target);
-	if (it == _config.locations.end())
-		return findConfigLocation(go_one_directory_up(target));
-	return it;
-}
-
-list<Location*>::iterator Response::searchLocations(string target) {
-	list<Location*>::iterator it = _config.locations.begin();
-	while (it != _config.locations.end()) {
-		if ((*it)->getPath() == target)
-			return it;
-		++it;
-	}
-	return it;
-}
-
-string Response::setCookie()
-{
-	string value;
-	if (_request.getURI() == "/session_logout.php") {
-		value = "deleted";
-		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
-	if (_request.getURI() == "/cookies_delete.php") {
-		value = "deleted";
-		return "Set-Cookie: cookie_value=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
-
-	map<string, string> env = _request.getEnv();
-	if (_request.getURI() == "/session_login.php") {
-		if (env.find("username") != env.end())
-			value = env["username"];
-		return "Set-Cookie: sessionID=" + value + "\n";
-	}
-	if (_request.getURI() == "/cookies.php") {
-		if (env.find("cookie_value") != env.end())
-			value = env["cookie_value"];
-		return "Set-Cookie: cookie_value=" + value + "\n";
-	}
-
-	return "";
 }
 
 string Response::redirect()
@@ -272,4 +209,67 @@ string Response::createErrorHTML()
 		<< _status_codes[_status]
 		<< "</h1></center></body></html>";
 	return ss.str();
+}
+
+string Response::setCookie()
+{
+	string value;
+	if (_request.getURI() == "/session_logout.php") {
+		value = "deleted";
+		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
+	}
+	if (_request.getURI() == "/cookies_delete.php") {
+		value = "deleted";
+		return "Set-Cookie: cookie_value=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
+	}
+
+	map<string, string> env = _request.getEnv();
+	if (_request.getURI() == "/session_login.php") {
+		if (env.find("username") != env.end())
+			value = env["username"];
+		return "Set-Cookie: sessionID=" + value + "\n";
+	}
+	if (_request.getURI() == "/cookies.php") {
+		if (env.find("cookie_value") != env.end())
+			value = env["cookie_value"];
+		return "Set-Cookie: cookie_value=" + value + "\n";
+	}
+
+	return "";
+}
+
+string Response::getCGI()
+{
+	string target = _request.getURI();
+	list<Location*>::iterator it = findConfigLocation(target);
+	if (it == _config.locations.end()) {
+		_status = INTERNAL_SERVER_ERROR;
+		return createErrorHTML();
+	}
+	class CGI CGI(_request, *(*it), _filepath);
+	string cgi = CGI.ExecuteCGI();
+	if (cgi.find("<!doctype html>") == string::npos)
+		return getCGI();
+	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
+}
+
+list<Location*>::iterator Response::findConfigLocation(string target) {
+	if (target.rfind("/") == 0)
+		return searchLocations("/");
+
+	list<Location*>::iterator it = _config.locations.begin();
+	it = searchLocations(target);
+	if (it == _config.locations.end())
+		return findConfigLocation(go_one_directory_up(target));
+	return it;
+}
+
+list<Location*>::iterator Response::searchLocations(string target) {
+	list<Location*>::iterator it = _config.locations.begin();
+	while (it != _config.locations.end()) {
+		if ((*it)->getPath() == target)
+			return it;
+		++it;
+	}
+	return it;
 }

@@ -21,7 +21,6 @@ Request &Request::operator = (const Request &src)
 		this->_http_version = src._http_version;
 		this->_extension = src._extension;
 		this->_headers = src._headers;
-		this->_isCGI = src._isCGI;
 		this->_env = src._env;
 		this->_cookies = src._cookies;
 		this->_is_succesfull_uploaded = src._is_succesfull_uploaded;
@@ -34,11 +33,6 @@ void Request::initRequest(string request)
 {
 	parseHTTPInfoAndHeaders(request);
 	parseExtension();
-
-	_isCGI = false;
-	if (_extension == ".php" || _extension == ".py")
-		_isCGI = true;
-
 	parseCookies();
 	parseEnv();
 }
@@ -49,7 +43,6 @@ const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
 map<string, string> Request::getEnv() const { return _env; };
 map<string, string> Request::getCookies() const { return _cookies; };
-bool		 Request::isCGI() const { return _isCGI; }
 bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
 void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
 
@@ -99,11 +92,6 @@ void Request::parseEnv()
 	map<string, string>::iterator it;
 	for (it = _cookies.begin(); it != _cookies.end(); it++)
 		_env.insert(pair<string, string> (it->first, it->second));
-
-	// if (_cookies.find("sessionID") != _cookies.end())
-	// 	_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
-	// if (_cookies.find("cookie_value") != _cookies.end())
-	// 	_env.insert(pair<string, string> ("cookie_value", _cookies["cookie_value"]));
 
 	if (_uri.find("?") != string::npos) {
 		string value;

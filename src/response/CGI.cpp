@@ -25,21 +25,15 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 
 	char *_path_to_cgi;
 	int path_length = _location.getCgiPath().size();
-	_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
+	char *_path_to_cgi = new char[path_length + 1];
 	_path_to_cgi = strcpy(_path_to_cgi, _location.getCgiPath().c_str());
-
-	// _path[0] = const_cast<char*>(_location.getCgiPath().c_str());
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
-	// if (_request.getExtension() == ".php") 
-		// _path[2] = &_argument[0];
-	// else
-		_path[2] = NULL;
-	_path[3] = NULL;
+	_path[2] = NULL;
 	_env = createEnv();
 
-	cout << "_filepath = " << _filepath << endl;
-	cout << "_path_to_cgi = " << _location.getCgiPath().c_str() << endl;
+	// cout << "_filepath = " << _filepath << endl;
+	// cout << "_path_to_cgi = " << _location.getCgiPath().c_str() << endl;
 	// cout << "_path_to_script = " << _path_to_script << endl;
 	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
 }
@@ -70,8 +64,7 @@ string CGI::ExecuteCGI()
 		perror("execve failed: ");
 		cout << "<!DOCTYPE html><html lang=\"en\"><head><title>"
 		<< "500 Internal Server Error\n"
-		<< "</title>"
-		<< "</head><body><center><h1>"
+		<< "</title></head><body><center><h1>"
 		<< "500 Internal Server Error\n"
 		<< "</h1></center></body></html>" << endl;
 		exit(0);
@@ -79,7 +72,6 @@ string CGI::ExecuteCGI()
 	// TO DO: message can currently not be bigger than CGI_BUFSIZE
 	char	buffer[CGI_BUFSIZE] = {0};
 	read(fd[0], buffer, CGI_BUFSIZE);
-
 	close(fd[1]);
 
 	return buffer;
@@ -128,7 +120,6 @@ void	CGI::freeEnv()
 {
 	if (_request.getEnv().empty())
 		return ;
-
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;

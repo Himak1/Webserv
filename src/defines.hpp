@@ -32,19 +32,5 @@
 #define CASE_301 "/permanently_moved"
 #define CASE_302 "/temporary_unavailable"
 
-// CODAM
-#define PATH_TO_PHP_CGI "/Users/mweitenb/.brew/bin/php-cgi"
-#define PATH_TO_PHP_CGI_LENGTH 33
-#define PATH_TO_PY_CGI "/usr/bin/python"
-#define PATH_TO_PY_CGI_LENGTH 15
-
-// THUIS
-// #define PATH_TO_PHP_CGI "/usr/bin/php-cgi"
-// #define PATH_TO_PHP_CGI_LENGTH 16
-// #define PATH_TO_PY_CGI "/usr/bin/python3"
-// #define PATH_TO_PY_CGI_LENGTH 16
-
-// TO DO:
-// - accepted methods (GET POST) moet per location gecheckt worden (geldt dan voor directories en subdirectories).
 
 #endif
