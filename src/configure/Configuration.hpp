@@ -14,7 +14,7 @@ class Configuration : public AConfig
 		Configuration( Node* serverNode );
 		~Configuration();
 
-		std::string		getIP() const;
+		std::string		getHost() const;
 		unsigned int	getPort() const;
 		unsigned int	getClientMaxBodySize() const;
 
@@ -22,7 +22,6 @@ class Configuration : public AConfig
 	private:
 		void			navigateNode( Node* serverNode );
 
-		std::string				_ipAddress;
 		std::string				_host; // server_name
 		unsigned int			_port; // listen
 		unsigned int			_clientMaxBodySize;

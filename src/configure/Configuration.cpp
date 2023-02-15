@@ -13,7 +13,7 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
-	: _ipAddress("0.0.0.0"), _port(80), _clientMaxBodySize(2)
+	: _host("localhost"), _port(80), _clientMaxBodySize(2)
 {
 	try {
 		navigateNode(serverNode);
@@ -34,9 +34,9 @@ Configuration::~Configuration()
 
 //----------------------------------Accessors-------------------------------//
 
-std::string 		Configuration::getIP() const
+std::string 		Configuration::getHost() const
 {
-	return (this->_ipAddress);
+	return (this->_host);
 }
 
 unsigned int	Configuration::getPort() const
