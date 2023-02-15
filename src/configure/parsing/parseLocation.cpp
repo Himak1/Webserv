@@ -113,7 +113,7 @@ Node*	parseLocationPath( TokenStream& tokensToParse )
 Node*	parseLocation( TokenStream& tokensToParse )
 {
 	Node*	newNode;
-	int		status;
+	int		status = 1;
 
 	if (!accept(tokensToParse, T_LOCATION))
 		return (NULL);

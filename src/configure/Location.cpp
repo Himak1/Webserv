@@ -18,6 +18,7 @@ Location::Location( Node* locationNode )
 }
 
 Location::Location( const Location& src )
+	: AConfig(src)
 {
 	*this = src;
 }
@@ -47,6 +48,15 @@ Location&	Location::operator=( const Location& src )
 		_acceptedMethods[i] = src._acceptedMethods[i];
 	}
 	return *this;
+}
+
+std::ostream&	operator<<( std::ostream& o, const Location& location )
+{
+	o	<< "path: " << location.getPath() << '\n'
+		<< "alias: " << location.getAlias() << '\n'
+		<< "CGI Extension: " << location.getCgiExtension() << '\n'
+		<< "CGI Path: " << location.getCgiPath();
+	return (o);
 }
 
 /*

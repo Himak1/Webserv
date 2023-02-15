@@ -2,13 +2,12 @@
 # define TOKENSTREAM_HPP
 
 # include <list>
-
-class Token;
+# include "Token.hpp"
 
 class TokenStream
 {
 	public:
-		TokenStream( std::list<Token*> tokenList );
+		TokenStream( std::list<Token> tokenList );
 		~TokenStream();
 
 		std::string	getTokenString();
@@ -16,8 +15,8 @@ class TokenStream
 		bool		moveToNextToken();
 		bool		isEmpty() const;
 	private:
-		std::list<Token*>			_tokenList;
-		std::list<Token*>::iterator	_currentToken;
+		std::list<Token>			_tokenList;
+		std::list<Token>::iterator	_currentToken;
 };
 
 #endif

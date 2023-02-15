@@ -28,6 +28,8 @@ class Configuration : public AConfig
 		unsigned int			_clientMaxBodySize;
 };
 
+std::ostream&	operator<<( std::ostream& o, const Configuration& config );
+
 std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv);
 
 #endif

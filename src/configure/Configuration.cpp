@@ -32,20 +32,7 @@ Configuration::~Configuration()
 {
 }
 
-/* Configuration &Configuration::operator = (const Configuration &src) */
-/* { */
-/* 	if (this != &src) { */
-/* 		this->_pathWebsite = src._pathWebsite; */
-/* 		this->_ipAddress = src._ipAddress; */
-/* 		this->_port = src._port; */
-/* 		this->_errorPage404 = src._errorPage404; */
-/* 	} */
-/* 	return (*this); */
-/* } */
-
-// ------------------------------------------------------------------------ //
-//									Accessors								//
-// ------------------------------------------------------------------------ //
+//----------------------------------Accessors-------------------------------//
 
 std::string 		Configuration::getIP() const
 {
@@ -63,9 +50,7 @@ unsigned int	Configuration::getClientMaxBodySize() const
 }
 
 
-// ------------------------------------------------------------------------ //
-//									Methods									//
-// ------------------------------------------------------------------------ //
+//----------------------------------Methods---------------------------------//
 
 void	Configuration::navigateNode( Node* serverNode )
 {
@@ -101,9 +86,20 @@ void	Configuration::navigateNode( Node* serverNode )
 	}
 }
 
-// ------------------------------------------------------------------------ //
-//									External Functions						//
-// ------------------------------------------------------------------------ //
+//----------------------------------External Functions----------------------//
+
+std::ostream&	operator<<( std::ostream& o, const Configuration& config )
+{
+	o	<< "host: " << config.getIP() << '\n'
+		<< "port: " << config.getPort() << '\n'
+		<< "client max body size: " << config.getClientMaxBodySize() << "\n\n";
+	for (std::list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
+	{
+		o	<< "----location----" << '\n'
+			<< **i << '\n';
+	}
+	return (o);
+}
 
 static std::list<Configuration*>	createConfigurations(std::list<Configuration*>& serverConfigs, Node* ast)
 {

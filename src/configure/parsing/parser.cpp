@@ -76,7 +76,7 @@ Node*	parseServerName( TokenStream& tokensToParse )
 Node*	parseServer( TokenStream& tokensToParse )
 {
 	Node*	newNode;
-	int		status;
+	int		status = 1;
 
 	tokensToParse.moveToNextToken();
 	if (!accept(tokensToParse, T_BRACKET_OPEN))

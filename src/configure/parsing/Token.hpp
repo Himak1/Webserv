@@ -27,8 +27,6 @@ enum TokenTypes
 	// Punctuation and Seperators
 	T_BRACKET_OPEN,
 	T_BRACKET_CLOSE,
-	//T_FORWARD_SLASH,
-	//T_BACK_SLASH,
 	T_SEMICOLON,
 	T_HASHTAG,
 	T_DOLLAR,
@@ -38,8 +36,9 @@ enum TokenTypes
 class Token
 {
 	public:
+		Token();
 		Token( int type, std::string tokenString );
-		Token( Token const& src );
+		Token( const Token& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
@@ -47,7 +46,6 @@ class Token
 		int			getTokenType() const;
 		const std::string&	getToken() const;
 	private:
-		Token();
 		int			_tokenType;
 		std::string	_token;
 };

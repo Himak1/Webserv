@@ -16,8 +16,9 @@ Token::Token( int type, std::string tokenString )
 }
 
 Token::Token( const Token& src )
+	: _tokenType(src._tokenType), _token(src._token)
 {
-	*this = src;
+	/* *this = src; */
 }
 
 
@@ -34,14 +35,14 @@ Token::~Token()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Token&	Token::operator=( Token const& rhs )
-{
-	if ( this != &rhs )
-	{
-		this->_tokenType = rhs.getTokenType();
-	}
-	return *this;
-}
+/* Token&	Token::operator=( Token const& rhs ) */
+/* { */
+/* 	if ( this != &rhs ) */
+/* 	{ */
+/* 		this->_tokenType = rhs.getTokenType(); */
+/* 	} */
+/* 	return *this; */
+/* } */
 
 std::ostream&	operator<<( std::ostream& o, Token const& i )
 {
