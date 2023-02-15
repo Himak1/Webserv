@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
 	using namespace http;
 
-	std::list<Configuration*>	serverConfigs;
+	std::vector<Configuration*>	serverConfigs;
 	try {
 		serverConfigs = parseAndCreateConfigurations(argc, argv);
 	}

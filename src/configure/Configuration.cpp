@@ -7,6 +7,7 @@
 #include "parsing/parser.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 // ------------------------------------------------------------------------ //
 //							Constructors & Destructor						//
@@ -47,9 +48,9 @@ Configuration::~Configuration()
 //									Accessors								//
 // ------------------------------------------------------------------------ //
 
-std::string 		Configuration::getIP() const
+std::string 		Configuration::getHost() const
 {
-	return (this->_ipAddress);
+	return (this->_host);
 }
 
 unsigned int	Configuration::getPort() const
@@ -105,7 +106,7 @@ void	Configuration::navigateNode( Node* serverNode )
 //									External Functions						//
 // ------------------------------------------------------------------------ //
 
-static std::list<Configuration*>	createConfigurations(std::list<Configuration*>& serverConfigs, Node* ast)
+static std::vector<Configuration*>	createConfigurations(std::vector<Configuration*>& serverConfigs, Node* ast)
 {
 	for (NodeList::const_iterator i = ast->getChildrenBegin(); i != ast->getChildrenEnd(); ++i) {
 		try {
@@ -119,7 +120,7 @@ static std::list<Configuration*>	createConfigurations(std::list<Configuration*>&
 	return (serverConfigs);
 }
 
-std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
+std::vector<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
 {
 	std::ifstream	configFile;
 
@@ -135,7 +136,7 @@ std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
 	TokenStream	tokens = tokenizer(configFile);
 	Node*		ast = parser(tokens);
 
-	std::list<Configuration*>	serverConfigs;
+	std::vector<Configuration*>	serverConfigs;
 	if (!ast)
 		return (serverConfigs);
 	createConfigurations(serverConfigs, ast);

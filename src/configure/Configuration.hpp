@@ -14,7 +14,7 @@ class Configuration : public AConfig
 		Configuration( Node* serverNode );
 		~Configuration();
 
-		std::string		getIP() const;
+		std::string		getHost() const;
 		unsigned int	getPort() const;
 		unsigned int	getClientMaxBodySize() const;
 
@@ -28,6 +28,6 @@ class Configuration : public AConfig
 		unsigned int			_clientMaxBodySize;
 };
 
-std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv);
+std::vector<Configuration*>	parseAndCreateConfigurations(int argc, char **argv);
 
 #endif

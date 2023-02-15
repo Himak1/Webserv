@@ -3,6 +3,8 @@
 # include "../utils/strings.hpp"
  
 # include <sys/socket.h>
+# include <sys/types.h>
+# include <netdb.h>
 # include <errno.h>
 # include <poll.h>
 # include <fcntl.h>
@@ -105,7 +107,7 @@ namespace http
 {;
 
 			// CONSTRUCTOR
-TCPServer::TCPServer(std::list<Configuration*> configList) :
+TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		_nbListeningSockets(0),
 		_configList(configList)
 		//_config(configuration), 
@@ -126,34 +128,47 @@ TCPServer::~TCPServer()
 void	TCPServer::setUpListeningSockets()
 {
 	struct pollfd	listening_pollFd;
-	int				re_use = 1;
+	int				re_use = 1, i = 0;
 	t_socket		listening_socket;
+	struct addrinfo	*res, *p, hints;
 
-	int test_port = 8000;			// tmp
-
-	// for (int i = 0; i < 4; i++) {								
-	for (std::list<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++) {	// justin merge							
-		socketDefault(&listening_socket);
-
+	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {					
+		// setUpSocketStruct(&listening_socket);
+		memset(&listening_socket, 0, sizeof(listening_socket));
 		memset(&listening_pollFd, 0, sizeof(listening_pollFd));
-		listening_socket.socket_info.sin_port = htons(_configList.front()->getPort());			// justin merge
-		// listening_socket.socket_info.sin_port = htons(test_port++); 					// tmp
+		listening_socket.socket_info.sin_port = htons((*it)->getPort());	
+		// listening_socket.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
+		listening_socket.socket_info.sin_addr.s_addr = inet_addr((*it)->getHost().c_str());
+
+		std::cout << (*it)->getHost().c_str() << endl;
+
+		// memset(&hints, 0, sizeof(hints));
+		// hints.ai_family = AF_INET;
+		// hints.ai_socktype = SOCK_STREAM;
+		// std::string port_nb = number_to_string((*it)->getPort());
+		// int status;
+		// status = getaddrinfo((*it)->getIP().c_str(), port_nb.c_str(), &hints, &res);
+		// if (status != 0){
+		// 	std::cout << "Getaddrinfo error : ";
+		// 	exitWithError(gai_strerror(status));
+		// }
+		// listening_socket.socket_info = *((sockaddr_in *) res);
+
 		
 		// listening_socket.socket_info.sin_addr.s_addr = inet_addr(ips[i].c_str());
 		// evt getaddrinfo()
-		listening_socket.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
 		// inet_pton(AF_INET, "www.example.com", &(listening_socket.socket_info.sin_addr)); // write de de adres info van de string in de struct socket_info.sin_addr
 		
-		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
-		memset(listening_socket.socket_info.sin_zero, 0, sizeof(listening_socket.socket_info.sin_zero));
-		_socketInfo.push_back(listening_socket);
 
 	
-		listening_pollFd.fd = socket(AF_INET, SOCK_STREAM, 0);		
+		listening_pollFd.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	// AF_INET == ipv4, AF_INET6 == ipv6 of AF_UNSPEC
 		if (listening_pollFd.fd < 0) {
 			exitWithError("Cannot create listening socket");
 		}
 		fcntl(listening_pollFd.fd, F_SETFL, O_NONBLOCK);			
+		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
+		// memset(listening_socket.socket_info.sin_zero, 0, sizeof(listening_socket.socket_info.sin_zero));
+		_socketInfo.push_back(listening_socket);
 		
 		listening_pollFd.events = POLLIN;
 		_pollFds.push_back(listening_pollFd);
@@ -163,20 +178,20 @@ void	TCPServer::setUpListeningSockets()
 			exitWithError("setsockopt error\n");
 		}	
 
-		int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[0].socket_info, _socketInfo[0].socket_address_len);
+		int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
 		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
 		if (rc < 0) {
 			exitWithError("Cannot bind() socket to address");
 		}
-		logStartupMessage(_socketInfo[0].socket_info);
+		logStartupMessage(_socketInfo[i].socket_info);
 	}
 }
 
-void	TCPServer::socketDefault(t_socket *socket)
+void	TCPServer::setUpSocketStruct(t_socket *socket)
 {
-	memset(socket, 0, sizeof(*socket));
-	socket->socket_info.sin_family = AF_INET;
-	socket->socket_info.sin_addr.s_addr = INADDR_ANY; // misschien veranderen naar ip uit config?
+	// memset(socket, 0, sizeof(*socket));
+	// // socket->socket_info.sin_family = AF_INET;
+	// // socket->socket_info.sin_addr.s_addr = INADDR_ANY; // misschien veranderen naar ip uit config?
 }
 
 void TCPServer::startListen()
@@ -210,11 +225,12 @@ void	TCPServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
+
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
-		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i);
-		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);
-		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);			// tmp?
+		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i);	
+		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
+		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);	
 		else if (_pollFds[i].revents & POLLNVAL) {	// closeConnection(i);
 		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
 		}
@@ -223,32 +239,6 @@ void	TCPServer::lookupActiveSocket()
 	  													 		
 }
 
-/*
-
-
-           SO_DEBUG        enables recording of debugging information
-           SO_REUSEADDR    enables local address reuse
-           SO_REUSEPORT    enables duplicate address and port bindings
-           SO_KEEPALIVE    enables keep connections alive
-           SO_DONTROUTE    enables routing bypass for outgoing messages
-           SO_LINGER       linger on close if data present
-           SO_BROADCAST    enables permission to transmit broadcast messages
-           SO_OOBINLINE    enables reception of out-of-band data in band
-           SO_SNDBUF       set buffer size for output
-           SO_RCVBUF       set buffer size for input
-           SO_SNDLOWAT     set minimum count for output
-           SO_RCVLOWAT     set minimum count for input
-           SO_SNDTIMEO     set timeout value for output
-           SO_RCVTIMEO     set timeout value for input
-           SO_TYPE         get the type of the socket (get only)
-           SO_ERROR        get and clear error on the socket (get only)
-           SO_NOSIGPIPE    do not generate SIGPIPE, instead return EPIPE
-           SO_NREAD        number of bytes to be read (get only)
-           SO_NWRITE       number of bytes written not yet sent by the
-                           protocol (get only)
-           SO_LINGER_SEC   linger on close if data present with timeout in
-                           seconds
-*/
 void TCPServer::newConnection(int idx)
 {
 	struct pollfd	new_pollfd;
@@ -303,14 +293,14 @@ void TCPServer::receiveRequest(int idx)
 		if (bytes_received < 0)
 			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startListen()" << std::endl;		
 		// else
-		// 	std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
+		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
 		return ;
 	} 
-		
+
 	_request.initRequest(std::string(buff));
-	
-	class Response respons(_request, *(_configList.front() + _socketInfo[idx].config_idx));
+
+	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	_pollFds[idx].events = POLLOUT;
 	// _pollFds[idx].events = POLLIN | POLLOUT;
@@ -327,7 +317,7 @@ void TCPServer::sendResponse(int idx)
 	size_t		bytes_send;
 
 
-	class Response respons(_request, *(_configList.front() + _socketInfo[idx].config_idx));
+	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	if (_socketInfo[idx].server_message.empty())
 		_socketInfo[idx].server_message = respons.getMessage();
@@ -335,14 +325,14 @@ void TCPServer::sendResponse(int idx)
 	
 	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
-	if (bytes_send <= 0)
+	if (bytes_send <= 0) 
 		if (bytes_send < 0) {
 			std::cout << "Send error in TCPServer::sendResponse()" << std::endl;
 			closeConnection(idx);
 		}
-		else
+		else 
 			cout << "Zero bytes send. Need handler?" << endl;
-
+			
 	// if (bytes_send == (long)_socketInfo[idx].server_message.size())
 	// 	log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
 	// else

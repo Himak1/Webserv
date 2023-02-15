@@ -1,4 +1,5 @@
 #include "strings.hpp"
+#include <sstream>
 
 string safe_substr(string str, int start, int length)
 {
@@ -31,4 +32,11 @@ size_t	ft_strlen(char *s)
 
 	for (i = 0; s[i]; i++) ;
 	return i;
+}
+
+std::string number_to_string (unsigned int number)
+{
+    std::ostringstream ss;
+    ss << number;
+    return ss.str();
 }

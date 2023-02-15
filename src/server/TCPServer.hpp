@@ -24,13 +24,13 @@ typedef struct s_socket {
 class TCPServer
 {
 public:
-	TCPServer(std::list<Configuration*>);
+	TCPServer(std::vector<Configuration*>);
 	~TCPServer();
 	void				startListen();
 
 private:
 	// class Configuration			_config;
-	std::list<Configuration*>	_configList;
+	std::vector<Configuration*>	_configList;
 	class Request				_request;
 	
 	std::vector<struct pollfd>	_pollFds;			
@@ -39,7 +39,6 @@ private:
 
 	bool						_isServerRunning;
 
-	void						socketDefault(t_socket *);
 	void						newConnection(int);
 	void						closeConnection(int);
 	void						closeServer();
@@ -48,6 +47,7 @@ private:
 	void						sendResponse(int);
 	int 						startServer();
 	void						setUpListeningSockets();
+	void						setUpSocketStruct(t_socket *);
 	void						lookupActiveSocket();
 };
 
