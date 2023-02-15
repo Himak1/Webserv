@@ -1,0 +1,14 @@
+server {
+	server_name 0.0.0.0;
+	listen 40;
+	client_max_body_size 5;
+
+	root www;
+	index file.html file.htm file.php;
+	error_page 404 404.html;
+
+	location /files/ {
+		error_page 404 custom_404.html;
+		allowed_methods GET POST;
+	}
+}

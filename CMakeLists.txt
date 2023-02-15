@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.23)
 project(webserv)
 
 set(CMAKE_CXX_STANDARD 98)
-set(CMAKE_CXX_FLAGS "-Wextra -Wall -Werror")
+set(CMAKE_CXX_FLAGS "-Wextra -Wall -Werror -g")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ### Google Test ###
 configure_file(CMakeLists.txt.in gtest/googletest-download/CMakeLists.txt)

@@ -96,10 +96,16 @@ void Request::parseEnv()
 
 	_env.clear();
 
-	if (_cookies.find("sessionID") != _cookies.end())
-		_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
+	map<string, string>::iterator it;
+	for (it = _cookies.begin(); it != _cookies.end(); it++)
+		_env.insert(pair<string, string> (it->first, it->second));
 
-	if (_method == "GET") {
+	// if (_cookies.find("sessionID") != _cookies.end())
+	// 	_env.insert(pair<string, string> ("sessionID", _cookies["sessionID"]));
+	// if (_cookies.find("cookie_value") != _cookies.end())
+	// 	_env.insert(pair<string, string> ("cookie_value", _cookies["cookie_value"]));
+
+	if (_uri.find("?") != string::npos) {
 		string value;
 		istringstream ss(safe_substr(_uri, _uri.find("?") + 1, -1));
 		while (getline(ss, line, '&')) {
@@ -116,7 +122,7 @@ void Request::parseEnv()
 	}
 	// TO DO? will not work if input fields are empty. 
 	// Currently solved with 'required' tag in html form
-	else if (_method == "POST") {
+	if (_method == "POST") {
 		string query = _headers;
 
 		istringstream ss(safe_substr(_headers, _headers.find("Content-Disposition:"), -1));
@@ -158,25 +164,3 @@ void	Request::parseCookies()
 		// cout << "cookie | " << it->first << ": " << it->second << endl;
 	// }
 }
-
-// void handleLogin(std::string& user, std::string& password) {
-//     // check if user and password are valid
-//     // if (!isValid(user, password)) {
-//         // return error message to client
-//         // return;
-//     // }
-
-//     // create a new session for the user
-//     std::string sessionID = generateSessionID();
-//     Session session;
-//     session.user = user;
-//     session.expiration = time() + SESSION_TIMEOUT;
-//     sessions[sessionID] = session;
-
-//     // create a new "Set-Cookie" header
-//     std::string cookie = "session=" + sessionID + "; expires=" + session.expiration;
-
-//     // send "Set-Cookie" header to client
-//     std::string headers = "Set-Cookie: " + cookie;
-//     sendResponse(headers);
-// }

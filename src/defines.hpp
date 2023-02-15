@@ -23,14 +23,18 @@
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
 // TEMPORARY 
-#define CGI_BUFSIZE 30720
+// #define PATH_ROOT "www"
+// #define IP_ADDRESS "0.0.0.0"
+// #define PORT_NO 4243
 
-// #define COSTUM_301 "/templates/301.html"
-// #define COSTUM_302 "/templates/302.html"
-// #define COSTUM_404 "/templates/404.html"
-#define COSTUM_301 "default"
-#define COSTUM_302 "default"
-#define COSTUM_404 "default"
+#define CGI_BUFSIZE 307200
+
+#define COSTUM_301 "/templates/301.html"
+#define COSTUM_302 "/templates/302.html"
+#define COSTUM_404 "/templates/404.html"
+// #define COSTUM_301 "default"
+// #define COSTUM_302 "default"
+// #define COSTUM_404 "default"
 
 #define UPLOAD_FOLDER "uploads"
 #define DIRECTORY_LISTING "true"
@@ -49,5 +53,8 @@
 // #define PATH_TO_PHP_CGI_LENGTH 16
 // #define PATH_TO_PY_CGI "/usr/bin/python3"
 // #define PATH_TO_PY_CGI_LENGTH 16
+
+// TO DO:
+// - accepted methods (GET POST) moet per location gecheckt worden (geldt dan voor directories en subdirectories).
 
 #endif

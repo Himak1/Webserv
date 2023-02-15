@@ -2,8 +2,7 @@
 # define TCP_SERVER_HPP
 
 # include "../request/Request.hpp"
-# include "../server/Configuration.hpp"
-# include "Socket.hpp"
+# include "../configure/Configuration.hpp"
 
 # include <stdio.h>
 # include <sys/socket.h>
@@ -19,17 +18,19 @@ typedef struct s_socket {
 	unsigned int		socket_address_len;
 	struct sockaddr_in	socket_info;
 	std::string			server_message;
+	unsigned int		config_idx;
 }	t_socket;
 
-class TcpServer
+class TCPServer
 {
 public:
-	TcpServer(class Configuration configuration);
-	~TcpServer();
+	TCPServer(std::list<Configuration*>);
+	~TCPServer();
 	void				startListen();
 
 private:
-	class Configuration			_config;
+	// class Configuration			_config;
+	std::list<Configuration*>	_configList;
 	class Request				_request;
 	
 	std::vector<struct pollfd>	_pollFds;			
@@ -38,6 +39,7 @@ private:
 
 	bool						_isServerRunning;
 
+	void						socketDefault(t_socket *);
 	void						newConnection(int);
 	void						closeConnection(int);
 	void						closeServer();

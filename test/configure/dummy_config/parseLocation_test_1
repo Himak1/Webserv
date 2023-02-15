@@ -1,0 +1,5 @@
+location / {
+        index index.html index.htm index.php;
+        allowed_methods GET POST DELETE;
+        autoindex off;
+}

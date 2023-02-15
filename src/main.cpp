@@ -1,15 +1,23 @@
-# include "server/TcpServer.hpp"
-# include "server/Configuration.hpp"
+#include "server/TCPServer.hpp"
+#include "configure/Configuration.hpp"
+#include <fstream>
+#include <iostream>
 
 
 int main(int argc, char **argv)
 {
 	using namespace http;
 
-	class Configuration configuration;
-	if (argc == 2)
-		configuration.parseConfiguration(argv[1]);
+	std::list<Configuration*>	serverConfigs;
+	try {
+		serverConfigs = parseAndCreateConfigurations(argc, argv);
+	}
+	catch (std::exception) {
+		return 1;
+	}
 
-	TcpServer server8000 = TcpServer(configuration);
+	// TCPServer server(*serverConfigs.front());
+	TCPServer server(serverConfigs);
+	// server.startListen();
 	return 0;
 }

@@ -3,9 +3,6 @@
 		<div id="middle">
 			<h3 class="">DIRECTORY LIST</h3>
 		<?php
-			// $env_array =getenv();
-			// foreach ($env_array as $key=>$value)
-			// 	echo "$key => $value <br />";
 			
 			$directory_listing = getenv("directory_listing");
 			if ($directory_listing !== "true") {
@@ -14,6 +11,7 @@
 			}
 
 			$directory = getenv("upload_directory");
+			// echo "DIRECTORY = ". $directory . "<br>";
 			if (!is_dir($directory)) {
 				echo "Invalid upload directory";
 				return;
@@ -30,4 +28,3 @@
 		</div>
 
 <?php include("templates/bottom.php");?>
-

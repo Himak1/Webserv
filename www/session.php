@@ -23,7 +23,7 @@
 
 				$sessionID = getenv("sessionID");
 				if ($sessionID)
-					echo "<br>". $sessionID. 'is logged in.';
+					echo "<br>". $sessionID. ' is logged in.';
 			?>
 
 			<div style="<?php if ($sessionID) echo "visibility: hidden;"; ?>">

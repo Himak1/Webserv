@@ -117,7 +117,7 @@ table {
 /* STYLING */
 #content {
 	box-sizing: border-box;
-	width: 500px;
+	width: 600px;
 	height: 100%;
 }
 
@@ -226,6 +226,9 @@ table {
 	border-radius: 5px;
 	padding: 5px;
 	transition: 1s;
+	font-family: Verdana;
+	font-size: 9pt;
+	font-weight: normal;
 }
 
 .button_link:hover {
