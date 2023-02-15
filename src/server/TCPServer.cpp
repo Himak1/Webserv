@@ -131,7 +131,7 @@ void	TcpServer::setUpListeningSockets()
 
 	int test_port = 8000;			// tmp
 
-	for (int i = 0; i < 25; i++) {								
+	for (int i = 0; i < 4; i++) {								
 	// for (vector<int>::itterator it = getPort().begin; it < getPort().end; it++) {	// justin merge							
 		memset(&listening_socket, 0, sizeof(listening_socket));
 		memset(&listening_socket, 0, sizeof(listening_pollFd));
@@ -139,9 +139,14 @@ void	TcpServer::setUpListeningSockets()
 
 		// listening_socket.socket_info.sin_port = htons(_config.getPort());			// justin merge
 		listening_socket.socket_info.sin_port = htons(test_port++); 					// tmp
-		listening_socket.socket_info.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+
+		// listening_socket.socket_info.sin_addr.s_addr = inet_addr(ips[i].c_str());
+		// evt getaddrinfo()
+		listening_socket.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
+		// inet_pton(AF_INET, "www.example.com", &(listening_socket.socket_info.sin_addr)); // write de de adres info van de string in de struct socket_info.sin_addr
 		
 		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
+		memset(listening_socket.socket_info.sin_zero, 0, sizeof(listening_socket.socket_info.sin_zero));
 		_socketInfo.push_back(listening_socket);
 
 	
@@ -164,6 +169,7 @@ void	TcpServer::setUpListeningSockets()
 		if (rc < 0) {
 			exitWithError("Cannot bind() socket to address");
 		}
+		logStartupMessage(_socketInfo[i].socket_info);
 	}
 }
 
