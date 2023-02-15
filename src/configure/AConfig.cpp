@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "AConfig.hpp"
 #include "Node.hpp"
 

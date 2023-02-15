@@ -37,4 +37,6 @@ class Location : public AConfig
 		bool		_autoIndex;
 };
 
+std::ostream&	operator<<( std::ostream& o, const Location& location );
+
 #endif

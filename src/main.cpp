@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	catch (std::exception) {
 		return 1;
 	}
-
+	std::cout << *serverConfigs.front() << std::endl;
 	TCPServer server(*serverConfigs.front());
 	server.startListen();
 	return 0;

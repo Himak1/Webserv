@@ -37,3 +37,7 @@ set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BI
 add_executable(${BINARY} ${SRC_FILES})
 target_include_directories(${BINARY} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+add_custom_target(copy_default.conf ALL
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/default.conf ${CMAKE_BINARY_DIR}/bin
+)
