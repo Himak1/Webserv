@@ -38,7 +38,7 @@ namespace http
 	{
 		_socketAddress.sin_family = AF_INET;
 		_socketAddress.sin_port = htons(_config.getPort());
-		_socketAddress.sin_addr.s_addr = inet_addr(_config.getIP().c_str());
+		_socketAddress.sin_addr.s_addr = inet_addr(_config.getHost().c_str());
 
 		if (startServer() != 0) {
 			std::ostringstream ss;

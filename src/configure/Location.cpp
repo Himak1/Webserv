@@ -68,8 +68,7 @@ void	Location::convertCgiPass( Node* cgiPass )
 	NodeList::const_iterator i = cgiPass->getChildrenBegin();
 
 	_cgiExtension = (*i)->getTerminal();
-	++i;
-	_cgiPath = (*i)->getTerminal();
+	_cgiPath = (*++i)->getTerminal();
 }
 
 void	Location::convertAcceptedMethods( Node* allowedMethods )
@@ -144,8 +143,7 @@ void	Location::convertLocation( Node* location )
 */
 
 std::string	Location::getPath() const
-{
-	return (_path);
+{ return (_path);
 }
 
 std::string	Location::getAlias() const
