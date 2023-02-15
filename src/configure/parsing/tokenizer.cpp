@@ -28,8 +28,6 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	// Punctuation and Seperators
 	tokenMap["{"]				= T_BRACKET_OPEN;
 	tokenMap["}"]				= T_BRACKET_CLOSE;
-	//tokenMap["/"]				= T_FORWARD_SLASH;
-	//tokenMap["\\"]				= T_BACK_SLASH;
 	tokenMap[";"]				= T_SEMICOLON;
 	tokenMap["#"]				= T_HASHTAG;
 	tokenMap["$"]				= T_DOLLAR;
@@ -82,27 +80,27 @@ std::list<std::string>	splitLineByDelimiters( std::string line )
 	return (words);
 }
 
-std::list<Token*>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap )
+std::list<Token>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap )
 {
-	std::list<Token*>	tokensFromLine;
+	std::list<Token>	tokensFromLine;
 	for (std::list<std::string>::iterator it = splitStrings.begin(); it != splitStrings.end(); ++it)
 	{
 		if ((*it)[0] == '#')
 			break ;
-		tokensFromLine.push_back(new Token(checkTokenType(tokenMap, *it), *it));
+		tokensFromLine.push_back(Token(checkTokenType(tokenMap, *it), *it));
 	}
 	return (tokensFromLine);
 }
 
-std::list<Token*>	createTokenList( std::ifstream& file, TokenMap tokenMap )
+std::list<Token>	createTokenList( std::ifstream& file, TokenMap tokenMap )
 {
-	std::list<Token*>	tokenList;
+	std::list<Token>	tokenList;
 	std::string			line;
 
 	while (std::getline(file, line))
 	{
 		std::list<std::string>	splitStrings = splitLineByDelimiters(line);
-		std::list<Token*> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap);
+		std::list<Token> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap);
 		tokenList.splice(tokenList.end(), tokensFromLine);
 	}
 	return (tokenList);
@@ -113,30 +111,7 @@ TokenStream	tokenizer( std::ifstream& file )
 	TokenMap				tokenMap;
 
 	initMap(tokenMap);
-	std::list<Token*>	tokenList = createTokenList(file, tokenMap);
+	std::list<Token>	tokenList = createTokenList(file, tokenMap);
 	TokenStream	tokenStream(tokenList);
 	return (tokenStream);
 }
-
-/*
-TokenStream	tokenizer( std::ifstream& file )
-{
-	std::list<Token*>		output;
-	std::list<std::string>	words;
-	TokenMap				tokenMap;
-	std::string				line;
-
-	initMap(tokenMap);
-	while (std::getline(file, line))
-	{
-		words = splitLineByDelimiters(line);
-		for (std::list<std::string>::iterator it = words.begin(); it != words.end(); ++it)
-		{
-			if ((*it)[0] == '#')
-				break ;
-			output.push_back(new Token(checkTokenType(tokenMap, *it), *it));
-		}
-	}
-	return (TokenStream(output));
-}
-*/

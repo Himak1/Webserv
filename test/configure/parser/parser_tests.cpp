@@ -6,10 +6,10 @@
 
 TEST(parseServer, client_max_body_size)
 {
-	std::list<Token*> lst = {
-		new Token(T_CLIENT_MAX_BODY, "client_max_body_size"),
-		new Token(T_STRING, "22"),
-		new Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {
+		Token(T_CLIENT_MAX_BODY, "client_max_body_size"),
+		Token(T_STRING, "22"),
+		Token(T_SEMICOLON, ";")};
 	TokenStream testInput(lst);
 
 	Node*	output = parseClientMaxBodySize(testInput);
@@ -21,12 +21,12 @@ TEST(parseServer, client_max_body_size)
 
 TEST(parseServer, index)
 {
-	std::list<Token*> lst = {
-		new Token(T_INDEX, "index"),
-		new Token(T_STRING, "index.html"),
-		new Token(T_STRING, "index.htm"),
-		new Token(T_STRING, "index.php"),
-		new Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {
+ 		Token(T_INDEX, "index"),
+		Token(T_STRING, "index.html"),
+		Token(T_STRING, "index.htm"),
+		Token(T_STRING, "index.php"),
+		Token(T_SEMICOLON, ";")};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseIndex(testInput);
@@ -45,10 +45,10 @@ TEST(parseServer, index)
 
 TEST(parseServer, serverName)
 {
-	std::list<Token*> lst = {
-		new Token(T_SERVER_NAME, "server_name"),
-		new Token(T_STRING, "www.website.org"),
-		new Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {
+		Token(T_SERVER_NAME, "server_name"),
+		Token(T_STRING, "www.website.org"),
+		Token(T_SEMICOLON, ";")};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseServerName(testInput);
@@ -61,10 +61,10 @@ TEST(parseServer, serverName)
 
 TEST(parseServer, listen)
 {
-	std::list<Token*> lst = {
-		new Token(T_LISTEN, "listen"),
-		new Token(T_STRING, "80"),
-		new Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {
+		Token(T_LISTEN, "listen"),
+		Token(T_STRING, "80"),
+		Token(T_SEMICOLON, ";")};
 	TokenStream testInput(lst);
 
 	Node*	output = parseListen(testInput);
@@ -77,11 +77,11 @@ TEST(parseServer, listen)
 
 TEST(parseServer, errorPage)
 {
-	std::list<Token*> lst = {
-		new Token(T_ERROR_PAGE, "error_page"),
-		new Token(T_STRING, "404"),
-		new Token(T_STRING, "/custom_404.html"),
-		new Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {
+		Token(T_ERROR_PAGE, "error_page"),
+		Token(T_STRING, "404"),
+		Token(T_STRING, "/custom_404.html"),
+		Token(T_SEMICOLON, ";")};
 	TokenStream testInput(lst);
 
 	Node*	output = parseErrorPage(testInput);
@@ -97,16 +97,16 @@ TEST(parseServer, errorPage)
 
 TEST(parseServer, parseServer)
 {
-	std::list<Token*> lst = {
-		new Token(T_SERVER, "server"),
-		new Token(T_BRACKET_OPEN, "{"),
-		new Token(T_SERVER_NAME, "server_name"),
-		new Token(T_STRING, "www.test.org"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_LISTEN, "listen"),
-		new Token(T_STRING, "80"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_BRACKET_CLOSE, "}")};
+	std::list<Token> lst = {
+		Token(T_SERVER, "server"),
+		Token(T_BRACKET_OPEN, "{"),
+		Token(T_SERVER_NAME, "server_name"),
+		Token(T_STRING, "www.test.org"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_LISTEN, "listen"),
+		Token(T_STRING, "80"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_BRACKET_CLOSE, "}")};
 	TokenStream testInput(lst);
 
 	Node*	output = parseServer(testInput);
@@ -120,25 +120,25 @@ TEST(parseServer, parseServer)
 
 TEST(parser, basic_2_servers)
 {	
-	std::list<Token*> lst = {
-		new Token(T_SERVER, "server"),
-		new Token(T_BRACKET_OPEN, "{"),
-		new Token(T_SERVER_NAME, "server_name"),
-		new Token(T_STRING, "www.test.org"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_LISTEN, "listen"),
-		new Token(T_STRING, "80"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_BRACKET_CLOSE, "}"),
-		new Token(T_SERVER, "server"),
-		new Token(T_BRACKET_OPEN, "{"),
-		new Token(T_SERVER_NAME, "server_name"),
-		new Token(T_STRING, "www.test.org"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_LISTEN, "listen"),
-		new Token(T_STRING, "80"),
-		new Token(T_SEMICOLON, ";"),
-		new Token(T_BRACKET_CLOSE, "}")};
+	std::list<Token> lst = {
+		Token(T_SERVER, "server"),
+		Token(T_BRACKET_OPEN, "{"),
+		Token(T_SERVER_NAME, "server_name"),
+		Token(T_STRING, "www.test.org"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_LISTEN, "listen"),
+		Token(T_STRING, "80"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_BRACKET_CLOSE, "}"),
+		Token(T_SERVER, "server"),
+		Token(T_BRACKET_OPEN, "{"),
+		Token(T_SERVER_NAME, "server_name"),
+		Token(T_STRING, "www.test.org"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_LISTEN, "listen"),
+		Token(T_STRING, "80"),
+		Token(T_SEMICOLON, ";"),
+		Token(T_BRACKET_CLOSE, "}")};
 	TokenStream testInput(lst);
 
 	Node*	output = parser(testInput);

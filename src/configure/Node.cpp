@@ -46,12 +46,12 @@ std::ostream&	operator<<( std::ostream& o, Node const& i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-const int&	Node::getNodeType() const
+int	Node::getNodeType() const
 {
 	return (_nodeType);
 }
 
-const std::string&	Node::getTerminal() const
+std::string	Node::getTerminal() const
 {
 	return (_terminal);
 }

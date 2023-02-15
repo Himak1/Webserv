@@ -36,11 +36,11 @@ class Node
 		Node( int nodeType, std::string terminal);
 		~Node();
 
-		const int&			getNodeType() const;
-		const std::string&	getTerminal() const;
+		int							getNodeType() const;
+		std::string					getTerminal() const;
 		NodeList::const_iterator	getChildrenBegin() const;
 		NodeList::const_iterator	getChildrenEnd() const;
-		int					addChild( Node* newNode );
+		int							addChild( Node* newNode );
 	private:
 		Node();
 
