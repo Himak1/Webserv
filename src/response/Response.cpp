@@ -44,16 +44,9 @@ string 	Response::getMessage()
 {
 	_status = setStatus();
 
-	if (safe_substr(_request.getURI(), 0, _request.getURI().find("?")) == "/upload_handler.php")
-		uploadFile();
+	uploadFile();
 
-	if (_request.getMethod() == "DELETE")	_content = deleteFile();
-	else if (_status == MOVED_PERMANENTLY)	_content = redirect();
-	else if (_status == FOUND)				_content = redirect();
-	else if (_status == NOT_FOUND)			_content = fileNotFound();
-	else if (_status != OK)					_content = createErrorHTML();
-	else if (_request.isCGI())				_content = getCGI();
-	else									_content = getFileContent();
+	_content = getContent();
 
 	return createResponse();
 }
@@ -67,10 +60,9 @@ void	Response::initStatusCodes()
 	_status_codes[301] = "301 Moved Permanently\n";
 	_status_codes[302] = "302 Found\n";
 	_status_codes[400] = "400 Bad Request\n";
-	// _status_codes[401] = "401 Unauthorized\n";
-	// _status_codes[403] = "403 Forbidden\n";
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
+	_status_codes[413] = "413 Request Entity Too Large\n";
 	_status_codes[415] = "415 Unsupported Media Type\n";
 	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
@@ -92,7 +84,8 @@ void	Response::initContentTypes()
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
 }
 
-bool	Response::isExistingFile(string filename) {
+bool	Response::isExistingFile(string filename)
+{
 	basic_ifstream<char> input_stream(filename.c_str());
 	if (input_stream.is_open()) {
 		input_stream.close();
@@ -123,7 +116,19 @@ int		Response::setStatus()
 	return NOT_FOUND;
 }
 
-string Response::deleteFile()
+string	Response::getContent()
+{
+	if (_request.getMethod() == "DELETE")	return deleteFile();
+	if (_status == MOVED_PERMANENTLY)		return redirect();
+	if (_status == FOUND)					return redirect();
+	if (_status == NOT_FOUND)				return fileNotFound();
+	if (_status != OK)						return createErrorHTML();
+	if (_request.isCGI())					return getCGI();
+
+	return(getFileContent());
+}
+
+string	Response::deleteFile()
 {
 	if (remove(_filepath.c_str()) != 0) {
 		_status = NOT_FOUND;
@@ -132,45 +137,46 @@ string Response::deleteFile()
 	return "File " + _filepath + " has been deleted";
 }
 
-void Response::uploadFile()
+void	Response::uploadFile()
 {
 	_request.setUploadSucces(false);
 
 	string input_path;
 	map<string, string> env = _request.getEnv();
-	if (env.find("file_to_upload") != env.end())
+	if (env.find("file_to_upload") == env.end())
+		return;
+	else
 		input_path = env["file_to_upload"];
 
-	cout << "UPLOAD PATH = " << input_path << endl;
-	// check if file exists
 	if (!isExistingFile(input_path)) {
 		cout << "FILE DOES NOT EXIST" << endl;
-		_request.setUploadSucces(false);
 		return;
 	}
 
-	// stream input to file_data
+	string file_data = streamFileDataToString(input_path);
+	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
+	writeStringToFile(file_data, filename);
+
+	if (isExistingFile(filename))
+		_request.setUploadSucces(true);
+}
+
+string	Response::streamFileDataToString(string input_path)
+{
 	ifstream input_stream(input_path.c_str());
 	ostringstream ss;
 	string line;
 	while (getline(input_stream, line))
 		ss << line << endl;
-	string file_data = ss.str();
-	cout << "file_data = " << file_data << endl;
+	return ss.str();
+}
 
-	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
-	// write file_data to output_path
+void	Response::writeStringToFile(string file_data, string filename) 
+{
 	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
 	ofstream fout(upload_path);
 	fout << file_data << endl;
     fout.close();
-
-	// check if upload was succesful
-	basic_ifstream<char> check_upload(upload_path.c_str());
-	if (check_upload.is_open()) {
-		check_upload.close();
-		_request.setUploadSucces(true);
-	}
 }
 
 string Response::getCGI()
