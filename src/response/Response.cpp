@@ -2,6 +2,7 @@
 #include "CGI.hpp"
 #include "../utils/log.hpp"
 #include "../utils/strings.hpp"
+#include "../utils/fileHandling.hpp"
 #include "../configure/Location.hpp"
 
 #include <iostream>
@@ -16,22 +17,11 @@
 Response::Response(class Request request, class Configuration config)
 	: _request(request), _config(config)
 {
-	if (_request.getURI() == "/"
-		|| ((_request.getMethod() != "DELETE"
-		&& _request.getURI().rfind('.') == string::npos))) {
-		list<string> indexFiles = _config.indexFiles;
-		list<string>::iterator it;
-		for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
-			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
-			if (isExistingFile(_filepath))
-				break;
-		}
-	}
-	else
-		_filepath = _config.getRoot() + _request.getURI();
-
 	initStatusCodes();
 	initContentTypes();
+	_filepath = setFilePath();
+	_status = setStatus();
+	_content = getContent();
 }
 
 // DESTRUCTOR
@@ -42,16 +32,41 @@ string 	Response::getFilepath() { return _filepath; }
 
 string 	Response::getMessage()
 {
-	_status = setStatus();
-
 	uploadFile();
 
-	_content = getContent();
-
-	return createResponse();
+	ostringstream ss;
+	ss	<< _request.getHTTPVersion() << " "
+		<< _status_codes[_status]
+		<< _content_types[ _request.getExtension()]
+		<< setCookie()
+		<< "Content-Length: "
+		<< _content.size() << "\n\n"
+		<< _content;
+	return ss.str();
 }
 
 // PRIVATE FUNCTIONS
+string	Response::setFilePath()
+{
+	if (_request.getURI() == "/"
+		|| ((_request.getMethod() != "DELETE"
+		&& _request.getURI().rfind('.') == string::npos))) {
+		list<string>::iterator it = _config.indexFiles.begin();
+		cout << "????" << endl;
+		cout << it->c_str() << endl;
+		while (it != _config.indexFiles.end()) {
+			cout << it->c_str() << endl;
+			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
+			if (isExistingFile(_filepath))
+				return _filepath;
+			++it;
+		}
+		if (it == _config.indexFiles.end())
+			return _config.getRoot() + "/";
+	}
+	return (_config.getRoot() + _request.getURI());
+}
+
 void	Response::initStatusCodes()
 {
 	_status_codes[200] = "200 OK\n";
@@ -64,6 +79,7 @@ void	Response::initStatusCodes()
 	_status_codes[405] = "405 Method Not Allowed\n";
 	_status_codes[413] = "413 Request Entity Too Large\n";
 	_status_codes[415] = "415 Unsupported Media Type\n";
+	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
@@ -82,16 +98,6 @@ void	Response::initContentTypes()
 	_content_types[".php"] 	= "Content-Type: text/html; charset=utf-8\n";
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
-}
-
-bool	Response::isExistingFile(string filename)
-{
-	basic_ifstream<char> input_stream(filename.c_str());
-	if (input_stream.is_open()) {
-		input_stream.close();
-		return true;
-	}
-	return false;
 }
 
 int		Response::setStatus()
@@ -125,7 +131,7 @@ string	Response::getContent()
 	if (_status != OK)						return createErrorHTML();
 	if (_request.isCGI())					return getCGI();
 
-	return(getFileContent());
+	return(streamFileDataToString(_filepath));
 }
 
 string	Response::deleteFile()
@@ -155,43 +161,47 @@ void	Response::uploadFile()
 
 	string file_data = streamFileDataToString(input_path);
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
-	writeStringToFile(file_data, filename);
+	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
+	writeStringToFile(file_data, upload_path);
 
 	if (isExistingFile(filename))
 		_request.setUploadSucces(true);
 }
 
-string	Response::streamFileDataToString(string input_path)
-{
-	ifstream input_stream(input_path.c_str());
-	ostringstream ss;
-	string line;
-	while (getline(input_stream, line))
-		ss << line << endl;
-	return ss.str();
-}
-
-void	Response::writeStringToFile(string file_data, string filename) 
-{
-	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
-	ofstream fout(upload_path);
-	fout << file_data << endl;
-    fout.close();
-}
-
 string Response::getCGI()
 {
-	list<Location*>::iterator i = _config.locations.begin();
-	while (i != _config.locations.end()) {
-		if ((*i)->getPath() == _filepath)
-			break;
-		++i;
+	string target = _request.getURI();
+	list<Location*>::iterator it = findConfigLocation(target);
+	if (it == _config.locations.end()) {
+		_status = INTERNAL_SERVER_ERROR;
+		return createErrorHTML();
 	}
-	class CGI CGI(_request, *(*i), _filepath);
+	class CGI CGI(_request, *(*it), _filepath);
 	string cgi = CGI.ExecuteCGI();
 	if (cgi.find("<!doctype html>") == string::npos)
 		return getCGI();
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
+}
+
+list<Location*>::iterator Response::findConfigLocation(string target) {
+	if (target.rfind("/") == 0)
+		return searchLocations("/");
+
+	list<Location*>::iterator it = _config.locations.begin();
+	it = searchLocations(target);
+	if (it == _config.locations.end())
+		return findConfigLocation(go_one_directory_up(target));
+	return it;
+}
+
+list<Location*>::iterator Response::searchLocations(string target) {
+	list<Location*>::iterator it = _config.locations.begin();
+	while (it != _config.locations.end()) {
+		if ((*it)->getPath() == target)
+			return it;
+		++it;
+	}
+	return it;
 }
 
 string Response::setCookie()
@@ -233,7 +243,7 @@ string Response::redirect()
 	if (_status == 302)
 		_filepath = _config.getRoot() + COSTUM_302;
 
-	return getFileContent();
+	return streamFileDataToString(_filepath);
 }
 
 string Response::fileNotFound()
@@ -244,7 +254,7 @@ string Response::fileNotFound()
 		return createErrorHTML();
 
 	_filepath = _config.getRoot() + COSTUM_404;
-	return getFileContent();
+	return streamFileDataToString(_filepath);
 }
 
 string Response::createErrorHTML()
@@ -261,32 +271,5 @@ string Response::createErrorHTML()
 		<< "</head><body><center><h1>"
 		<< _status_codes[_status]
 		<< "</h1></center></body></html>";
-	return ss.str();
-}
-
-string Response::getFileContent()
-{
-	ifstream input_stream(_filepath.c_str());
-
-	ostringstream ss;
-	string line;
-	while (getline(input_stream, line))
-		ss << line << endl;
-	return ss.str();
-}
-
-string Response::createResponse()
-{
-	ostringstream ss;
-	ss	<< _request.getHTTPVersion() << " "
-		<< _status_codes[_status]
-		<< _content_types[ _request.getExtension()]
-		<< setCookie()
-		<< "Content-Length: "
-		<< _content.size() << "\n\n"
-		<< _content;
-
-	// if (_request.getExtension() == ".php")
-	// 	cout << "RESPONS: " << ss.str() << endl;
 	return ss.str();
 }

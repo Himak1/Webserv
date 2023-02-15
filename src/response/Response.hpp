@@ -27,23 +27,21 @@ class Response
 		class Configuration			_config;
 		map<int, string>			_status_codes;
 		map<string, string>			_content_types;
-
+	
+		string						setFilePath();
 		void						initStatusCodes();
 		void						initContentTypes();
-		bool						isExistingFile(string filename);
 		int							setStatus();
 		string						getContent();
 		string 						deleteFile();
 		void 						uploadFile();
-		string						streamFileDataToString(string input_path);
-		void						writeStringToFile(string file_data, string filename);
 		string						getCGI();
 		string						setCookie();
 		string 						redirect();
 		string 						fileNotFound();
 		string						createErrorHTML();
-		string						getFileContent();
-		string						createResponse();
+		list<Location*>::iterator 	findConfigLocation(string target);
+		list<Location*>::iterator 	searchLocations(string target);
 };
 
 #endif

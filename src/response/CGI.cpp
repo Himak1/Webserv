@@ -23,20 +23,13 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 	_argument = new char[3];
 	_argument = strcpy(_argument, "-q");
 
-	// char *_path_to_cgi;
-	// if (_request.getExtension() == ".php") {
-	// 	// _path_to_cgi = location.getCgiPath().c_str();
-	// 	_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
-	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
-	// }
-	// else if (_request.getExtension() == ".py") {
-	// 	// _config.g = 
-	// 	_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
-	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
-	// }
+	char *_path_to_cgi;
+	int path_length = _location.getCgiPath().size();
+	_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
+	_path_to_cgi = strcpy(_path_to_cgi, _location.getCgiPath().c_str());
 
-	_path[0] = const_cast<char*>(_location.getCgiPath().c_str());
-	// _path[0] = &_path_to_cgi[0];
+	// _path[0] = const_cast<char*>(_location.getCgiPath().c_str());
+	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
 	// if (_request.getExtension() == ".php") 
 		// _path[2] = &_argument[0];
@@ -45,8 +38,8 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 	_path[3] = NULL;
 	_env = createEnv();
 
-	// cout << "_filepath = " << _filepath << endl;
-	// cout << "_path_to_cgi = " << _path_to_cgi << endl;
+	cout << "_filepath = " << _filepath << endl;
+	cout << "_path_to_cgi = " << _location.getCgiPath().c_str() << endl;
 	// cout << "_path_to_script = " << _path_to_script << endl;
 	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
 }
@@ -75,7 +68,12 @@ string CGI::ExecuteCGI()
 		close(fd[1]);
 		execve(_path[0], _path, _env);
 		perror("execve failed: ");
-		cout << "Execve error" << endl;
+		cout << "<!DOCTYPE html><html lang=\"en\"><head><title>"
+		<< "500 Internal Server Error\n"
+		<< "</title>"
+		<< "</head><body><center><h1>"
+		<< "500 Internal Server Error\n"
+		<< "</h1></center></body></html>" << endl;
 		exit(0);
 	}
 	// TO DO: message can currently not be bigger than CGI_BUFSIZE
