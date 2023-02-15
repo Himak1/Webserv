@@ -13,7 +13,7 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
-	: _ipAddress("0.0.0.0")
+	: _ipAddress("0.0.0.0"), _port(80), _clientMaxBodySize(2)
 {
 	try {
 		navigateNode(serverNode);
