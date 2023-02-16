@@ -23,7 +23,6 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 	_argument = new char[3];
 	_argument = strcpy(_argument, "-q");
 
-	char *_path_to_cgi;
 	int path_length = _location.getCgiPath().size();
 	char *_path_to_cgi = new char[path_length + 1];
 	_path_to_cgi = strcpy(_path_to_cgi, _location.getCgiPath().c_str());

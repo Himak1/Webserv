@@ -48,11 +48,11 @@ string 	Response::getMessage()
 // PRIVATE FUNCTIONS
 string	Response::setFilePath()
 {
-	if (_request.getURI() == "/"
-		|| ((_request.getMethod() != "DELETE"
-		&& _request.getURI().rfind('.') == string::npos))) {
+	bool is_undefined_extension = _request.getMethod() != "DELETE"
+									&& _request.getURI().rfind('.') == string::npos;
+
+	if (_request.getURI() == "/" || is_undefined_extension) {
 		list<string>::iterator it = _config.indexFiles.begin();
-		cout << "????" << endl;
 		cout << it->c_str() << endl;
 		while (it != _config.indexFiles.end()) {
 			cout << it->c_str() << endl;
@@ -61,8 +61,10 @@ string	Response::setFilePath()
 				return _filepath;
 			++it;
 		}
+		// Wat doen we als er geen (correcte) IndexFiles worden opgegeven?
+		// Of is dat verplicht in de config?
 		if (it == _config.indexFiles.end())
-			return _config.getRoot() + "/";
+			return _config.getRoot() + "/index.html";
 	}
 	return (_config.getRoot() + _request.getURI());
 }
@@ -124,12 +126,14 @@ int		Response::setStatus()
 
 string	Response::getContent()
 {
+	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
+
 	if (_request.getMethod() == "DELETE")	return deleteFile();
 	if (_status == MOVED_PERMANENTLY)		return redirect();
 	if (_status == FOUND)					return redirect();
 	if (_status == NOT_FOUND)				return fileNotFound();
 	if (_status != OK)						return createErrorHTML();
-	if (_request.isCGI())					return getCGI();
+	if (isCGI)								return getCGI();
 	return(streamFileDataToString(_filepath));
 }
 
