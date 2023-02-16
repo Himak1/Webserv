@@ -2,9 +2,9 @@
 #include "Configuration.hpp"
 #include "Location.hpp"
 #include "Node.hpp"
-#include "parsing/tokenizer.hpp"
-#include "parsing/TokenStream.hpp"
-#include "parsing/parser.hpp"
+#include "parser/tokenizer.hpp"
+#include "parser/TokenStream.hpp"
+#include "parser/parser.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -101,39 +101,3 @@ std::ostream&	operator<<( std::ostream& o, const Configuration& config )
 	return (o);
 }
 
-static std::list<Configuration*>	createConfigurations(std::list<Configuration*>& serverConfigs, Node* ast)
-{
-	for (NodeList::const_iterator i = ast->getChildrenBegin(); i != ast->getChildrenEnd(); ++i) {
-		try {
-			serverConfigs.push_back(new Configuration(*i));
-		}
-		catch (std::exception& e) {
-			std::cout << "invalid values were found" << std::endl;
-			throw std::exception();
-		}
-	}
-	return (serverConfigs);
-}
-
-std::list<Configuration*>	parseAndCreateConfigurations(int argc, char **argv)
-{
-	std::ifstream	configFile;
-
-	if (argc >= 2)
-		configFile.open(argv[1]);
-	else
-		configFile.open("default.conf");
-	if (!configFile) {
-		std::cerr << "invalid config file" << std::endl;
-		throw std::exception();
-	}
-
-	TokenStream	tokens = tokenizer(configFile);
-	Node*		ast = parser(tokens);
-
-	std::list<Configuration*>	serverConfigs;
-	if (!ast)
-		return (serverConfigs);
-	createConfigurations(serverConfigs, ast);
-	return (serverConfigs);
-}

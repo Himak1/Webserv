@@ -2,16 +2,17 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 ### Setting Source Files & Header Files ###
 set(SRC_FILES
+    configure/configure.cpp
     configure/AConfig.cpp
     configure/Configuration.cpp
     configure/Location.cpp
     configure/Node.cpp
-    configure/parsing/Token.cpp
-    configure/parsing/TokenStream.cpp
-    configure/parsing/tokenizer.cpp
-    configure/parsing/parser.cpp
-    configure/parsing/parseLocation.cpp
-    configure/parsing/parser_utils.cpp
+    configure/parser/Token.cpp
+    configure/parser/TokenStream.cpp
+    configure/parser/tokenizer.cpp
+    configure/parser/parser.cpp
+    configure/parser/parseLocation.cpp
+    configure/parser/parser_utils.cpp
 
     main.cpp
     server/TCPServer.cpp
