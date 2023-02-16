@@ -53,7 +53,8 @@ string	Response::setFilePath()
 
 	if (_request.getURI() == "/" || is_undefined_extension) {
 		list<string>::iterator it = _config.indexFiles.begin();
-		cout << it->c_str() << endl;
+		//it->c_str() returned nooit iets
+		cout << "SETFILEPATH | "<< it->c_str() << endl;
 		while (it != _config.indexFiles.end()) {
 			cout << it->c_str() << endl;
 			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
