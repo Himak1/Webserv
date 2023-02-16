@@ -45,16 +45,18 @@ socket fd 0 ##########invalid! (POLLNVAL event) needs handler, voor nu callt dez
 /* #################################################################################################### */	//		TMP		
 /* #################################################################################################### */	//		TMP
 /* ###########																				###########	*/	//		TMP
+/* ###########		WERKT WEL (leidt example.com naar onze localhost)						###########	*/	//		TMP
+/* ###########		curl --resolve example.com:80:127.0.0.1 http://example.com/index.html	###########	*/	//		TMP
+/* ###########																				###########	*/	//		TMP
+/* ###########		WERKT NIET (bezoekt example.com)										###########	*/	//		TMP
+/* ###########		curl --resolve example.com:8000:127.0.0.1 http://example.com/index.html	########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* ###########		Voordat we runnen moet het max aantal open file descriptors van 		###########	*/	//		TMP
 /* ###########		het OS gecheckt worden (wij hebben per connectie een file descriptor 	###########	*/	//		TMP
 /* ###########		nodig).																 	###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
 /* ###########		Dit doe je door in terminal 'ulimit -n' in te typen.					###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
 /* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
 /* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/	//		TMP
 /* ###########																				###########	*/	//		TMP
 /* ###########		In siege.conf (root/.siege/)											###########	*/	//		TMP
@@ -83,8 +85,6 @@ namespace
 
 	void logStartupMessage(struct sockaddr_in _socketAddress)
 	{
-
-
 		std::ostringstream ss;
 
 		ss	<< "\n*** Listening on ADDRESS: "

@@ -3,6 +3,7 @@
 
 # include <string>
 # include <list>
+# include <vector>
 # include "AConfig.hpp"
 
 class Node;
