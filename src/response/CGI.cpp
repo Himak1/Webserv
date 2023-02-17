@@ -9,7 +9,8 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <stdlib.h>
-
+#include <stdio.h>
+#include <errno.h>
 
 // CONSTRUCTOR
 // CGI::CGI(class Request request, class Configuration config, string filepath)
@@ -63,6 +64,7 @@ char** 	CGI::getFormEnv() const { return _env; }
 string CGI::ExecuteCGI()
 {
 	int		fd[2];
+	fd[0] = 0;
 	dup2(fd[0], STDIN_FILENO);
 	close(fd[0]);
 	if (pipe(fd) < 0)

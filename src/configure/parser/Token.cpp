@@ -10,8 +10,8 @@ Token::Token()
 {
 }
 
-Token::Token( int type, std::string tokenString )
-	: _tokenType(type), _token(tokenString)
+Token::Token( int type, std::string tokenString, int lineNumber )
+	: _tokenType(type), _token(tokenString), _lineNumber(lineNumber)
 {
 }
 
@@ -66,8 +66,7 @@ const std::string&	Token::getToken() const
 	return (_token);
 }
 
-/*
-** --------------------------------- ACCESSOR ---------------------------------
-*/
-
- 
+int	Token::getLineNumber() const
+{
+	return (_lineNumber);
+}

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include "configure.hpp"
 #include "Node.hpp"
 #include "parser/TokenStream.hpp"
@@ -8,9 +9,24 @@
 
 static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
 {
-	if (argc >= 2)	configFile.open(argv[1]);
-	else 			configFile.open("default.conf");
-	if (!configFile) std::terminate();
+	if (argc >= 2)
+	{
+		configFile.open(argv[1]);
+		if (!configFile)
+		{
+			std::cerr << "ERROR: '" << argv[1] << "' could not be opened" << std::endl;
+			exit(1);
+		}
+	}
+	else
+	{
+		configFile.open("default.conf");
+		if (!configFile)
+		{
+			std::cerr << "ERROR: default configuration file wasn't found" << std::endl;
+			exit(1);
+		}
+	}
 }
 
 static std::list<Configuration*>	convertASTtoConfigList( Node* ast )
@@ -22,8 +38,9 @@ static std::list<Configuration*>	convertASTtoConfigList( Node* ast )
 			serverConfigs.push_back(new Configuration(*i));
 		}
 		catch (std::exception& e) {
-			std::cout << "invalid values were found" << std::endl;
-			throw std::exception();
+			std::cout	<< "ERROR: invalid values were found in the configuration file"
+						<< std::endl;
+			exit(1);
 		}
 	}
 	return (serverConfigs);
@@ -38,7 +55,7 @@ std::list<Configuration*>	initializeConfigurations( int argc, char **argv )
 	TokenStream					tokens = tokenizer(configFile);
 	Node*						ast = parser(tokens);
 	if (!ast)
-		std::terminate();
+		exit(1);
 	std::list<Configuration*>	serverConfigs = convertASTtoConfigList(ast);
 	return (serverConfigs);
 }

@@ -37,17 +37,19 @@ class Token
 {
 	public:
 		Token();
-		Token( int type, std::string tokenString );
+		Token( int type, std::string tokenString, int lineNumber );
 		Token( const Token& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
 
-		int			getTokenType() const;
+		int					getTokenType() const;
 		const std::string&	getToken() const;
+		int					getLineNumber() const;
 	private:
 		int			_tokenType;
 		std::string	_token;
+		int			_lineNumber;
 };
 
 std::ostream&		operator<<( std::ostream& o, Token const& i );
