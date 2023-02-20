@@ -32,7 +32,7 @@ namespace
 namespace http
 {
 	// CONSTRUCTOR
-	TCPServer::TCPServer(class Configuration configuration)
+	TCPServer::TCPServer(class Configuration& configuration)
 		: _config(configuration), _socket(), _new_socket(),
 		_socketAddress(), _socketAddress_len(sizeof(_socketAddress))
 	{

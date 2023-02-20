@@ -24,6 +24,7 @@ Configuration::Configuration( Node* serverNode )
 }
 
 /* Configuration::Configuration(const Configuration &src) */
+/* 	: */ 
 /* { */
 /* 	*this = src; */
 /* } */

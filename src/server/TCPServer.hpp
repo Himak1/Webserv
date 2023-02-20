@@ -16,12 +16,12 @@ namespace http
 	class TCPServer
 	{
 	public:
-		TCPServer(class Configuration configuration);
+		TCPServer(class Configuration& configuration);
 		~TCPServer();
 		void						startListen();
 
 	private:
-		const class Configuration	_config;
+		const class Configuration&	_config;
 		class Request				_request;
 		int							_socket;
 		int							_new_socket;
