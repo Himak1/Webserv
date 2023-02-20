@@ -182,6 +182,7 @@ string Response::returnErrorPage()
 {
 	try {
 		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		cout << _filepath << endl;
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}
