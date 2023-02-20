@@ -28,28 +28,21 @@ class TCPServer
 public:
 	TCPServer(std::vector<Configuration*>);
 	~TCPServer();
-	void				startListen();
 
-	struct TCPServerException : public exception {
-		const char * what () const throw () {
-    		return "TCPServer error ";
-		}
-	};
+	void				startPolling();
 	
 private:
-	// class Configuration			_config;
+		// Private members 
 	std::vector<Configuration*>	_configList;
-	class Request				_request;
-	
 	std::vector<struct pollfd>	_pollFds;			
 	std::vector<t_socket>		_socketInfo;
-	unsigned int				_nbListeningSockets;
+	class Request				_request;
 
+	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
-
- 
-	void						newConnection(int);
+		// Private member functions
+ 	void						newConnection(int);
 	void						closeConnection(int);
 	void						closeServer();
 	void						receiveRequest(int);
@@ -61,6 +54,32 @@ private:
 	void						setupSocketStruct(t_socket *);
 	void						setFileDescrOptions(int);
 	void						lookupActiveSocket();
+
+		// Private exceptions
+	struct SockBindingFail : public exception {
+		const char * what () const throw () {
+    		return "Failed to bind socket. Exiting program";
+		}
+	};	
+	struct ListenFail : public exception {
+		const char * what () const throw () {
+    		return "Failure to listen to socket. Exiting program";
+		}
+	};	
+	struct SockNoBlock : public exception {
+		const char * what () const throw () {
+    		return "Failure to set socket to non-blocking. Exiting program";
+		}
+	};	
+	struct SockCreateFail : public exception {
+		const char * what () const throw () {
+    		return "Failure to create socket. Exiting program";
+		}
+	};	
+
+
+
+
 };
 
 }			// namespace http

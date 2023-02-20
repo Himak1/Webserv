@@ -93,10 +93,23 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		_nbListeningSockets(0),
 		_configList(configList)
 {
-	// try {
+	try {
 		setupListeningSockets();
-		_isServerRunning = true;
-		startListen();
+	} catch (SockBindingFail& e) {
+		cout << e.what() << endl;
+		exit(1);
+	} catch (ListenFail& e) {
+		cout << e.what() << endl;
+		exit(2);
+	} catch (SockNoBlock& e) {
+		cout << e.what() << endl;
+		exit(3);
+	}	
+
+	_isServerRunning = true;
+	startPolling();
+
+	
 	// } catch (TCPServerException& e) {
 	// 	std::cout << "TCP except caught: " << e.what() << std::endl;
 	// 	std::exit(1);
@@ -115,61 +128,56 @@ TCPServer::~TCPServer()
 
 			// PRIVATE FUNCTIONS
 
-/* setsocktopt() zorgt ervoor dat we ingeval van een restart de socket kunnen hergebruiken                            */
+/* setsocktopt() zorgt ervoor dat we ingeval van een restart de socket kunnen hergebruiken    
+
+				evt ipv sin_addr.s_addr = inet_addr
+		
+
+                        */
 void	TCPServer::setupListeningSockets()
 {
 	struct pollfd	poll_fd;
-	int				i = 0;
+	int				i = 0, rv;
 	t_socket		listener;
-
+	int				re_use = 1;
 
 	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
+
+
 		std::memset(&listener, 0, sizeof(listener));
 		std::memset(&poll_fd, 0, sizeof(poll_fd));
-		listener.socket_info.sin_port = htons((*it)->getPort());	
-		
-		// listener.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
-		listener.socket_info.sin_addr.s_addr = inet_addr((*it)->getHost().c_str());
 
-		// struct addrinfo	*res, *p, hints;
-		// memset(&hints, 0, sizeof(hints));
-		// hints.ai_family = AF_INET;
-		// hints.ai_socktype = SOCK_STREAM;
-		// std::string port_nb = number_to_string((*it)->getPort());
-		// int status;
-		// status = getaddrinfo((*it)->getIP().c_str(), port_nb.c_str(), &hints, &res);
-		// if (status != 0){
-		// 	std::cout << "Getaddrinfo error : ";
-		// 	exitWithError(gai_strerror(status));
-		// }
-		// listener.socket_info = *((sockaddr_in *) res);
-
-		
-		poll_fd.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	// AF_INET == ipv4, AF_INET6 == ipv6 of AF_UNSPEC
-		if (poll_fd.fd < 0) {
-			exitWithError("Cannot create listening socket");
-		}
-		setFileDescrOptions(poll_fd.fd);
+		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+				// err handle
 	
+		setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use));
+			
+
+		// setFileDescrOptions(poll_fd.fd);
+
+
+		listener.socket_info.sin_addr.s_addr = INADDR_ANY;
+		listener.socket_info.sin_family = AF_INET;
+		listener.socket_info.sin_port = htons((*it)->getPort());
+
+		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_info, sizeof(listener.socket_info)) == -1)
+			throw SockBindingFail();
+		if (listen(poll_fd.fd, SOMAXCONN) == -1)
+			throw ListenFail();
+		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
+			throw SockNoBlock();
 
 
 
-		listener.socket_address_len = sizeof(listener.socket_info);
-		// memset(listener.socket_info.sin_zero, 0, sizeof(listener.socket_info.sin_zero));
-		_socketInfo.push_back(listener);
-
-
+		listener.socket_address_len = sizeof(listener.socket_info);		// nodig?
 		poll_fd.events = POLLIN;
+
+		_socketInfo.push_back(listener);
 		_pollFds.push_back(poll_fd);
 		_nbListeningSockets++;
-		
 
-		int rc = bind(poll_fd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
-		// int rc = bind(poll_fd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
-		if (rc < 0) {
-			exitWithError("Cannot bind() socket to address");
-		}
 		logStartupMessage(_socketInfo[i].socket_info);
+
 	}
 }
 
@@ -180,21 +188,15 @@ void	TCPServer::setupSocketStruct(t_socket *socket)
 	// // socket->socket_info.sin_addr.s_addr = INADDR_ANY; // misschien veranderen naar ip uit config?
 }
 
-void TCPServer::startListen()
+void TCPServer::startPolling()
 {
 	int	poll_count;
 	int i;
 
-	for ( i = 0; i < _nbListeningSockets; i++) {					// listeningSockets == pollFd.size
-		if (listen(_pollFds[i].fd, QUEU_LIMIT_LISTEN) < 0)			
-			exitWithError("Socket listen failed");
-		// logStartupMessage(_socketInfo[i].socket_info);
-	}
-
 	while (_isServerRunning) {
 		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
-			exitWithError("Poll count = negative (TCPServer::startListen()");
+			exitWithError("Poll count = negative (TCPServer::startPolling()");
 		}
 		lookupActiveSocket();
 	}	
@@ -215,23 +217,10 @@ void	TCPServer::lookupActiveSocket()
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
 		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i); 	
-		else if (_pollFds[i].revents & POLLOUT) 	{
-			// try {
-				sendResponse(i);	
-		// 	} catch 	(TCPServer::TCPServerException& e) {
-		// std::cout << "lookup try: TCPServ error caught " << e.what() << std::endl;
-		// std::exit(1);
-	// } catch (std::exception& e) {
-	// 	std::cout << "lookupt try: Standard error caught: " << e.what() << std::endl;
-	// 	std::exit(2);
-	// }	
-
-		}	
+		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);	
-		else if (_pollFds[i].revents & POLLNVAL) {	// closeConnection(i);
-		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
-		}
-		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;
+		else if (_pollFds[i].revents & POLLNVAL) 	closeConnection(i);
+		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;	// tmp
 	}	
 	  													 		
 }
@@ -290,7 +279,7 @@ void TCPServer::receiveRequest(int idx)
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
-			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startListen()" << std::endl;		// error
+			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startPolling()" << std::endl;		// error
 		// else
 		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);

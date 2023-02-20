@@ -45,19 +45,6 @@ http://127.0.0.1:8002/favicon.ico
 http://127.0.0.1:8002/index.html
 http://127.0.0.1:8002/index.py
 
-http://127.0.0.1:8003/inc/bg.jpg
-http://127.0.0.1:8003/inc/gif.gif
-http://127.0.0.1:8003/inc/jpg.jpg
-http://127.0.0.1:8003/inc/png.png
-http://127.0.0.1:8003/inc/text.txt
-http://127.0.0.1:8003/templates/301.html
-http://127.0.0.1:8003/templates/302.html
-http://127.0.0.1:8003/templates/404.html
-http://127.0.0.1:8003/templates/style.css
-http://127.0.0.1:8003/templates/
-http://127.0.0.1:8003/uploads/notes.txt
-http://127.0.0.1:8003/favicon.ico
-http://127.0.0.1:8003/index.html
-http://127.0.0.1:8003/index.py
+
 
 

@@ -35,6 +35,6 @@ int main(int argc, char **argv)
 	// try	{
 	// } catch std::exception 
 	// {}
-	// server.startListen();
+	// server.startPolling();
 	return 0;
 }
