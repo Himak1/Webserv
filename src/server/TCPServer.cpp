@@ -1,7 +1,9 @@
 # include "TCPServer.hpp"
 # include "../response/Response.hpp"
 # include "../utils/strings.hpp"
- 
+
+# include <cstdlib>
+# include <cstring>
 # include <sys/socket.h>
 # include <sys/types.h>
 # include <netdb.h>
@@ -17,27 +19,6 @@
 
 
 # define POLL_TIMEOUT 200	 // in ms
-
-
-/////////// TOOO DOOOOO
-/*
-
-	Sockets moeten goed closen. Dit zou er voor meoten zorgen dat 'siege -b localhost:8000' werkt?
-
-
-	siege -c100 -f siege_url.txt      100 concurrent users die website uit de file bezoeken
-
-	fix vastlopers: 
-
-unable to write to socket sock.c:733: Broken pipe
-[error] socket: read error Connection reset by peer sock.c:635: Connection reset by peer
-[error] socket: unable to connect sock.c:282: Connection refused
-
-
-socket fd 0 ##########invalid! (POLLNVAL event) needs handler, voor nu callt deze de closeConnection()
-
-*/
-
 
 
 
@@ -106,41 +87,54 @@ namespace
 namespace http
 {;
 
-			// CONSTRUCTOR
+			// CONSTRUCTORS
+
 TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		_nbListeningSockets(0),
 		_configList(configList)
-		//_config(configuration), 
 {
-	setUpListeningSockets();
-	_isServerRunning = true;
-	startListen();
+	// try {
+		setupListeningSockets();
+		_isServerRunning = true;
+		startListen();
+	// } catch (TCPServerException& e) {
+	// 	std::cout << "TCP except caught: " << e.what() << std::endl;
+	// 	std::exit(1);
+	// } catch (std::exception& e) {
+	// 	std::cout << "Standard error caught: " << e.what() << std::endl;
+	// 	std::exit(2);
+	// }	
 }
 
-			// DESTRUCTOR
+			// DESTRUCTORS
+
 TCPServer::~TCPServer()
 {
 	closeServer();
 }
 
 			// PRIVATE FUNCTIONS
+
 /* setsocktopt() zorgt ervoor dat we ingeval van een restart de socket kunnen hergebruiken                            */
-void	TCPServer::setUpListeningSockets()
+void	TCPServer::setupListeningSockets()
 {
 	struct pollfd	listening_pollFd;
-	int				re_use = 1, i = 0;
+	int				i = 0;
 	t_socket		listening_socket;
 	struct addrinfo	*res, *p, hints;
 
 	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {					
-		// setUpSocketStruct(&listening_socket);
-		memset(&listening_socket, 0, sizeof(listening_socket));
-		memset(&listening_pollFd, 0, sizeof(listening_pollFd));
+		// setupSocketStruct(&listening_socket);
+		std::memset(&listening_socket, 0, sizeof(listening_socket));
+		std::memset(&listening_pollFd, 0, sizeof(listening_pollFd));
 		listening_socket.socket_info.sin_port = htons((*it)->getPort());	
 		// listening_socket.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
+		
+		
+		
 		listening_socket.socket_info.sin_addr.s_addr = inet_addr((*it)->getHost().c_str());
 
-		std::cout << (*it)->getHost().c_str() << endl;
+		std::cout << "hostname: " << (*it)->getHost().c_str() << endl;
 
 		// memset(&hints, 0, sizeof(hints));
 		// hints.ai_family = AF_INET;
@@ -165,18 +159,20 @@ void	TCPServer::setUpListeningSockets()
 		if (listening_pollFd.fd < 0) {
 			exitWithError("Cannot create listening socket");
 		}
-		fcntl(listening_pollFd.fd, F_SETFL, O_NONBLOCK);			
+		setFileDescrOptions(listening_pollFd.fd);
+	
+
+
+
 		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
 		// memset(listening_socket.socket_info.sin_zero, 0, sizeof(listening_socket.socket_info.sin_zero));
 		_socketInfo.push_back(listening_socket);
-		
+
+
 		listening_pollFd.events = POLLIN;
 		_pollFds.push_back(listening_pollFd);
 		_nbListeningSockets++;
 		
-		if (setsockopt(listening_pollFd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {
-			exitWithError("setsockopt error\n");
-		}	
 
 		int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
 		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
@@ -187,7 +183,7 @@ void	TCPServer::setUpListeningSockets()
 	}
 }
 
-void	TCPServer::setUpSocketStruct(t_socket *socket)
+void	TCPServer::setupSocketStruct(t_socket *socket)
 {
 	// memset(socket, 0, sizeof(*socket));
 	// // socket->socket_info.sin_family = AF_INET;
@@ -228,8 +224,19 @@ void	TCPServer::lookupActiveSocket()
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
-		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i);	
-		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
+		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i); 	
+		else if (_pollFds[i].revents & POLLOUT) 	{
+			// try {
+				sendResponse(i);	
+		// 	} catch 	(TCPServer::TCPServerException& e) {
+		// std::cout << "lookup try: TCPServ error caught " << e.what() << std::endl;
+		// std::exit(1);
+	// } catch (std::exception& e) {
+	// 	std::cout << "lookupt try: Standard error caught: " << e.what() << std::endl;
+	// 	std::exit(2);
+	// }	
+
+		}	
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);	
 		else if (_pollFds[i].revents & POLLNVAL) {	// closeConnection(i);
 		cout << i << " revents = " << _pollFds[i].revents <<  " ##########invalid! (POLLNVAL event) needs handler" << endl; closeConnection(i);
@@ -254,13 +261,7 @@ void TCPServer::newConnection(int idx)
 	}
 	new_socket.socket_address_len = socket_len;
 
-	if (setsockopt(new_pollfd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) < 0) {		// tmp
-		exitWithError("setsockopt reuse address error\n");					
-	}
-	if (setsockopt(new_pollfd.fd, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) < 0) {		// tmp
-		exitWithError("setsockopt reuse port error\n");
-	}
-
+	setFileDescrOptions(new_pollfd.fd);
 	new_pollfd.events = POLLIN;
 	new_socket.config_idx = idx;
 	_pollFds.push_back(new_pollfd);
@@ -291,7 +292,7 @@ void TCPServer::receiveRequest(int idx)
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
-			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startListen()" << std::endl;		
+			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startListen()" << std::endl;		// error
 		// else
 		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
@@ -338,6 +339,8 @@ void TCPServer::sendResponse(int idx)
 	// else
 	// 	log("Error sending response to client");
 
+	// throw(TCPServerException());
+
 
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 
@@ -351,9 +354,23 @@ void TCPServer::sendResponse(int idx)
 
 }
 
-void TCPServer::closeServer()
+
+void	TCPServer::setFileDescrOptions(int file_descr)
 {
-	exit(0);
+	int	re_use = 1;
+
+	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1) 
+		exitWithError("set file descriptor as non blocking failed\n");
+	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
+		exitWithError("setsockopt reuse address error\n");					
+	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) == -1) 
+		exitWithError("setsockopt reuse port error\n");
+}
+
+
+void 	TCPServer::closeServer()
+{
+	std::exit(0);
 }
 
 } // namespace http

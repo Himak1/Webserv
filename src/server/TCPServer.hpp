@@ -4,12 +4,14 @@
 # include "../request/Request.hpp"
 # include "../configure/Configuration.hpp"
 
+# include <exception>
 # include <stdio.h>
 # include <sys/socket.h>
 # include <arpa/inet.h>
 # include <stdlib.h>
 # include <string>
-#include <poll.h>
+# include <vector>
+# include <poll.h>
 
 namespace http
 {;
@@ -28,6 +30,12 @@ public:
 	~TCPServer();
 	void				startListen();
 
+	struct TCPServerException : public exception {
+		const char * what () const throw () {
+    		return "TCPServer error ";
+		}
+	};
+	
 private:
 	// class Configuration			_config;
 	std::vector<Configuration*>	_configList;
@@ -39,6 +47,8 @@ private:
 
 	bool						_isServerRunning;
 
+
+ 
 	void						newConnection(int);
 	void						closeConnection(int);
 	void						closeServer();
@@ -46,8 +56,9 @@ private:
 	void 						createServerMessage(int);
 	void						sendResponse(int);
 	int 						startServer();
-	void						setUpListeningSockets();
-	void						setUpSocketStruct(t_socket *);
+	void						setupListeningSockets();
+	void						setupSocketStruct(t_socket *);
+	void						setFileDescrOptions(int);
 	void						lookupActiveSocket();
 };
 
