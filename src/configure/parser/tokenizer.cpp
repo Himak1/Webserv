@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -80,14 +79,15 @@ std::list<std::string>	splitLineByDelimiters( std::string line )
 	return (words);
 }
 
-std::list<Token>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap )
+std::list<Token>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap, int lineCount )
 {
 	std::list<Token>	tokensFromLine;
+
 	for (std::list<std::string>::iterator it = splitStrings.begin(); it != splitStrings.end(); ++it)
 	{
 		if ((*it)[0] == '#')
 			break ;
-		tokensFromLine.push_back(Token(checkTokenType(tokenMap, *it), *it));
+		tokensFromLine.push_back(Token(checkTokenType(tokenMap, *it), *it, lineCount));
 	}
 	return (tokensFromLine);
 }
@@ -96,12 +96,14 @@ std::list<Token>	createTokenList( std::ifstream& file, TokenMap tokenMap )
 {
 	std::list<Token>	tokenList;
 	std::string			line;
+	int					lineCount = 1;
 
 	while (std::getline(file, line))
 	{
 		std::list<std::string>	splitStrings = splitLineByDelimiters(line);
-		std::list<Token> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap);
+		std::list<Token> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap, lineCount);
 		tokenList.splice(tokenList.end(), tokensFromLine);
+		lineCount++;
 	}
 	return (tokenList);
 }

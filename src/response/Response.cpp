@@ -175,8 +175,8 @@ void	Response::uploadFile()
 
 string Response::redirect()
 {
-	if ((_status == 301 && COSTUM_301 == "default")
-		|| (_status == 302 && COSTUM_302 == "default"))
+	if ((_status == 301 && std::string(COSTUM_301) == "default")
+		|| (_status == 302 && std::string(COSTUM_302) == "default"))
 		return createErrorHTML();
 
 	if (_status == 301)
@@ -192,7 +192,7 @@ string Response::fileNotFound()
 {
 	_status = 404;
 
-	if (COSTUM_404 == "default")
+	if (std::string(COSTUM_404) == "default")
 		return createErrorHTML();
 
 	_filepath = _config.getRoot() + COSTUM_404;

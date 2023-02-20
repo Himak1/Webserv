@@ -20,6 +20,11 @@ int	TokenStream::getTokenType()
 	return ((*_currentToken).getTokenType());
 }
 
+int	TokenStream::getCurrentLine()
+{
+	return ((*_currentToken).getLineNumber());
+}
+
 bool	TokenStream::moveToNextToken()
 {
 	if (isEmpty())

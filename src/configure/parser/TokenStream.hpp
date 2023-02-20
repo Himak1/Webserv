@@ -12,11 +12,13 @@ class TokenStream
 
 		std::string	getTokenString();
 		int			getTokenType();
+		int			getCurrentLine();
 		bool		moveToNextToken();
 		bool		isEmpty() const;
 	private:
 		std::list<Token>			_tokenList;
 		std::list<Token>::iterator	_currentToken;
+		TokenMap					_tokenMap;
 };
 
 #endif
