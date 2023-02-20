@@ -7,6 +7,7 @@
 #include "parser/parser.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 // ------------------------------------------------------------------------ //
 //							Constructors & Destructor						//

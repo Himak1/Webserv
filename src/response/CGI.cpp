@@ -47,8 +47,8 @@ string CGI::ExecuteCGI()
 	if(pid == 0) {
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
+		std::cout << _path[0] << " <- path[0]" << std::endl;
 		execve(_path[0], _path, _env);
-		perror("execve failed: ");
 		cout << "<!doctype html><html lang=\"en\"><head><title>"
 			<< "500 Internal Server Error\n"
 			<< "</title></head><body><center><h1>"

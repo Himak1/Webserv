@@ -2,7 +2,21 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 ### Setting Source Files & Header Files ###
 set(SRC_FILES
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+    configuration/Configuration.cpp
+    configuration/config.cpp
+    BuildResponse.cpp
+    HTTPRequest.cpp
+    main.cpp
+    TCPServer.cpp
+=======
+    server/Configuration.cpp
+=======
+=======
     configure/configure.cpp
+>>>>>>> jhille
     configure/AConfig.cpp
     configure/Configuration.cpp
     configure/Location.cpp
@@ -15,12 +29,18 @@ set(SRC_FILES
     configure/parser/parser_utils.cpp
 
     main.cpp
+>>>>>>> milan
     server/TCPServer.cpp
     request/Request.cpp
     response/Response.cpp
 	response/CGI.cpp
 	utils/log.cpp
 	utils/strings.cpp
+<<<<<<< HEAD
+    main.cpp
+>>>>>>> milan
+=======
+>>>>>>> milan
     # !Add new src files here! #
     CACHE INTERNAL ""
 )
