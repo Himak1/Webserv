@@ -56,10 +56,12 @@ Node*	parseAllowedMethods( TokenStream& tokensToParse )
 	newNode = new Node(N_ALLOWED_METHODS);
 	for (int i = 0; i < HTTP_METHODS; i++)
 	{
-		if (expect(tokensToParse, T_STRING))
+		if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == T_SEMICOLON)
+			break;
+		else if (expect(tokensToParse, T_STRING))
 			acceptAndCreateNewNode(tokensToParse, newNode);
 		else
-			break;
+			return (deleteNewNode(newNode));
 	}
 	if (!accept(tokensToParse, T_SEMICOLON))
 		return (deleteNewNode(newNode));

@@ -33,6 +33,19 @@ AConfig::~AConfig()
 {
 }
 
+//	Overloads	//
+
+std::ostream&	operator<<( std::ostream& o, const AConfig& config )
+{
+	o << "index files: ";
+	for (std::list<std::string>::const_iterator i = config.indexFiles.begin(); i != config.indexFiles.end(); ++i)
+	{
+		o << *i << " ";
+	}
+	o << '\n' << "root: " << config.getRoot();
+	return o;
+}
+
 //	Public Methods	//
 
 std::string	AConfig::getRoot() const

@@ -42,4 +42,6 @@ class AConfig
 		std::list<ErrorPage>	_errorPages;
 };
 
+std::ostream&	operator<<( std::ostream& o, const AConfig& config );
+
 #endif
