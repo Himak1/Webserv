@@ -87,11 +87,13 @@ bool	Response::searchIndexFiles(list<string> index_files)
 void	Response::setLocation()
 {
 	string target = _request.getURI();
+	// cout << "TARGET " << target << endl;
 	list<Location*>::iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {
 		_status = INTERNAL_SERVER_ERROR;
 	}
 	_location = (*it);
+	// cout << "LOCATION " << _location->getCgiPath() << endl;
 }
 
 list<Location*>::iterator Response::findConfigLocation(string target) {
@@ -100,6 +102,8 @@ list<Location*>::iterator Response::findConfigLocation(string target) {
 
 	list<Location*>::iterator it = _config.locations.begin();
 	it = searchLocations(target);
+	// cout << "TARGET " << target << endl;
+	// cout << "LOCATION " << (*it)->getCgiPath() << endl;
 	if (it == _config.locations.end())
 		return findConfigLocation(go_one_directory_up(target));
 	return it;
@@ -146,6 +150,7 @@ void	Response::initContentTypes()
 	_content_types[".php"] 	= "Content-Type: text/html; charset=utf-8\n";
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
+	_content_types[".py"] 	= "Content-Type: text/html; charset=utf-8\n";
 }
 
 int		Response::setStatus()
@@ -261,8 +266,11 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
+	cout << cgi << endl;
+	if (cgi.find("<!doctype html>") == string::npos && _request.getExtension() != ".py")
 		return getCGI();
+	// if (cgi.find("<!doctype html>") == string::npos)
+	// 	return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
 	if (cgi.find("500 Internal Server Error") != string::npos)
