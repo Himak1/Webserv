@@ -28,7 +28,9 @@ class CGI
 		char*						_path[4];
 		char**						_env;
 
-		char**						createEnv();
+		void						createPath();
+		void						createEnv();
+		void						addToEnv(string value, int i);
 		void						freeEnv();
 };
 

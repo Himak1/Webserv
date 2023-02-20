@@ -41,7 +41,7 @@ class Response
 		string						getCGI();
 		string						setCookie();
 		string 						redirect();
-		string 						fileNotFound();
+		string 						returnErrorPage();
 		string						createErrorHTML();
 		list<Location*>::iterator 	findConfigLocation(string target);
 		list<Location*>::iterator 	searchLocations(string target);

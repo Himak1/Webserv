@@ -16,25 +16,11 @@
 CGI::CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize)
 	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
-	_filepath = _filepath.substr(0, _filepath.find("?"));
-	_path_to_script = realpath(&_filepath[0], NULL);
-
-	_argument = new char[3];
-	_argument = strcpy(_argument, "-q");
-
-	int path_length = (*_location).getCgiPath().size();
-	char *_path_to_cgi = new char[path_length + 1];
-	_path_to_cgi = strcpy(_path_to_cgi, (*_location).getCgiPath().c_str());
-	_path[0] = &_path_to_cgi[0];
-	_path[1] = &_path_to_script[0];
-	_path[2] = NULL;
-	_env = createEnv();
-
 	_buffer = (char *)calloc(_clientMaxBodySize, sizeof(char));
-	// cout << "_filepath = " << _filepath << endl;
-	// cout << "_path_to_cgi = " << _location.getCgiPath().c_str() << endl;
-	// cout << "_path_to_script = " << _path_to_script << endl;
-	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
+	_env = new char*[_request.getEnv().size() + 4];
+
+	createPath();
+	createEnv();
 }
 
 // DESTRUCTOR
@@ -64,16 +50,15 @@ string CGI::ExecuteCGI()
 		execve(_path[0], _path, _env);
 		perror("execve failed: ");
 		cout << "<!doctype html><html lang=\"en\"><head><title>"
-		<< "500 Internal Server Error\n"
-		<< "</title></head><body><center><h1>"
-		<< "500 Internal Server Error\n"
-		<< "</h1></center></body></html>" << endl;
+			<< "500 Internal Server Error\n"
+			<< "</title></head><body><center><h1>"
+			<< "500 Internal Server Error\n"
+			<< "</h1></center></body></html>" << endl;
 		exit(0);
 	}
-
-	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
 	close(fd[1]);
 
+	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
 	if (message_size >= _clientMaxBodySize)
 		return "<!doctype html><html lang=\"en\"><head><title>" \
 				"413 Request Entity Too Large\n" \
@@ -83,48 +68,47 @@ string CGI::ExecuteCGI()
 	return _buffer;
 }
 
-// convert list to char**
-char**	CGI::createEnv()
+// PRIVATE FUNCTIONS
+void	CGI::createPath()
+{
+	_filepath = _filepath.substr(0, _filepath.find("?"));
+	_path_to_script = realpath(&_filepath[0], NULL);
+
+	int path_length = (*_location).getCgiPath().size();
+	char *_path_to_cgi = new char[path_length + 1];
+	_path_to_cgi = strcpy(_path_to_cgi, (*_location).getCgiPath().c_str());
+	_path[0] = &_path_to_cgi[0];
+	_path[1] = &_path_to_script[0];
+	_path[2] = NULL;
+}
+
+void	CGI::createEnv()
 {
 	map<string, string>	env_list = _request.getEnv();
-
-	_env = new char*[env_list.size() + 4];
 	map<string, string>::iterator it;
 	int i = 0;
 	for (it = env_list.begin(); it != env_list.end(); it++) {
-		string env_var = (*it).first + "=" + (*it).second;
-		int length = env_var.length() + 2;
-		_env[i] = new char[length];
-		_env[i] = strncpy(_env[i], (const char*)env_var.c_str(), length);
+		addToEnv((*it).first + "=" + (*it).second, i);
 		i++;
 	}
 
-	string directory_listing;
 	if (_location->autoIndexingOn())
-		directory_listing = "directory_listing=true";
+		addToEnv("directory_listing=true", i);
 	else
-		directory_listing = "directory_listing=false";
-
-	_env[i] = new char[directory_listing.length() + 1];
-	_env[i] = strcpy(_env[i], directory_listing.c_str());
-
+		addToEnv("directory_listing=false", i);
 
 	string temp_define_2 = UPLOAD_FOLDER;
-	string upload_directory = "upload_directory=" + temp_define_2;
-	_env[++i] = new char[upload_directory.length() + 1];
-	_env[i] = strcpy(_env[i], upload_directory.c_str());
+	addToEnv("upload_directory=" + temp_define_2, ++i);
 
-	if (_request.getUploadSucces() == true) {
-		string upload_succes = "upload_succes=true";
-		_env[++i] = new char[upload_succes.length() + 1];
-		_env[i] = strcpy(_env[i], upload_succes.c_str());
-	}
-	else
-		_env[++i] = NULL;
+	if (_request.getUploadSucces() == true) addToEnv("upload_succes=true", ++i);
 	
 	_env[++i] = NULL;
+}
 
-	return _env;
+void	CGI::addToEnv(string value, int i)
+{
+	_env[i] = new char[value.length() + 1];
+	strcpy(_env[i], value.c_str());
 }
 
 void	CGI::freeEnv()

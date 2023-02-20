@@ -19,12 +19,6 @@
 // TEMPORARY 
 
 
-#define COSTUM_301 "/templates/301.html"
-#define COSTUM_302 "/templates/302.html"
-#define COSTUM_404 "/templates/404.html"
-// #define COSTUM_301 "default"
-// #define COSTUM_302 "default"
-// #define COSTUM_404 "default"
 
 #define UPLOAD_FOLDER "uploads"
 

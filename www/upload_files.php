@@ -9,7 +9,6 @@
 				echo "Directory listing is turned off";
 				return;
 			}
-
 			$directory = getenv("upload_directory");
 			// echo "DIRECTORY = ". $directory . "<br>";
 			if (!is_dir($directory)) {

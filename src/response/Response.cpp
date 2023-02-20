@@ -137,10 +137,7 @@ string	Response::getContent()
 	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
 
 	if (_request.getMethod() == "DELETE")	return deleteFile();
-	if (_status == MOVED_PERMANENTLY)		return redirect();
-	if (_status == FOUND)					return redirect();
-	if (_status == NOT_FOUND)				return fileNotFound();
-	if (_status != OK)						return createErrorHTML();
+	if (_status != OK)						return returnErrorPage();
 	if (isCGI)								return getCGI();
 	return(streamFileDataToString(_filepath));
 }
@@ -166,7 +163,8 @@ void	Response::uploadFile()
 		input_path = env["file_to_upload"];
 
 	if (!isExistingFile(input_path)) {
-		_content = fileNotFound();
+		_status = NOT_FOUND;
+		_content = returnErrorPage();
 		return;
 	}
 
@@ -180,30 +178,17 @@ void	Response::uploadFile()
 		_request.setUploadSucces(true);
 }
 
-string Response::redirect()
+string Response::returnErrorPage()
 {
-	if ((_status == 301 && std::string(COSTUM_301) == "default")
-		|| (_status == 302 && std::string(COSTUM_302) == "default"))
+	try {
+		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		if (isExistingFile(_filepath))
+			return streamFileDataToString(_filepath);
+	}
+	catch (const std::exception& e) {
 		return createErrorHTML();
-
-	if (_status == 301)
-		_filepath = _config.getRoot() + COSTUM_301;
-
-	if (_status == 302)
-		_filepath = _config.getRoot() + COSTUM_302;
-
-	return streamFileDataToString(_filepath);
-}
-
-string Response::fileNotFound()
-{
-	_status = 404;
-
-	if (std::string(COSTUM_404) == "default")
-		return createErrorHTML();
-
-	_filepath = _config.getRoot() + COSTUM_404;
-	return streamFileDataToString(_filepath);
+	}
+	return createErrorHTML();
 }
 
 string Response::createErrorHTML()
