@@ -6,7 +6,7 @@
 void	failed_allocation_handler()
 {
 	std::cerr << "ERROR: Memory allocation failed. Terminating program" << std::endl;
-	std::terminate();
+	std::exit(1);
 }
 
 int main(int argc, char **argv)

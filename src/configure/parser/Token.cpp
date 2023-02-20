@@ -1,4 +1,3 @@
-
 #include "Token.hpp"
 
 /*
@@ -16,9 +15,8 @@ Token::Token( int type, std::string tokenString, int lineNumber )
 }
 
 Token::Token( const Token& src )
-	: _tokenType(src._tokenType), _token(src._token)
+	: _tokenType(src._tokenType), _token(src._token), _lineNumber(src._lineNumber)
 {
-	/* *this = src; */
 }
 
 
@@ -34,15 +32,6 @@ Token::~Token()
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
-
-/* Token&	Token::operator=( Token const& rhs ) */
-/* { */
-/* 	if ( this != &rhs ) */
-/* 	{ */
-/* 		this->_tokenType = rhs.getTokenType(); */
-/* 	} */
-/* 	return *this; */
-/* } */
 
 std::ostream&	operator<<( std::ostream& o, Token const& i )
 {
