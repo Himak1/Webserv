@@ -29,9 +29,9 @@ static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
 	}
 }
 
-static std::list<Configuration*>	convertASTtoConfigList( Node* ast )
+static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 {
-	std::list<Configuration*>	serverConfigs;
+	std::vector<Configuration*>	serverConfigs;
 
 	for (NodeList::const_iterator i = ast->getChildrenBegin(); i != ast->getChildrenEnd(); ++i) {
 		try {
@@ -47,7 +47,7 @@ static std::list<Configuration*>	convertASTtoConfigList( Node* ast )
 	
 }
 
-std::list<Configuration*>	initializeConfigurations( int argc, char **argv )
+std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 {
 	std::ifstream	configFile;
 	openConfigFile(configFile, argc, argv);
@@ -56,7 +56,7 @@ std::list<Configuration*>	initializeConfigurations( int argc, char **argv )
 	Node*						ast = parser(tokens);
 	if (!ast)
 		exit(1);
-	std::list<Configuration*>	serverConfigs = convertASTtoConfigList(ast);
+	std::vector<Configuration*>	serverConfigs = convertASTtoConfigVector(ast);
 	return (serverConfigs);
 }
 
