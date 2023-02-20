@@ -22,7 +22,6 @@ Request &Request::operator = (const Request &src)
 		this->_extension = src._extension;
 		this->_headers = src._headers;
 		this->_env = src._env;
-		this->_cookies = src._cookies;
 		this->_is_succesfull_uploaded = src._is_succesfull_uploaded;
 	}
 	return (*this);
@@ -33,7 +32,6 @@ void Request::initRequest(string request)
 {
 	parseHTTPInfoAndHeaders(request);
 	parseExtension();
-	parseCookies();
 	parseEnv();
 }
 
@@ -42,7 +40,6 @@ const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
 map<string, string> Request::getEnv() const { return _env; };
-map<string, string> Request::getCookies() const { return _cookies; };
 bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
 void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
 
@@ -66,7 +63,6 @@ void Request::parseHTTPInfoAndHeaders(string request)
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
 
 	_headers = request;
-	// cout << _headers << endl;
 }
 
 void Request::parseExtension()
@@ -81,18 +77,49 @@ void Request::parseExtension()
 	if (_uri.find(".php?") != string::npos)
 		_extension = ".php";
 
+	// size_t extension_start;
+	// string uri = _uri;
+	// if (uri.find('?') != string::npos)
+	// 	uri = safe_substr(uri, extension_start, uri.find('?'));
+
+	// cout << "uri = " << uri << endl;
+	// extension_start = uri.rfind('.');
+	// if (extension_start == string::npos)
+	// 	_extension = ".php";
+	// else
+	// 	_extension = safe_substr(uri, extension_start, uri.length());
+	
+	// cout << "extension = " << _extension << endl;
 }
 
 void Request::parseEnv()
 {
-	string	line;
-
 	_env.clear();
+	parseCookies();
+	parseGet();
+	parsePost();
+}
 
-	map<string, string>::iterator it;
-	for (it = _cookies.begin(); it != _cookies.end(); it++)
-		_env.insert(pair<string, string> (it->first, it->second));
+void	Request::parseCookies()
+{
+	string	cookie_input = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
+	cookie_input = safe_substr(cookie_input, 0, cookie_input.find("\n"));
 
+	string 	line;
+	istringstream ss(cookie_input);
+	while (getline(ss, line, ';')) {
+		unsigned long pos = line.find('=');
+		if (pos == string::npos)
+			break;
+		string key = trim_spaces(safe_substr(line, 0, pos));
+		string value = trim_spaces(safe_substr(line, pos + 1, -1));
+		_env.insert(pair<string, string> (key, value));
+	}
+}
+
+void Request::parseGet()
+{
+	string	line;
 	if (_uri.find("?") != string::npos) {
 		string value;
 		istringstream ss(safe_substr(_uri, _uri.find("?") + 1, -1));
@@ -108,8 +135,13 @@ void Request::parseEnv()
 			_env.insert(pair<string, string> (key, value));
 	    }
 	}
+}
+
+void Request::parsePost() 
+{
 	// TO DO? will not work if input fields are empty. 
 	// Currently solved with 'required' tag in html form
+	string	line;
 	if (_method == "POST") {
 		string query = _headers;
 
@@ -129,26 +161,4 @@ void Request::parseEnv()
 			previous_line = line;
 	    }
 	}
-}
-
-void	Request::parseCookies()
-{
-	string	cookie_input = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
-	cookie_input = safe_substr(cookie_input, 0, cookie_input.find("\n"));
-
-	_cookies.clear();
-	string 	line;
-	istringstream ss(cookie_input);
-	while (getline(ss, line, ';')) {
-		unsigned long pos = line.find('=');
-		if (pos == string::npos)
-			break;
-		string key = trim_spaces(safe_substr(line, 0, pos));
-		string value = trim_spaces(safe_substr(line, pos + 1, -1));
-		_cookies.insert(pair<string, string> (key, value));
-	}
-
-	// for (map<string, string>::iterator it = _cookies.begin(); it != _cookies.end(); ++it) {
-		// cout << "cookie | " << it->first << ": " << it->second << endl;
-	// }
 }

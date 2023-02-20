@@ -37,12 +37,13 @@ class Request
 		string				_extension;
 		string				_headers;
 		map<string, string>	_env;
-		map<string, string>	_cookies;
 		bool				_is_succesfull_uploaded;
 
 		void				parseHTTPInfoAndHeaders(string request);
 		void				parseExtension();
 		void				parseEnv();
+		void				parseGet();
+		void				parsePost();
 		void				parseCookies();
 		// void 				handleFileUpload(string request);
 };

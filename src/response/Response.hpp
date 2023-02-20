@@ -31,6 +31,8 @@ class Response
 		map<string, string>			_content_types;
 	
 		void						setFilePath();
+		bool						searchExtension(string extension);
+		bool						searchIndexFiles(list<string> index_files);
 		void						setLocation();
 		void						initStatusCodes();
 		void						initContentTypes();
@@ -40,7 +42,6 @@ class Response
 		void 						uploadFile();
 		string						getCGI();
 		string						setCookie();
-		string 						redirect();
 		string 						returnErrorPage();
 		string						createErrorHTML();
 		list<Location*>::iterator 	findConfigLocation(string target);
