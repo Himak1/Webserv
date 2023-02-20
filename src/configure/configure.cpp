@@ -57,6 +57,7 @@ std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 	if (!ast)
 		exit(1);
 	std::vector<Configuration*>	serverConfigs = convertASTtoConfigVector(ast);
+	delete ast;
 	return (serverConfigs);
 }
 
