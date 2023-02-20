@@ -161,7 +161,7 @@ void Response::uploadFile()
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
 	// write file_data to output_path
 	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
-	ofstream fout(upload_path);
+	ofstream fout(upload_path.c_str());
 	fout << file_data << endl;
     fout.close();
 
@@ -217,8 +217,8 @@ string Response::setCookie()
 
 string Response::redirect()
 {
-	if ((_status == 301 && COSTUM_301 == "default")
-		|| (_status == 302 && COSTUM_302 == "default"))
+	if ((_status == 301 && std::string(COSTUM_301) == "default")
+		|| (_status == 302 && std::string(COSTUM_302) == "default"))
 		return createErrorHTML();
 
 	if (_status == 301)
@@ -234,10 +234,10 @@ string Response::fileNotFound()
 {
 	_status = 404;
 
-	if (COSTUM_404 == "default")
+	if (std::string(COSTUM_404) == "default")
 		return createErrorHTML();
 
-	_filepath = _config.getRoot() + COSTUM_404;
+	_filepath = _config.getRoot() + std::string(COSTUM_404);
 	return getFileContent();
 }
 

@@ -1,9 +1,9 @@
 #include <list>
 #include <vector>
-#include "../../../src/configure/parsing/parser.hpp"
-#include "../../../src/configure/parsing/Token.hpp"
-#include "../../../src/configure/parsing/tokenizer.hpp"
-#include "../../../src/configure/parsing/TokenStream.hpp"
+#include "../../../src/configure/parser/parser.hpp"
+#include "../../../src/configure/parser/Token.hpp"
+#include "../../../src/configure/parser/tokenizer.hpp"
+#include "../../../src/configure/parser/TokenStream.hpp"
 #include "../../../src/configure/Node.hpp"
 
 #include "gtest/gtest.h"

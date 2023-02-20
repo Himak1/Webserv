@@ -280,6 +280,14 @@ void	TCPServer::closeConnection(int idx)
 
 }
 
+bool	TCPServer::serverMsgIsEmpty(int idx)
+{
+	if (_socketInfo[idx].server_message.empty())
+		return true;
+	else
+		return false;	
+}
+
 // idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
 // Verder ontvangt receive request data op een socket en maakt (evt) een response aan.
 // Als er een response is zal de socket events op POLLOUT worden gezet, zodat in de volgende loop 
@@ -316,35 +324,24 @@ void TCPServer::receiveRequest(int idx)
 void TCPServer::sendResponse(int idx)
 {
 	size_t		bytes_send;
+	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
-
-	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
-
-	if (_socketInfo[idx].server_message.empty())
+	if (serverMsgIsEmpty(idx))
 		_socketInfo[idx].server_message = respons.getMessage();
-
 	
 	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
-	if (bytes_send <= 0) 
+	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
 			std::cout << "Send error in TCPServer::sendResponse()" << std::endl;
 			closeConnection(idx);
 		}
-		else 
-			cout << "Zero bytes send. Need handler?" << endl;
-			
-	// if (bytes_send == (long)_socketInfo[idx].server_message.size())
-	// 	log(_socketInfo[idx].server_message.substr(0, _socketInfo[idx].server_message.find('\n')));
-	// else
-	// 	log("Error sending response to client");
-
-	// throw(TCPServerException());
-
-
+		else {
+			cout << "Zero bytes send. Need handler?" << endl;	// tmp
+		}
+	}	
 	_socketInfo[idx].server_message.erase(0, bytes_send);
-
-	if (_socketInfo[idx].server_message.empty())
+	if (serverMsgIsEmpty(idx))
 		_pollFds[idx].events = POLLIN;
 		// closeConnection(idx); 
 	else {

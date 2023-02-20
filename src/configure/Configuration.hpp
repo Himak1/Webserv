@@ -23,12 +23,11 @@ class Configuration : public AConfig
 	private:
 		void			navigateNode( Node* serverNode );
 
-		std::string				_ipAddress;
 		std::string				_host; // server_name
 		unsigned int			_port; // listen
 		unsigned int			_clientMaxBodySize;
 };
 
-std::vector<Configuration*>	parseAndCreateConfigurations(int argc, char **argv);
+std::ostream&	operator<<( std::ostream& o, const Configuration& config );
 
 #endif

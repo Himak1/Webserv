@@ -4,6 +4,7 @@
 
 # include <iostream>
 # include <string>
+# include <map>
 
 enum TokenTypes
 {
@@ -27,29 +28,31 @@ enum TokenTypes
 	// Punctuation and Seperators
 	T_BRACKET_OPEN,
 	T_BRACKET_CLOSE,
-	//T_FORWARD_SLASH,
-	//T_BACK_SLASH,
 	T_SEMICOLON,
 	T_HASHTAG,
 	T_DOLLAR,
 	T_HOME_DIR
 };
 
+typedef std::map<std::string, int> TokenMap;
+
 class Token
 {
 	public:
-		Token( int type, std::string tokenString );
-		Token( Token const& src );
+		Token();
+		Token( int type, std::string tokenString, int lineNumber );
+		Token( const Token& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
 
-		int			getTokenType() const;
+		int					getTokenType() const;
 		const std::string&	getToken() const;
+		int					getLineNumber() const;
 	private:
-		Token();
 		int			_tokenType;
 		std::string	_token;
+		int			_lineNumber;
 };
 
 std::ostream&		operator<<( std::ostream& o, Token const& i );

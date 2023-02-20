@@ -1,5 +1,8 @@
+#include <cstdlib>
 #include "AConfig.hpp"
 #include "Node.hpp"
+
+//	ErrorPage Constructors & Destructors
 
 ErrorPage::ErrorPage( int codeArg, std::string pageArg )
 	: code(codeArg), page(pageArg)
@@ -15,7 +18,7 @@ ErrorPage::~ErrorPage()
 {
 }
 
-// -----------
+//	AConfig Constructors & Destructors	//
 
 AConfig::AConfig()
 {
@@ -32,9 +35,7 @@ AConfig::~AConfig()
 {
 }
 
-// ------------------------------------------------------------------------ //
-//								Public Methods								//
-// ------------------------------------------------------------------------ //
+//	Public Methods	//
 
 std::string	AConfig::getRoot() const
 {
@@ -75,9 +76,7 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 	return (output);
 }
 
-// ------------------------------------------------------------------------ //
-//								Protected Methods							//
-// ------------------------------------------------------------------------ //
+//	Protected Methods	//
 
 void	AConfig::convertIndexFiles( Node* node )
 {

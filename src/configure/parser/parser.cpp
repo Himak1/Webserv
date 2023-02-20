@@ -76,13 +76,13 @@ Node*	parseServerName( TokenStream& tokensToParse )
 Node*	parseServer( TokenStream& tokensToParse )
 {
 	Node*	newNode;
-	int		status;
+	int		status = 1;
 
 	tokensToParse.moveToNextToken();
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
 		return (NULL);
 	newNode = new Node(N_SERVER);
-	while (!accept(tokensToParse, T_BRACKET_CLOSE) && status != 0)
+	while (tokensToParse.getTokenType() != T_BRACKET_CLOSE && status != 0)
 	{
 		switch (tokensToParse.getTokenType())
 		{
@@ -107,10 +107,14 @@ Node*	parseServer( TokenStream& tokensToParse )
 			case T_ERROR_PAGE:
 				status = newNode->addChild(parseErrorPage(tokensToParse));
 				break;
+			default:
+				status = 0;
+				break;
 		}
 	}
 	if (status == 0)
 		return (deleteNewNode(newNode));
+	tokensToParse.moveToNextToken();
 	return (newNode);
 }
 

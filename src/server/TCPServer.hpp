@@ -54,6 +54,7 @@ private:
 	void						closeServer();
 	void						receiveRequest(int);
 	void 						createServerMessage(int);
+	bool						serverMsgIsEmpty(int);
 	void						sendResponse(int);
 	int 						startServer();
 	void						setupListeningSockets();

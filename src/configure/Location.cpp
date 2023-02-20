@@ -18,6 +18,7 @@ Location::Location( Node* locationNode )
 }
 
 Location::Location( const Location& src )
+	: AConfig(src)
 {
 	*this = src;
 }
@@ -49,6 +50,15 @@ Location&	Location::operator=( const Location& src )
 	return *this;
 }
 
+std::ostream&	operator<<( std::ostream& o, const Location& location )
+{
+	o	<< "path: " << location.getPath() << '\n'
+		<< "alias: " << location.getAlias() << '\n'
+		<< "CGI Extension: " << location.getCgiExtension() << '\n'
+		<< "CGI Path: " << location.getCgiPath();
+	return (o);
+}
+
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
@@ -58,8 +68,7 @@ void	Location::convertCgiPass( Node* cgiPass )
 	NodeList::const_iterator i = cgiPass->getChildrenBegin();
 
 	_cgiExtension = (*i)->getTerminal();
-	++i;
-	_cgiPath = (*i)->getTerminal();
+	_cgiPath = (*++i)->getTerminal();
 }
 
 void	Location::convertAcceptedMethods( Node* allowedMethods )
@@ -134,8 +143,7 @@ void	Location::convertLocation( Node* location )
 */
 
 std::string	Location::getPath() const
-{
-	return (_path);
+{ return (_path);
 }
 
 std::string	Location::getAlias() const

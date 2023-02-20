@@ -4,6 +4,7 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 set(SRC_FILES
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     configuration/Configuration.cpp
     configuration/config.cpp
     BuildResponse.cpp
@@ -13,16 +14,19 @@ set(SRC_FILES
 =======
     server/Configuration.cpp
 =======
+=======
+    configure/configure.cpp
+>>>>>>> jhille
     configure/AConfig.cpp
     configure/Configuration.cpp
     configure/Location.cpp
     configure/Node.cpp
-    configure/parsing/Token.cpp
-    configure/parsing/TokenStream.cpp
-    configure/parsing/tokenizer.cpp
-    configure/parsing/parser.cpp
-    configure/parsing/parseLocation.cpp
-    configure/parsing/parser_utils.cpp
+    configure/parser/Token.cpp
+    configure/parser/TokenStream.cpp
+    configure/parser/tokenizer.cpp
+    configure/parser/parser.cpp
+    configure/parser/parseLocation.cpp
+    configure/parser/parser_utils.cpp
 
     main.cpp
 >>>>>>> milan
@@ -54,3 +58,7 @@ set_target_properties(${LIB_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BI
 add_executable(${BINARY} ${SRC_FILES})
 target_include_directories(${BINARY} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 set_target_properties(${BINARY} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+add_custom_target(copy_default.conf ALL
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/default.conf ${CMAKE_BINARY_DIR}/bin
+)

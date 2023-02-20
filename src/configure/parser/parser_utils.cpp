@@ -28,19 +28,28 @@ Node*	deleteNewNode( Node* newNode )
 
 bool	accept( TokenStream& tokensToParse, int expectedToken )
 {
-	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
+	if (expect(tokensToParse, expectedToken) == false)
 	{
-		tokensToParse.moveToNextToken();
-		return (true);
+		return (false);
 	}
-	return (false);
+	tokensToParse.moveToNextToken();
+	return (true);
 }
 
 bool	expect( TokenStream& tokensToParse, int expectedToken )
 {
-	if (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == expectedToken)
+	if (tokensToParse.isEmpty())
 	{
-		return (true);
+		std::cout	<< "Syntax Error: incomplete block or statement on last line"
+					<< std::endl;
+		return (false);
 	}
-	return (false);
+	else if (tokensToParse.getTokenType() != expectedToken)
+	{
+		std::cout	<< "Syntax Error: unexpected character(s) '"
+					<< tokensToParse.getTokenString() << "' on line "
+					<< tokensToParse.getCurrentLine() << std::endl;
+		return (false);
+	}
+	return (true);
 }

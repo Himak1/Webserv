@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "../../src/configure/parsing/tokenizer.hpp"
-#include "../../src/configure/parsing/parser.hpp"
-#include "../../src/configure/parsing/TokenStream.hpp"
+#include "../../src/configure/parser/tokenizer.hpp"
+#include "../../src/configure/parser/parser.hpp"
+#include "../../src/configure/parser/TokenStream.hpp"
 #include "../../src/configure/Node.hpp"
 #include "../../src/configure/Configuration.hpp"
 
