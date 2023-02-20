@@ -118,24 +118,20 @@ TCPServer::~TCPServer()
 /* setsocktopt() zorgt ervoor dat we ingeval van een restart de socket kunnen hergebruiken                            */
 void	TCPServer::setupListeningSockets()
 {
-	struct pollfd	listening_pollFd;
+	struct pollfd	poll_fd;
 	int				i = 0;
-	t_socket		listening_socket;
-	struct addrinfo	*res, *p, hints;
+	t_socket		listener;
 
-	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {					
-		// setupSocketStruct(&listening_socket);
-		std::memset(&listening_socket, 0, sizeof(listening_socket));
-		std::memset(&listening_pollFd, 0, sizeof(listening_pollFd));
-		listening_socket.socket_info.sin_port = htons((*it)->getPort());	
-		// listening_socket.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
-		
-		
-		
-		listening_socket.socket_info.sin_addr.s_addr = inet_addr((*it)->getHost().c_str());
 
-		std::cout << "hostname: " << (*it)->getHost().c_str() << endl;
+	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
+		std::memset(&listener, 0, sizeof(listener));
+		std::memset(&poll_fd, 0, sizeof(poll_fd));
+		listener.socket_info.sin_port = htons((*it)->getPort());	
+		
+		// listener.socket_info.sin_addr.s_addr = INADDR_ANY;	// INADDR_ANY werkt met all 'interfaces' en is wat je wilt voor een webserver (zie  https://stackoverflow.com/questions/16508685/understanding-inaddr-any-for-socket-programming )
+		listener.socket_info.sin_addr.s_addr = inet_addr((*it)->getHost().c_str());
 
+		// struct addrinfo	*res, *p, hints;
 		// memset(&hints, 0, sizeof(hints));
 		// hints.ai_family = AF_INET;
 		// hints.ai_socktype = SOCK_STREAM;
@@ -146,36 +142,30 @@ void	TCPServer::setupListeningSockets()
 		// 	std::cout << "Getaddrinfo error : ";
 		// 	exitWithError(gai_strerror(status));
 		// }
-		// listening_socket.socket_info = *((sockaddr_in *) res);
+		// listener.socket_info = *((sockaddr_in *) res);
 
 		
-		// listening_socket.socket_info.sin_addr.s_addr = inet_addr(ips[i].c_str());
-		// evt getaddrinfo()
-		// inet_pton(AF_INET, "www.example.com", &(listening_socket.socket_info.sin_addr)); // write de de adres info van de string in de struct socket_info.sin_addr
-		
-
-	
-		listening_pollFd.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	// AF_INET == ipv4, AF_INET6 == ipv6 of AF_UNSPEC
-		if (listening_pollFd.fd < 0) {
+		poll_fd.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	// AF_INET == ipv4, AF_INET6 == ipv6 of AF_UNSPEC
+		if (poll_fd.fd < 0) {
 			exitWithError("Cannot create listening socket");
 		}
-		setFileDescrOptions(listening_pollFd.fd);
+		setFileDescrOptions(poll_fd.fd);
 	
 
 
 
-		listening_socket.socket_address_len = sizeof(listening_socket.socket_info);
-		// memset(listening_socket.socket_info.sin_zero, 0, sizeof(listening_socket.socket_info.sin_zero));
-		_socketInfo.push_back(listening_socket);
+		listener.socket_address_len = sizeof(listener.socket_info);
+		// memset(listener.socket_info.sin_zero, 0, sizeof(listener.socket_info.sin_zero));
+		_socketInfo.push_back(listener);
 
 
-		listening_pollFd.events = POLLIN;
-		_pollFds.push_back(listening_pollFd);
+		poll_fd.events = POLLIN;
+		_pollFds.push_back(poll_fd);
 		_nbListeningSockets++;
 		
 
-		int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
-		// int rc = bind(listening_pollFd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
+		int rc = bind(poll_fd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
+		// int rc = bind(poll_fd.fd, (sockaddr *)&_socketInfo[i].socket_info, _socketInfo[i].socket_address_len);
 		if (rc < 0) {
 			exitWithError("Cannot bind() socket to address");
 		}
