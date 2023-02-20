@@ -4,6 +4,7 @@
 
 # include <iostream>
 # include <string>
+# include <map>
 
 enum TokenTypes
 {
@@ -32,6 +33,8 @@ enum TokenTypes
 	T_DOLLAR,
 	T_HOME_DIR
 };
+
+typedef std::map<std::string, int> TokenMap;
 
 class Token
 {

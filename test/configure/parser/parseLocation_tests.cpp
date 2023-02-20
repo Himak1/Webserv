@@ -1,15 +1,15 @@
 #include "gtest/gtest.h"
-#include "../../../src/configure/parsing/Token.hpp"
-#include "../../../src/configure/parsing/TokenStream.hpp"
+#include "../../../src/configure/parser/Token.hpp"
+#include "../../../src/configure/parser/TokenStream.hpp"
 #include "../../../src/configure/Node.hpp"
-#include "../../../src/configure/parsing/parser.hpp"
+#include "../../../src/configure/parser/parser.hpp"
 
 TEST(parseLocation, parseReturn)
 {
-	std::list<Token> lst = {	Token(T_RETURN, "return"),
-								Token(T_STRING, "301"),
-								Token(T_STRING, "localhost/"),
-								Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {	Token(T_RETURN, "return", 1),
+								Token(T_STRING, "301", 1),
+								Token(T_STRING, "localhost/", 1),
+								Token(T_SEMICOLON, ";", 1)};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseReturn(testInput);
@@ -25,10 +25,10 @@ TEST(parseLocation, parseReturn)
 
 TEST(parseLocation, AllowedMethods)
 {
-	std::list<Token> lst = {	Token(T_ALLOWED_METHODS, "allowed_methods"),
-								Token(T_STRING, "GET"),
-								Token(T_STRING, "POST"),
-								Token(T_SEMICOLON, ";")};
+	std::list<Token> lst = {	Token(T_ALLOWED_METHODS, "allowed_methods", 1),
+								Token(T_STRING, "GET", 1),
+								Token(T_STRING, "POST", 1),
+								Token(T_SEMICOLON, ";", 1)};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseAllowedMethods(testInput);
@@ -44,7 +44,7 @@ TEST(parseLocation, AllowedMethods)
 
 TEST(parseLocation, locationPath)
 {
-	std::list<Token> lst = {Token(T_STRING, "/usr/share/")};
+	std::list<Token> lst = {Token(T_STRING, "/usr/share/", 1)};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseLocationPath(testInput);
@@ -56,9 +56,9 @@ TEST(parseLocation, locationPath)
 TEST(parseLocation, root)
 {
 	std::list<Token> lst = {
-		Token(T_ROOT, "root"),
-		Token(T_STRING, "/files/data"),
-		Token(T_SEMICOLON, ";")};
+		Token(T_ROOT, "root", 1),
+		Token(T_STRING, "/files/data", 1),
+		Token(T_SEMICOLON, ";", 1)};
 	TokenStream	testInput(lst);
 
 	Node*	output = parseRoot(testInput);
@@ -72,10 +72,10 @@ TEST(parseLocation, root)
 TEST(parseLocation, cgi_pass)
 {
 	std::list<Token> lst = {
-		Token(T_CGI_PASS, "cgi_pass"),
-		Token(T_STRING, ".php"),
-		Token(T_STRING, "/usr/bin/php"),
-		Token(T_SEMICOLON, ";")};
+		Token(T_CGI_PASS, "cgi_pass", 1),
+		Token(T_STRING, ".php", 1),
+		Token(T_STRING, "/usr/bin/php", 1),
+		Token(T_SEMICOLON, ";", 1)};
 	TokenStream testInput(lst);
 
 	Node*	output = parseCgiPass(testInput);
@@ -92,9 +92,9 @@ TEST(parseLocation, cgi_pass)
 TEST(parseLocation, alias)
 {
 	std::list<Token> lst = {
-		Token(T_ALIAS, "alias"),
-		Token(T_STRING, "/usr/bin/"),
-		Token(T_SEMICOLON, ";")};
+		Token(T_ALIAS, "alias", 1),
+		Token(T_STRING, "/usr/bin/", 1),
+		Token(T_SEMICOLON, ";", 1)};
 	TokenStream testInput(lst);
 
 	Node*	output = parseAlias(testInput);
@@ -108,9 +108,9 @@ TEST(parseLocation, alias)
 TEST(parseLocation, autoindex)
 {
 	std::list<Token> lst = {
-		Token(T_AUTOINDEX, "autoindex"),
-		Token(T_STRING, "on"),
-		Token(T_SEMICOLON, ";")};
+		Token(T_AUTOINDEX, "autoindex", 1),
+		Token(T_STRING, "on", 1),
+		Token(T_SEMICOLON, ";", 1)};
 	TokenStream testInput(lst);
 
 	Node*	output = parseAutoIndex(testInput);

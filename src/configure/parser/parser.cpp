@@ -82,7 +82,7 @@ Node*	parseServer( TokenStream& tokensToParse )
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
 		return (NULL);
 	newNode = new Node(N_SERVER);
-	while (!accept(tokensToParse, T_BRACKET_CLOSE) && status != 0)
+	while (!expect(tokensToParse, T_BRACKET_CLOSE) && status != 0)
 	{
 		switch (tokensToParse.getTokenType())
 		{
@@ -111,9 +111,11 @@ Node*	parseServer( TokenStream& tokensToParse )
 				status = 0;
 				break;
 		}
+		tokensToParse.moveToNextToken();
 	}
 	if (status == 0)
 		return (deleteNewNode(newNode));
+	tokensToParse.moveToNextToken();
 	return (newNode);
 }
 
