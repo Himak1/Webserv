@@ -32,7 +32,7 @@ public:
 	void				startPolling();
 	
 private:
-		// Private members 
+			// PRIVATE MEMBERS
 	std::vector<Configuration*>	_configList;
 	std::vector<struct pollfd>	_pollFds;			
 	std::vector<t_socket>		_socketInfo;
@@ -41,7 +41,7 @@ private:
 	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
-		// Private member functions
+			// PRIVATE FUNCTIONS
  	void						newConnection(int);
 	void						closeConnection(int);
 	void						closeServer();
@@ -51,19 +51,19 @@ private:
 	void						sendResponse(int);
 	int 						startServer();
 	void						setupListeningSockets();
-	void						setupSocketStruct(t_socket *);
+	void						setupSocketStruct(t_socket *, int);
 	void						setFileDescrOptions(int);
 	void						lookupActiveSocket();
 
-		// Private exceptions
-	struct SockBindingFail : public exception {
-		const char * what () const throw () {
-    		return "Failed to bind socket. Exiting program";
-		}
-	};	
+			// PRIVATE EXCEPTIONS
 	struct ListenFail : public exception {
 		const char * what () const throw () {
     		return "Failure to listen to socket. Exiting program";
+		}
+	};	
+	struct SockBindingFail : public exception {
+		const char * what () const throw () {
+    		return "Failed to bind socket. Exiting program";
 		}
 	};	
 	struct SockNoBlock : public exception {
@@ -74,6 +74,11 @@ private:
 	struct SockCreateFail : public exception {
 		const char * what () const throw () {
     		return "Failure to create socket. Exiting program";
+		}
+	};	
+	struct SockOptionsFail : public exception {
+		const char * what () const throw () {
+    		return "Failure to set socket option to re use socket. Exiting program";
 		}
 	};	
 

@@ -19,7 +19,7 @@
 
 
 # define POLL_TIMEOUT 200	 // in ms
-
+# define DEBUG_INFO 1
 
 
 /* #################################################################################################### */
@@ -78,7 +78,6 @@ namespace
 
 	void exitWithError(const std::string &errorMessage)
 	{
-		perror(strerror(errno));
 		log("ERROR: " + errorMessage);
 		exit(1);
 	}
@@ -95,28 +94,15 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 {
 	try {
 		setupListeningSockets();
-	} catch (SockBindingFail& e) {
+	} catch (std::exception& e) {
+		if (DEBUG_INFO)
+			cout << std::strerror(errno) << endl;
 		cout << e.what() << endl;
-		exit(1);
-	} catch (ListenFail& e) {
-		cout << e.what() << endl;
-		exit(2);
-	} catch (SockNoBlock& e) {
-		cout << e.what() << endl;
-		exit(3);
+		std::exit(1);
 	}	
 
-	_isServerRunning = true;
+	_isServerRunning = true;	// tmp?
 	startPolling();
-
-	
-	// } catch (TCPServerException& e) {
-	// 	std::cout << "TCP except caught: " << e.what() << std::endl;
-	// 	std::exit(1);
-	// } catch (std::exception& e) {
-	// 	std::cout << "Standard error caught: " << e.what() << std::endl;
-	// 	std::exit(2);
-	// }	
 }
 
 			// DESTRUCTORS
@@ -128,37 +114,22 @@ TCPServer::~TCPServer()
 
 			// PRIVATE FUNCTIONS
 
-/* setsocktopt() zorgt ervoor dat we ingeval van een restart de socket kunnen hergebruiken    
-
-				evt ipv sin_addr.s_addr = inet_addr
-		
-
-                        */
 void	TCPServer::setupListeningSockets()
 {
 	struct pollfd	poll_fd;
-	int				i = 0, rv;
 	t_socket		listener;
-	int				re_use = 1;
+	int				re_use = 1, i = 0;
 
 	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
-
-
 		std::memset(&listener, 0, sizeof(listener));
-		std::memset(&poll_fd, 0, sizeof(poll_fd));
 
 		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-				// err handle
-	
-		setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use));
-			
+		if (poll_fd.fd == -1)
+			throw SockCreateFail();	
+		if (setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1)
+			throw SockOptionsFail();
 
-		// setFileDescrOptions(poll_fd.fd);
-
-
-		listener.socket_info.sin_addr.s_addr = INADDR_ANY;
-		listener.socket_info.sin_family = AF_INET;
-		listener.socket_info.sin_port = htons((*it)->getPort());
+		setupSocketStruct(&listener, (*it)->getPort());
 
 		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_info, sizeof(listener.socket_info)) == -1)
 			throw SockBindingFail();
@@ -167,25 +138,22 @@ void	TCPServer::setupListeningSockets()
 		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
 			throw SockNoBlock();
 
-
-
 		listener.socket_address_len = sizeof(listener.socket_info);		// nodig?
-		poll_fd.events = POLLIN;
 
+		poll_fd.events = POLLIN;
 		_socketInfo.push_back(listener);
 		_pollFds.push_back(poll_fd);
 		_nbListeningSockets++;
 
 		logStartupMessage(_socketInfo[i].socket_info);
-
 	}
 }
 
-void	TCPServer::setupSocketStruct(t_socket *socket)
+void	TCPServer::setupSocketStruct(t_socket *listener, int port)		// tmp?
 {
-	// memset(socket, 0, sizeof(*socket));
-	// // socket->socket_info.sin_family = AF_INET;
-	// // socket->socket_info.sin_addr.s_addr = INADDR_ANY; // misschien veranderen naar ip uit config?
+	listener->socket_info.sin_addr.s_addr = INADDR_ANY;
+	listener->socket_info.sin_family = AF_INET;
+	listener->socket_info.sin_port = htons(port);
 }
 
 void TCPServer::startPolling()
@@ -196,7 +164,9 @@ void TCPServer::startPolling()
 	while (_isServerRunning) {
 		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
-			exitWithError("Poll count = negative (TCPServer::startPolling()");
+			if (DEBUG_INFO)
+				cout << strerror(errno) << endl;
+			exitWithError("poll failed. Exiting");
 		}
 		lookupActiveSocket();
 	}	
@@ -212,7 +182,6 @@ void	TCPServer::lookupActiveSocket()
 		else
 			newConnection(i);	
 	}
-
 
 	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
@@ -240,7 +209,7 @@ void TCPServer::newConnection(int idx)
 	}
 	new_socket.socket_address_len = socket_len;
 
-	setFileDescrOptions(new_pollfd.fd);
+	setFileDescrOptions(new_pollfd.fd);				
 	new_pollfd.events = POLLIN;
 	new_socket.config_idx = idx;
 	_pollFds.push_back(new_pollfd);
@@ -285,7 +254,6 @@ void TCPServer::receiveRequest(int idx)
 		closeConnection(idx);
 		return ;
 	} 
-
 	_request.initRequest(std::string(buff));
 
 	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
@@ -307,8 +275,6 @@ void TCPServer::sendResponse(int idx)
 
 	if (serverMsgIsEmpty(idx))
 		_socketInfo[idx].server_message = respons.getMessage();
-	
-	// bytes_send = send(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size(), 0);
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
@@ -326,8 +292,6 @@ void TCPServer::sendResponse(int idx)
 	else {
 		_pollFds[idx].events = POLLOUT;
 	}	
-
-
 }
 
 
@@ -335,7 +299,7 @@ void	TCPServer::setFileDescrOptions(int file_descr)
 {
 	int	re_use = 1;
 
-	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1) 
+	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1) 						// exceptions
 		exitWithError("set file descriptor as non blocking failed\n");
 	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
 		exitWithError("setsockopt reuse address error\n");					
