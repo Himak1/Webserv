@@ -53,6 +53,7 @@ Location&	Location::operator=( const Location& src )
 std::ostream&	operator<<( std::ostream& o, const Location& location )
 {
 	o	<< "path: " << location.getPath() << '\n'
+		<< (AConfig&)location << '\n'
 		<< "alias: " << location.getAlias() << '\n'
 		<< "CGI Extension: " << location.getCgiExtension() << '\n'
 		<< "CGI Path: " << location.getCgiPath();

@@ -92,7 +92,8 @@ std::ostream&	operator<<( std::ostream& o, const Configuration& config )
 {
 	o	<< "host: " << config.getHost() << '\n'
 		<< "port: " << config.getPort() << '\n'
-		<< "client max body size: " << config.getClientMaxBodySize() << "\n\n";
+		<< "client max body size: " << config.getClientMaxBodySize() << '\n'
+		<< (AConfig&)config << "\n\n";
 	for (std::list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
 	{
 		o	<< "----location----" << '\n'
