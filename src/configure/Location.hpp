@@ -11,10 +11,7 @@ class Location : public AConfig
 {
 	public:
 		Location( Node* locationNode );
-		Location( const Location& src );
 		~Location();
-
-		Location&	operator=( const Location& src );
 
 		std::string	getPath() const;
 		std::string	getAlias() const;

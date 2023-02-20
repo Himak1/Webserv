@@ -17,13 +17,6 @@ Location::Location( Node* locationNode )
 	}
 }
 
-Location::Location( const Location& src )
-	: AConfig(src)
-{
-	*this = src;
-}
-
-
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
 */
@@ -35,20 +28,6 @@ Location::~Location()
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
-
-Location&	Location::operator=( const Location& src )
-{
-	_path = src._path;
-	_alias = src._alias;
-	_cgiExtension = src._cgiExtension;
-	_cgiPath = src._cgiPath;
-	_autoIndex = src._autoIndex;
-	for (int i = 0; i < 4; i++)
-	{
-		_acceptedMethods[i] = src._acceptedMethods[i];
-	}
-	return *this;
-}
 
 std::ostream&	operator<<( std::ostream& o, const Location& location )
 {

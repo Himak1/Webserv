@@ -24,11 +24,6 @@ AConfig::AConfig()
 {
 }
 
-AConfig::AConfig( const AConfig& src )
-	: indexFiles(src.indexFiles), _root(src._root), _errorPages(src._errorPages)
-{
-}
-
 AConfig::~AConfig()
 {
 }

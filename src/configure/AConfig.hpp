@@ -29,7 +29,6 @@ class AConfig
 		std::list<std::string>	indexFiles;
 	protected:
 		AConfig();
-		AConfig( const AConfig& src );
 
 		std::string				convertNodeToString( Node* node );
 		std::list<std::string>	convertMultiNodesToStrings( Node* node );
