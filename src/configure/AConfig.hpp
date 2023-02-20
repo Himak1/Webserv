@@ -23,6 +23,8 @@ class AConfig
 
 		std::string				getRoot() const;
 		const std::string&		getErrorPage( int errorCode ) const;
+		/* int						getRedirect() const; // returns 0 if not a redirect */
+		/* std::string				getRedirectURI() const; // returns empty string if not a redirect */
 
 		std::list<std::string>	indexFiles;
 	protected:
@@ -40,6 +42,7 @@ class AConfig
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
+		
 };
 
 std::ostream&	operator<<( std::ostream& o, const AConfig& config );

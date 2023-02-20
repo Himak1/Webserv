@@ -12,6 +12,7 @@ class Configuration : public AConfig
 {
 	public:
 		Configuration( Node* serverNode );
+		/* Configuration( const Configuration& src ); */
 		~Configuration();
 
 		std::string		getHost() const;

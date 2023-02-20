@@ -14,9 +14,11 @@
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(class Request request, class Configuration config)
+Response::Response(class Request request, class Configuration& config)
 	: _request(request), _config(config), _location()
 {
+	// std::cout << "\n\nRESPONSE\n" <<_config << std::endl;
+
 	initStatusCodes();
 	initContentTypes();
 	setFilePath();
@@ -52,9 +54,11 @@ void	Response::setFilePath()
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
 									&& _request.getURI().rfind('.') == string::npos;
 
-	if (_request.getURI() == "/" || is_undefined_extension) {
+	if (_request.getURI() == "/" || is_undefined_extension) {		
 		list<string>::iterator it = _config.indexFiles.begin();
-		cout << "SETPATHFILE |" << *it << endl;
+
+		cout << "front: " << _config.indexFiles.front() << std::endl;
+
 		while (it != _config.indexFiles.end()) {
 			cout << "SETPATHFILE |" << *it << endl;
 			_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
@@ -66,6 +70,19 @@ void	Response::setFilePath()
 			_status = NOT_FOUND;
 	}
 	_filepath = _config.getRoot() + _request.getURI();
+	// if (_request.getURI() == "/"
+	// 	|| ((_request.getMethod() != "DELETE"
+	// 	&& _request.getURI().rfind('.') == string::npos))) {
+	// 	list<string> indexFiles = _config.indexFiles;
+	// 	list<string>::iterator it;
+	// 	for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
+	// 		_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
+	// 		if (isExistingFile(_filepath))
+	// 			break;
+	// 	}
+	// }
+	// else
+	// 	_filepath = _config.getRoot() + _request.getURI();
 }
 
 void	Response::setLocation()
@@ -182,7 +199,7 @@ string Response::returnErrorPage()
 {
 	try {
 		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-		cout << _filepath << endl;
+		// cout << _filepath << endl;
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}

@@ -21,6 +21,7 @@ Location::Location( const Location& src )
 	: AConfig(src)
 {
 	*this = src;
+	std::cout << "Location: copy constructor called" << std::endl;
 }
 
 

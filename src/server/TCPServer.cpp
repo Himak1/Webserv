@@ -32,10 +32,12 @@ namespace
 namespace http
 {
 	// CONSTRUCTOR
-	TCPServer::TCPServer(class Configuration configuration)
+	TCPServer::TCPServer(class Configuration& configuration)
 		: _config(configuration), _socket(), _new_socket(),
 		_socketAddress(), _socketAddress_len(sizeof(_socketAddress))
 	{
+	// std::cout << "\n\nTCP\n" <<_config << std::endl;
+
 		_socketAddress.sin_family = AF_INET;
 		_socketAddress.sin_port = htons(_config.getPort());
 		_socketAddress.sin_addr.s_addr = inet_addr(_config.getHost().c_str());
