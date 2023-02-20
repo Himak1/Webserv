@@ -17,7 +17,7 @@
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
 // TEMPORARY 
-#define CGI_BUFSIZE 307200
+
 
 #define COSTUM_301 "/templates/301.html"
 #define COSTUM_302 "/templates/302.html"
@@ -27,7 +27,6 @@
 // #define COSTUM_404 "default"
 
 #define UPLOAD_FOLDER "uploads"
-#define DIRECTORY_LISTING "true"
 
 #define CASE_301 "/permanently_moved"
 #define CASE_302 "/temporary_unavailable"

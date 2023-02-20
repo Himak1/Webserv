@@ -2,6 +2,7 @@
 # define BUILDRESPONSE_HPP
 
 # include "../configure/Configuration.hpp"
+# include "../configure/Location.hpp"
 # include "../request/Request.hpp"
 # include "../defines.hpp"
 
@@ -25,10 +26,12 @@ class Response
 		string						_content;
 		class Request				_request;
 		class Configuration			_config;
+		class Location*				_location;
 		map<int, string>			_status_codes;
 		map<string, string>			_content_types;
 	
-		string						setFilePath();
+		void						setFilePath();
+		void						setLocation();
 		void						initStatusCodes();
 		void						initContentTypes();
 		int							setStatus();

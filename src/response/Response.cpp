@@ -15,11 +15,12 @@
 
 // CONSTRUCTOR
 Response::Response(class Request request, class Configuration config)
-	: _request(request), _config(config)
+	: _request(request), _config(config), _location()
 {
 	initStatusCodes();
 	initContentTypes();
-	_filepath = setFilePath();
+	setFilePath();
+	setLocation();
 	_status = setStatus();
 	_content = getContent();
 }
@@ -46,28 +47,35 @@ string 	Response::getMessage()
 }
 
 // PRIVATE FUNCTIONS
-string	Response::setFilePath()
+void	Response::setFilePath()
 {
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
 									&& _request.getURI().rfind('.') == string::npos;
 
 	if (_request.getURI() == "/" || is_undefined_extension) {
 		list<string>::iterator it = _config.indexFiles.begin();
-		//it->c_str() returned nooit iets
-		cout << "SETFILEPATH | "<< it->c_str() << endl;
+		cout << "SETPATHFILE |" << *it << endl;
 		while (it != _config.indexFiles.end()) {
-			cout << it->c_str() << endl;
-			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
+			cout << "SETPATHFILE |" << *it << endl;
+			_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
 			if (isExistingFile(_filepath))
-				return _filepath;
+				return;
 			++it;
 		}
-		// Wat doen we als er geen (correcte) IndexFiles worden opgegeven?
-		// Of is dat verplicht in de config?
 		if (it == _config.indexFiles.end())
-			return _config.getRoot() + "/index.html";
+			_status = NOT_FOUND;
 	}
-	return (_config.getRoot() + _request.getURI());
+	_filepath = _config.getRoot() + _request.getURI();
+}
+
+void	Response::setLocation()
+{
+	string target = _request.getURI();
+	list<Location*>::iterator it = findConfigLocation(target);
+	if (it == _config.locations.end()) {
+		_status = INTERNAL_SERVER_ERROR;
+	}
+	_location = (*it);
 }
 
 void	Response::initStatusCodes()
@@ -106,17 +114,16 @@ void	Response::initContentTypes()
 int		Response::setStatus()
 {
 	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_incorrect_method	= _request.getMethod() != "GET" 
-									&& _request.getMethod() != "POST" 
-									&& _request.getMethod() != "DELETE";
+	bool is_accepted_method		= _location->isMethodAccepted(_method);
 	bool is_php_file			= _filepath.find(".php?") != string::npos;
 	bool is_301					= _request.getURI() == CASE_301;
 	bool is_302					= _request.getURI() == CASE_302;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
 	bool is_existing_file		= isExistingFile(_filepath);
 
+	if (_status == NOT_FOUND)	return NOT_FOUND;
 	if (is_correct_HTTP)		return HTTP_VERSION_NOT_SUPPORTED;
-	if (is_incorrect_method)	return NOT_IMPLEMENTED;
+	if (!is_accepted_method)	return NOT_IMPLEMENTED;
 	if (is_301)					return MOVED_PERMANENTLY;
 	if (is_302)					return FOUND;
 	if (is_unsupported_type)	return UNSUPPORTED_MEDIA_TYPE;
@@ -245,16 +252,14 @@ string Response::setCookie()
 
 string Response::getCGI()
 {
-	string target = _request.getURI();
-	list<Location*>::iterator it = findConfigLocation(target);
-	if (it == _config.locations.end()) {
-		_status = INTERNAL_SERVER_ERROR;
-		return createErrorHTML();
-	}
-	class CGI CGI(_request, *(*it), _filepath);
+	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
 	if (cgi.find("<!doctype html>") == string::npos)
 		return getCGI();
+	if (cgi.find("413 Request Entity Too Large") != string::npos)
+		_status = REQUEST_ENTITY_TOO_LARGE;
+	if (cgi.find("500 Internal Server Error") != string::npos)
+		_status = INTERNAL_SERVER_ERROR;
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
 }
 

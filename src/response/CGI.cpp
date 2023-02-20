@@ -13,25 +13,24 @@
 #include <errno.h>
 
 // CONSTRUCTOR
-// CGI::CGI(class Request request, class Configuration config, string filepath)
-CGI::CGI(class Request request, class Location& location, string filepath)
-	: _request(request), _location(location), _filepath(filepath)
+CGI::CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize)
+	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
 	_filepath = _filepath.substr(0, _filepath.find("?"));
-	// mogen we realpath() gebruiken? Is onderdeel van C POSIX library, waar bijv. unistd.h en stdlib.h ook onder vallen
 	_path_to_script = realpath(&_filepath[0], NULL);
 
 	_argument = new char[3];
 	_argument = strcpy(_argument, "-q");
 
-	int path_length = _location.getCgiPath().size();
+	int path_length = (*_location).getCgiPath().size();
 	char *_path_to_cgi = new char[path_length + 1];
-	_path_to_cgi = strcpy(_path_to_cgi, _location.getCgiPath().c_str());
+	_path_to_cgi = strcpy(_path_to_cgi, (*_location).getCgiPath().c_str());
 	_path[0] = &_path_to_cgi[0];
 	_path[1] = &_path_to_script[0];
 	_path[2] = NULL;
 	_env = createEnv();
 
+	_buffer = (char *)calloc(_clientMaxBodySize, sizeof(char));
 	// cout << "_filepath = " << _filepath << endl;
 	// cout << "_path_to_cgi = " << _location.getCgiPath().c_str() << endl;
 	// cout << "_path_to_script = " << _path_to_script << endl;
@@ -40,6 +39,7 @@ CGI::CGI(class Request request, class Location& location, string filepath)
 
 // DESTRUCTOR
 CGI::~CGI() {
+	free(_buffer);
 	free(_path_to_script);
 	freeEnv();
 }
@@ -63,19 +63,24 @@ string CGI::ExecuteCGI()
 		close(fd[1]);
 		execve(_path[0], _path, _env);
 		perror("execve failed: ");
-		cout << "<!DOCTYPE html><html lang=\"en\"><head><title>"
+		cout << "<!doctype html><html lang=\"en\"><head><title>"
 		<< "500 Internal Server Error\n"
 		<< "</title></head><body><center><h1>"
 		<< "500 Internal Server Error\n"
 		<< "</h1></center></body></html>" << endl;
 		exit(0);
 	}
-	// TO DO: message can currently not be bigger than CGI_BUFSIZE
-	char	buffer[CGI_BUFSIZE] = {0};
-	read(fd[0], buffer, CGI_BUFSIZE);
+
+	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
 	close(fd[1]);
 
-	return buffer;
+	if (message_size >= _clientMaxBodySize)
+		return "<!doctype html><html lang=\"en\"><head><title>" \
+				"413 Request Entity Too Large\n" \
+				"</title></head><body><center><h1>" \
+				"413 Request Entity Too Large\n" \
+				"</h1></center></body></html>";
+	return _buffer;
 }
 
 // convert list to char**
@@ -94,10 +99,15 @@ char**	CGI::createEnv()
 		i++;
 	}
 
-	string temp_define_1 = DIRECTORY_LISTING;
-	string directory_listing = "directory_listing=" + temp_define_1;
+	string directory_listing;
+	if (_location->autoIndexingOn())
+		directory_listing = "directory_listing=true";
+	else
+		directory_listing = "directory_listing=false";
+
 	_env[i] = new char[directory_listing.length() + 1];
 	_env[i] = strcpy(_env[i], directory_listing.c_str());
+
 
 	string temp_define_2 = UPLOAD_FOLDER;
 	string upload_directory = "upload_directory=" + temp_define_2;
