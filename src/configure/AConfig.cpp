@@ -25,10 +25,8 @@ AConfig::AConfig()
 }
 
 AConfig::AConfig( const AConfig& src )
-	: _errorPages(src._errorPages)
+	: indexFiles(src.indexFiles), _root(src._root), _errorPages(src._errorPages)
 {
-	_root = src._root;
-	/* _errorPages = src._errorPages; */
 }
 
 AConfig::~AConfig()
