@@ -15,7 +15,7 @@ static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
 		if (!configFile)
 		{
 			std::cerr << "ERROR: '" << argv[1] << "' could not be opened" << std::endl;
-			exit(1);
+			std::exit(1);
 		}
 	}
 	else
@@ -24,7 +24,7 @@ static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
 		if (!configFile)
 		{
 			std::cerr << "ERROR: default configuration file wasn't found" << std::endl;
-			exit(1);
+			std::exit(1);
 		}
 	}
 }
@@ -40,7 +40,7 @@ static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 		catch (std::exception& e) {
 			std::cout	<< "ERROR: invalid values were found in the configuration file"
 						<< std::endl;
-			exit(1);
+			std::exit(1);
 		}
 	}
 	return (serverConfigs);
@@ -52,11 +52,12 @@ std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 	std::ifstream	configFile;
 	openConfigFile(configFile, argc, argv);
 
-	TokenStream					tokens = tokenizer(configFile);
-	Node*						ast = parser(tokens);
+	TokenStream		tokens = tokenizer(configFile);
+	Node*			ast = parser(tokens);
 	if (!ast)
 		exit(1);
 	std::vector<Configuration*>	serverConfigs = convertASTtoConfigVector(ast);
+	delete ast;
 	return (serverConfigs);
 }
 

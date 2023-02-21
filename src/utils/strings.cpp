@@ -26,17 +26,15 @@ string trim_spaces(const string& str)
 	return safe_substr(str, first, (last - first + 1));
 }
 
-size_t	ft_strlen(char *s)
+#include <iostream>
+string go_one_directory_up(string str)
 {
-	size_t	i;
-
-	for (i = 0; s[i]; i++) ;
-	return i;
-}
-
-std::string number_to_string (unsigned int number)
-{
-    std::ostringstream ss;
-    ss << number;
-    return ss.str();
+	size_t length = str.rfind("/");
+	// std::cout << "\n\n" << std::endl;
+	// std::cout << str << std::endl;
+	// std::cout << length << std::endl;
+	// std::cout << safe_substr(str, 0, length) << std::endl;
+	if (length == 0 || length == string::npos)
+		return "/";
+	return safe_substr(str, 0, length);
 }

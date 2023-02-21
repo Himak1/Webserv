@@ -12,49 +12,37 @@
 #include <stdio.h>
 #include <errno.h>
 
+# define INTERNAL_SERVER_ERROR_MSG "<!doctype html><html lang=\"en\"><head><title>" \
+						"500 Internal Server Error\n</title></head><body><center><h1>" \
+						"500 Internal Server Error\n</h1></center></body></html>"
+
 // CONSTRUCTOR
-// CGI::CGI(class Request request, class Configuration config, string filepath)
-CGI::CGI(class Request request, class Location& location, string filepath)
-	: _request(request), _location(location), _filepath(filepath)
+CGI::CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize)
+	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
-	_filepath = _filepath.substr(0, _filepath.find("?"));
-	// mogen we realpath() gebruiken? Is onderdeel van C POSIX library, waar bijv. unistd.h en stdlib.h ook onder vallen
-	_path_to_script = realpath(&_filepath[0], NULL);
+	_allocation_has_failed = false;
 
-	_argument = new char[3];
-	_argument = strcpy(_argument, "-q");
+	_buffer = (char *)calloc(_clientMaxBodySize, sizeof(char));
+	if (!_buffer)
+		_allocation_has_failed = true;
 
-	// if (_request.getExtension() == ".php") {
-	// 	// _path_to_cgi = location.getCgiPath().c_str();
-	// 	_path_to_cgi = new char[PATH_TO_PHP_CGI_LENGTH + 1];
-	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PHP_CGI);
-	// }
-	// else if (_request.getExtension() == ".py") {
-	// 	// _config.g = 
-	// 	_path_to_cgi = new char[PATH_TO_PY_CGI_LENGTH + 1];
-	// 	_path_to_cgi = strcpy(_path_to_cgi, PATH_TO_PY_CGI);
-	// }
+	if (!_allocation_has_failed) {
+		try {
+			_env = new char*[_request.getEnv().size() + 4];
+		} catch (std::bad_alloc&) {
+			_allocation_has_failed = true;
+		}
+	}
 
-	_path[0] = const_cast<char*>(_location.getCgiPath().c_str());
-	// _path[1] = location.gt
-	// _path[0] = &_path_to_cgi[0];
-	_path[1] = &_path_to_script[0];
-	// if (_request.getExtension() == ".php") 
-		// _path[2] = &_argument[0];
-	// else
-		_path[2] = NULL;
-	_path[3] = NULL;
-	_env = createEnv();
-
-	// cout << "_filepath = " << _filepath << endl;
-	// cout << "_path_to_cgi = " << _path_to_cgi << endl;
-	// cout << "_path_to_script = " << _path_to_script << endl;
-	// cout << "_request.getExtension() = " << _request.getExtension() << endl;
+	createPath();
+	createEnv();
 }
 
 // DESTRUCTOR
 CGI::~CGI() {
-	free(_path_to_script);
+	free(_buffer);
+	delete[] _path[0];
+	free(_path[1]);
 	freeEnv();
 }
 
@@ -63,8 +51,9 @@ char** 	CGI::getFormEnv() const { return _env; }
 
 string CGI::ExecuteCGI()
 {
-	int		fd[2];
-	fd[0] = 0;
+	if (_allocation_has_failed)
+		return INTERNAL_SERVER_ERROR_MSG;
+	int		fd[2] = {0};
 	dup2(fd[0], STDIN_FILENO);
 	close(fd[0]);
 	if (pipe(fd) < 0)
@@ -77,63 +66,78 @@ string CGI::ExecuteCGI()
 		close(fd[1]);
 		std::cout << _path[0] << " <- path[0]" << std::endl;
 		execve(_path[0], _path, _env);
-		cout << "Execve error " ;
-		perror(strerror(errno));
+		perror("execve failed: ");
+		cout << INTERNAL_SERVER_ERROR_MSG << endl;
 		exit(0);
 	}
-	// TO DO: message can currently not be bigger than CGI_BUFSIZE
-	char	buffer[CGI_BUFSIZE] = {0};
-	read(fd[0], buffer, CGI_BUFSIZE);
-
 	close(fd[1]);
 
-	return buffer;
+	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
+	if (message_size >= _clientMaxBodySize)
+		return "<!doctype html><html lang=\"en\"><head><title>" \
+				"413 Request Entity Too Large\n</title></head><body><center><h1>" \
+				"413 Request Entity Too Large\n</h1></center></body></html>";
+	return _buffer;
 }
 
-// convert list to char**
-char**	CGI::createEnv()
+// PRIVATE FUNCTIONS
+void	CGI::createPath()
+{
+	_filepath = _filepath.substr(0, _filepath.find("?"));
+	char *path_to_script = realpath(&_filepath[0], NULL);
+
+	int path_length = (*_location).getCgiPath().size();
+	if (!_allocation_has_failed) {
+		try {
+			char *path_to_cgi = new char[path_length + 1];
+			path_to_cgi = strcpy(path_to_cgi, (*_location).getCgiPath().c_str());
+			cout << path_to_cgi << endl;
+			_path[0] = &path_to_cgi[0];
+			_path[1] = &path_to_script[0];
+			_path[2] = NULL;
+		} catch (std::bad_alloc&) {
+			_allocation_has_failed = true;
+		}
+	}
+}
+
+void	CGI::createEnv()
 {
 	map<string, string>	env_list = _request.getEnv();
-
-	_env = new char*[env_list.size() + 4];
 	map<string, string>::iterator it;
 	int i = 0;
-	for (it = env_list.begin(); it != env_list.end(); it++) {
-		string env_var = (*it).first + "=" + (*it).second;
-		int length = env_var.length() + 2;
-		_env[i] = new char[length];
-		_env[i] = strncpy(_env[i], (const char*)env_var.c_str(), length);
-		i++;
-	}
+	for (it = env_list.begin(); it != env_list.end(); it++)
+		addToEnv((*it).first + "=" + (*it).second, i++);
 
-	string temp_define_1 = DIRECTORY_LISTING;
-	string directory_listing = "directory_listing=" + temp_define_1;
-	_env[i] = new char[directory_listing.length() + 1];
-	_env[i] = strcpy(_env[i], directory_listing.c_str());
+	if (_location->autoIndexingOn())
+		addToEnv("directory_listing=true", i);
+	else
+		addToEnv("directory_listing=false", i);
 
 	string temp_define_2 = UPLOAD_FOLDER;
-	string upload_directory = "upload_directory=" + temp_define_2;
-	_env[++i] = new char[upload_directory.length() + 1];
-	_env[i] = strcpy(_env[i], upload_directory.c_str());
+	addToEnv("upload_directory=" + temp_define_2, ++i);
 
-	if (_request.getUploadSucces() == true) {
-		string upload_succes = "upload_succes=true";
-		_env[++i] = new char[upload_succes.length() + 1];
-		_env[i] = strcpy(_env[i], upload_succes.c_str());
-	}
-	else
-		_env[++i] = NULL;
+	if (_request.getUploadSucces() == true) addToEnv("upload_succes=true", ++i);
 	
 	_env[++i] = NULL;
+}
 
-	return _env;
+void	CGI::addToEnv(string value, int i)
+{
+	if (!_allocation_has_failed) {
+		try {
+			_env[i] = new char[value.length() + 1];
+			strcpy(_env[i], value.c_str());
+		} catch (std::bad_alloc&) {
+			_allocation_has_failed = true;
+		}
+	}
 }
 
 void	CGI::freeEnv()
 {
 	if (_request.getEnv().empty())
 		return ;
-
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;

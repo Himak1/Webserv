@@ -25,14 +25,26 @@ AConfig::AConfig()
 }
 
 AConfig::AConfig( const AConfig& src )
-	: _errorPages(src._errorPages)
+	: indexFiles(src.indexFiles), _root(src._root), _errorPages(src._errorPages)
 {
-	_root = src._root;
-	/* _errorPages = src._errorPages; */
+	std::cout << "AConfig: copy constructor called!" << std::endl;
 }
 
 AConfig::~AConfig()
 {
+}
+
+//	Overloads	//
+
+std::ostream&	operator<<( std::ostream& o, const AConfig& config )
+{
+	o << "index files: ";
+	for (std::list<std::string>::const_iterator i = config.indexFiles.begin(); i != config.indexFiles.end(); ++i)
+	{
+		o << *i << " ";
+	}
+	o << '\n' << "root: " << config.getRoot();
+	return o;
 }
 
 //	Public Methods	//

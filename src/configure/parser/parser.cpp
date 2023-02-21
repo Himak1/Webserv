@@ -23,7 +23,7 @@ Node*	parseIndex( TokenStream& tokensToParse )
 
 	tokensToParse.moveToNextToken();
 	newNode = new Node(N_INDEX);
-	while (expect(tokensToParse, T_STRING))
+	while (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == T_STRING)
 	{
 		acceptAndCreateTerminal(tokensToParse, newNode);
 	}
@@ -123,7 +123,7 @@ Node*	parser( TokenStream& tokensToParse )
 	Node*	ast;
 
 	ast = new Node(AST);
-	while (expect(tokensToParse, T_SERVER) && tokensToParse.isEmpty() == false)
+	while (tokensToParse.isEmpty() == false && expect(tokensToParse, T_SERVER))
 	{
 		if (ast->addChild(parseServer(tokensToParse)) == 0)
 			return (deleteNewNode(ast));

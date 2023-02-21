@@ -251,8 +251,6 @@ void TCPServer::receiveRequest(int idx)
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
 			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startPolling()" << std::endl;		// error
-		// else
-		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
 		return ;
 	} 
@@ -271,9 +269,8 @@ void TCPServer::sendResponse(int idx)
 	size_t		bytes_send;
 	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
-	// cout << "test " << idx << endl;
 
-	cout << "config_idx = " << _socketInfo[idx].config_idx << endl;
+	cout << "test\n" << endl;
 
 	if (serverMsgIsEmpty(idx))
 	{
@@ -290,9 +287,10 @@ void TCPServer::sendResponse(int idx)
 		}
 	}	
 	_socketInfo[idx].server_message.erase(0, bytes_send);
-	if (serverMsgIsEmpty(idx))
+	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		// closeConnection(idx); 
+		closeConnection(idx); 
+	}	
 	else {
 		_pollFds[idx].events = POLLOUT;
 	}	

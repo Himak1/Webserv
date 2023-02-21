@@ -2,6 +2,7 @@
 # define BUILDRESPONSE_HPP
 
 # include "../configure/Configuration.hpp"
+# include "../configure/Location.hpp"
 # include "../request/Request.hpp"
 # include "../defines.hpp"
 
@@ -13,7 +14,7 @@ using namespace std;
 class Response
 {
 	public:
-		Response(class Request request, class Configuration config);
+		Response(class Request request, class Configuration& config);
 		~Response();
 		string						getMessage();
 		string						getFilepath();
@@ -24,23 +25,27 @@ class Response
 		int							_status;
 		string						_content;
 		class Request				_request;
-		class Configuration			_config;
+		class Configuration&		_config;
+		class Location*				_location;
 		map<int, string>			_status_codes;
 		map<string, string>			_content_types;
-
+	
+		void						setFilePath();
+		bool						searchExtension(string extension);
+		bool						searchIndexFiles(list<string> index_files);
+		void						setLocation();
 		void						initStatusCodes();
 		void						initContentTypes();
-		bool						isExistingFile(string filename);
 		int							setStatus();
+		string						getContent();
 		string 						deleteFile();
 		void 						uploadFile();
 		string						getCGI();
 		string						setCookie();
-		string 						redirect();
-		string 						fileNotFound();
+		string 						returnErrorPage();
 		string						createErrorHTML();
-		string						getFileContent();
-		string						createResponse();
+		list<Location*>::iterator 	findConfigLocation(string target);
+		list<Location*>::iterator 	searchLocations(string target);
 };
 
 #endif

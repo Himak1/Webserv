@@ -2,6 +2,7 @@
 #include "CGI.hpp"
 #include "../utils/log.hpp"
 #include "../utils/strings.hpp"
+#include "../utils/fileHandling.hpp"
 #include "../configure/Location.hpp"
 
 #include <iostream>
@@ -13,25 +14,15 @@
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(class Request request, class Configuration config)
-	: _request(request), _config(config)
+Response::Response(class Request request, class Configuration& config)
+	: _request(request), _config(config), _location()
 {
-	if (_request.getURI() == "/"
-		|| ((_request.getMethod() != "DELETE"
-		&& _request.getURI().rfind('.') == string::npos))) {
-		list<string> indexFiles = _config.indexFiles;
-		list<string>::iterator it;
-		for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
-			_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
-			if (isExistingFile(_filepath))
-				break;
-		}
-	}
-	else
-		_filepath = _config.getRoot() + _request.getURI();
-
 	initStatusCodes();
 	initContentTypes();
+	setLocation();
+	setFilePath();
+	_status = setStatus();
+	_content = getContent();
 }
 
 // DESTRUCTOR
@@ -42,23 +33,92 @@ string 	Response::getFilepath() { return _filepath; }
 
 string 	Response::getMessage()
 {
-	_status = setStatus();
+	uploadFile();
 
-	if (safe_substr(_request.getURI(), 0, _request.getURI().find("?")) == "/upload_handler.php")
-		uploadFile();
-
-	if (_request.getMethod() == "DELETE")	_content = deleteFile();
-	else if (_status == MOVED_PERMANENTLY)	_content = redirect();
-	else if (_status == FOUND)				_content = redirect();
-	else if (_status == NOT_FOUND)			_content = fileNotFound();
-	else if (_status != OK)					_content = createErrorHTML();
-	else if (_request.isCGI())				_content = getCGI();
-	else									_content = getFileContent();
-
-	return createResponse();
+	return  _request.getHTTPVersion() + " "
+			+ _status_codes[_status]
+			+ _content_types[ _request.getExtension()]
+			+ setCookie()
+			+ "Content-Length: "
+			+ to_string(_content.size()) + "\n\n"
+			+ _content;
 }
 
 // PRIVATE FUNCTIONS
+void	Response::setFilePath()
+{
+	bool is_undefined_extension = _request.getMethod() != "DELETE"
+									&& _request.getURI().rfind('.') == string::npos;
+
+	if (is_undefined_extension) {	
+		if (searchExtension(".html")) 					return;
+		if (searchExtension(".htm")) 					return;
+		if (searchExtension(".php")) 					return;
+		if (searchExtension(".py")) 					return;
+		if (searchIndexFiles((*_location).indexFiles)) 	return;
+		if (searchIndexFiles(_config.indexFiles)) 		return;
+	}
+	_filepath = _config.getRoot() + _request.getURI();
+}
+
+bool	Response::searchExtension(string extension)
+{
+	_filepath = _config.getRoot() + _request.getURI() + extension;
+		if (isExistingFile(_filepath))
+			return true;
+	return false;
+}
+
+bool	Response::searchIndexFiles(list<string> index_files)
+{
+	_status = OK;
+	list<string>::iterator it = index_files.begin();
+	while (it != index_files.end()) {
+		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
+		if (isExistingFile(_filepath))
+			return true;
+		++it;
+	}
+	if (it == index_files.end())
+		_status = NOT_FOUND;
+	return false;
+}
+
+void	Response::setLocation()
+{
+	string target = _request.getURI();
+	// cout << "TARGET " << target << endl;
+	list<Location*>::iterator it = findConfigLocation(target);
+	if (it == _config.locations.end()) {
+		_status = INTERNAL_SERVER_ERROR;
+	}
+	_location = (*it);
+	// cout << "LOCATION " << _location->getCgiPath() << endl;
+}
+
+list<Location*>::iterator Response::findConfigLocation(string target) {
+	if (target.rfind("/") == 0)
+		return searchLocations("/");
+
+	list<Location*>::iterator it = _config.locations.begin();
+	it = searchLocations(target);
+	// cout << "TARGET " << target << endl;
+	// cout << "LOCATION " << (*it)->getCgiPath() << endl;
+	if (it == _config.locations.end())
+		return findConfigLocation(go_one_directory_up(target));
+	return it;
+}
+
+list<Location*>::iterator Response::searchLocations(string target) {
+	list<Location*>::iterator it = _config.locations.begin();
+	while (it != _config.locations.end()) {
+		if ((*it)->getPath() == target)
+			return it;
+		++it;
+	}
+	return it;
+}
+
 void	Response::initStatusCodes()
 {
 	_status_codes[200] = "200 OK\n";
@@ -67,11 +127,11 @@ void	Response::initStatusCodes()
 	_status_codes[301] = "301 Moved Permanently\n";
 	_status_codes[302] = "302 Found\n";
 	_status_codes[400] = "400 Bad Request\n";
-	// _status_codes[401] = "401 Unauthorized\n";
-	// _status_codes[403] = "403 Forbidden\n";
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
+	_status_codes[413] = "413 Request Entity Too Large\n";
 	_status_codes[415] = "415 Unsupported Media Type\n";
+	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
@@ -90,40 +150,40 @@ void	Response::initContentTypes()
 	_content_types[".php"] 	= "Content-Type: text/html; charset=utf-8\n";
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
-}
-
-bool	Response::isExistingFile(string filename) {
-	basic_ifstream<char> input_stream(filename.c_str());
-	if (input_stream.is_open()) {
-		input_stream.close();
-		return true;
-	}
-	return false;
+	_content_types[".py"] 	= "Content-Type: text/html; charset=utf-8\n";
 }
 
 int		Response::setStatus()
 {
 	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_incorrect_method	= _request.getMethod() != "GET" 
-									&& _request.getMethod() != "POST" 
-									&& _request.getMethod() != "DELETE";
+	bool is_accepted_method		= _location->isMethodAccepted(_method);
 	bool is_php_file			= _filepath.find(".php?") != string::npos;
 	bool is_301					= _request.getURI() == CASE_301;
 	bool is_302					= _request.getURI() == CASE_302;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
-	bool is_existing_file		= isExistingFile(_filepath);
 
-	if (is_correct_HTTP)		return HTTP_VERSION_NOT_SUPPORTED;
-	if (is_incorrect_method)	return NOT_IMPLEMENTED;
-	if (is_301)					return MOVED_PERMANENTLY;
-	if (is_302)					return FOUND;
-	if (is_unsupported_type)	return UNSUPPORTED_MEDIA_TYPE;
-	if (is_php_file)			return OK;
-	if (is_existing_file)		return OK;
+	if (_status == NOT_FOUND)		return NOT_FOUND;
+	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
+	if (!is_accepted_method)		return NOT_IMPLEMENTED;
+	if (is_301)						return MOVED_PERMANENTLY;
+	if (is_302)						return FOUND;
+	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	if (is_php_file)				return OK;
+	if (isExistingFile(_filepath))	return OK;
 	return NOT_FOUND;
 }
 
-string Response::deleteFile()
+string	Response::getContent()
+{
+	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
+
+	if (_request.getMethod() == "DELETE")	return deleteFile();
+	if (_status != OK)						return returnErrorPage();
+	if (isCGI)								return getCGI();
+	return(streamFileDataToString(_filepath));
+}
+
+string	Response::deleteFile()
 {
 	if (remove(_filepath.c_str()) != 0) {
 		_status = NOT_FOUND;
@@ -132,113 +192,44 @@ string Response::deleteFile()
 	return "File " + _filepath + " has been deleted";
 }
 
-void Response::uploadFile()
+void	Response::uploadFile()
 {
 	_request.setUploadSucces(false);
 
 	string input_path;
 	map<string, string> env = _request.getEnv();
-	if (env.find("file_to_upload") != env.end())
+	if (env.find("file_to_upload") == env.end())
+		return;
+	else
 		input_path = env["file_to_upload"];
 
-	cout << "UPLOAD PATH = " << input_path << endl;
-	// check if file exists
 	if (!isExistingFile(input_path)) {
-		cout << "FILE DOES NOT EXIST" << endl;
-		_request.setUploadSucces(false);
+		_status = NOT_FOUND;
+		_content = returnErrorPage();
 		return;
 	}
 
-	// stream input to file_data
-	ifstream input_stream(input_path.c_str());
-	ostringstream ss;
-	string line;
-	while (getline(input_stream, line))
-		ss << line << endl;
-	string file_data = ss.str();
-	cout << "file_data = " << file_data << endl;
-
+	string file_data = streamFileDataToString(input_path);
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
-	// write file_data to output_path
 	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
-	ofstream fout(upload_path.c_str());
-	fout << file_data << endl;
-    fout.close();
+	writeStringToFile(file_data, upload_path);
 
-	// check if upload was succesful
-	basic_ifstream<char> check_upload(upload_path.c_str());
-	if (check_upload.is_open()) {
-		check_upload.close();
+	if (isExistingFile(filename)
+		&& streamFileDataToString(filename) == file_data)
 		_request.setUploadSucces(true);
-	}
 }
 
-string Response::getCGI()
+string Response::returnErrorPage()
 {
-	list<Location*>::iterator i = _config.locations.begin();
-	while (i != _config.locations.end()) {
-		if ((*i)->getPath() == _filepath)
-			break;
-		++i;
+	try {
+		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		if (isExistingFile(_filepath))
+			return streamFileDataToString(_filepath);
 	}
-	class CGI CGI(_request, *(*i), _filepath);
-	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
-		return getCGI();
-	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
-}
-
-string Response::setCookie()
-{
-	string value;
-	if (_request.getURI() == "/session_logout.php") {
-		value = "deleted";
-		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
-	if (_request.getURI() == "/cookies_delete.php") {
-		value = "deleted";
-		return "Set-Cookie: cookie_value=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
-
-	map<string, string> env = _request.getEnv();
-	if (_request.getURI() == "/session_login.php") {
-		if (env.find("username") != env.end())
-			value = env["username"];
-		return "Set-Cookie: sessionID=" + value + "\n";
-	}
-	if (_request.getURI() == "/cookies.php") {
-		if (env.find("cookie_value") != env.end())
-			value = env["cookie_value"];
-		return "Set-Cookie: cookie_value=" + value + "\n";
-	}
-
-	return "";
-}
-
-string Response::redirect()
-{
-	if ((_status == 301 && std::string(COSTUM_301) == "default")
-		|| (_status == 302 && std::string(COSTUM_302) == "default"))
+	catch (const std::exception& e) {
 		return createErrorHTML();
-
-	if (_status == 301)
-		_filepath = _config.getRoot() + COSTUM_301;
-
-	if (_status == 302)
-		_filepath = _config.getRoot() + COSTUM_302;
-
-	return getFileContent();
-}
-
-string Response::fileNotFound()
-{
-	_status = 404;
-
-	if (std::string(COSTUM_404) == "default")
-		return createErrorHTML();
-
-	_filepath = _config.getRoot() + std::string(COSTUM_404);
-	return getFileContent();
+	}
+	return createErrorHTML();
 }
 
 string Response::createErrorHTML()
@@ -247,40 +238,42 @@ string Response::createErrorHTML()
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
 
-	ostringstream ss;
-	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
-		<< _status_codes[_status]
-		<< "</title>"
-		<< meta
-		<< "</head><body><center><h1>"
-		<< _status_codes[_status]
-		<< "</h1></center></body></html>";
-	return ss.str();
+	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
+			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"
+			+ _status_codes[_status] + "</h1></center></body></html>";
 }
 
-string Response::getFileContent()
+string Response::setCookie()
 {
-	ifstream input_stream(_filepath.c_str());
+	string value;
+	if (_request.getURI() == "/session_logout.php")
+		return "Set-Cookie: sessionID=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
 
-	ostringstream ss;
-	string line;
-	while (getline(input_stream, line))
-		ss << line << endl;
-	return ss.str();
+	if (_request.getURI() == "/cookies_delete.php")
+		return "Set-Cookie: cookie_value=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
+
+	map<string, string> env = _request.getEnv();
+	if (_request.getURI() == "/session_login.php" && env.find("username") != env.end())
+		return "Set-Cookie: sessionID=" + env["username"] + "\n";
+
+	if (_request.getURI() == "/cookies.php" && env.find("cookie_value") != env.end())
+		return "Set-Cookie: cookie_value=" + env["cookie_value"] + "\n";
+
+	return "";
 }
 
-string Response::createResponse()
+string Response::getCGI()
 {
-	ostringstream ss;
-	ss	<< _request.getHTTPVersion() << " "
-		<< _status_codes[_status]
-		<< _content_types[ _request.getExtension()]
-		<< setCookie()
-		<< "Content-Length: "
-		<< _content.size() << "\n\n"
-		<< _content;
-
-	// if (_request.getExtension() == ".php")
-	// 	cout << "RESPONS: " << ss.str() << endl;
-	return ss.str();
+	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
+	string cgi = CGI.ExecuteCGI();
+	cout << cgi << endl;
+	if (cgi.find("<!doctype html>") == string::npos && _request.getExtension() != ".py")
+		return getCGI();
+	// if (cgi.find("<!doctype html>") == string::npos)
+	// 	return getCGI();
+	if (cgi.find("413 Request Entity Too Large") != string::npos)
+		_status = REQUEST_ENTITY_TOO_LARGE;
+	if (cgi.find("500 Internal Server Error") != string::npos)
+		_status = INTERNAL_SERVER_ERROR;
+	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
 }
