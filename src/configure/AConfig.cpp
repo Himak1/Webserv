@@ -120,7 +120,6 @@ void	AConfig::convertReturn( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
 	std::string					numberString;
-	unsigned int				output;
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')

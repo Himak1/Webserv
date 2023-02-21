@@ -79,44 +79,37 @@ void	Location::convertAutoIndex( Node* autoIndex )
 void	Location::convertLocation( Node* location )
 {
 	for (NodeList::const_iterator i = location->getChildrenBegin(); i != location->getChildrenEnd(); ++i) {
-		try {
-			switch ((*i)->getNodeType())
-			{
-				case TERMINAL:
-					_path = (*i)->getTerminal();
-					break;
-				case N_ROOT:
-					_root = convertNodeToString(*i);
-					break;
-				case N_ALIAS:
-					_alias = convertNodeToString(*i);
-					break;
-				case N_CGI_PASS:
-					convertCgiPass(*i);
-					break;
-				case N_ALLOWED_METHODS:
-					convertAcceptedMethods(*i);
-					break;
-				case N_AUTOINDEX:
-					convertAutoIndex(*i);
-					break;
-				case N_ERROR_PAGE:
-					convertErrorPage(*i);
-					break;
-				case N_INDEX:
-					convertIndexFiles(*i);
-					break;
-				case N_RETURN:
-					convertReturn(*i);
-					break;
-				default:
-					std::cerr << "invalid Node type:" << (*i)->getNodeType() << std::endl;
-					throw std::exception();
-					break;
-			}
-		}
-		catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
+		switch ((*i)->getNodeType())
+		{
+			case TERMINAL:
+				_path = (*i)->getTerminal();
+				break;
+			case N_ROOT:
+				_root = convertNodeToString(*i);
+				break;
+			case N_ALIAS:
+				_alias = convertNodeToString(*i);
+				break;
+			case N_CGI_PASS:
+				convertCgiPass(*i);
+				break;
+			case N_ALLOWED_METHODS:
+				convertAcceptedMethods(*i);
+				break;
+			case N_AUTOINDEX:
+				convertAutoIndex(*i);
+				break;
+			case N_ERROR_PAGE:
+				convertErrorPage(*i);
+				break;
+			case N_INDEX:
+				convertIndexFiles(*i);
+				break;
+			case N_RETURN:
+				convertReturn(*i);
+				break;
+			default:
+				throw std::exception();
 		}
 	}
 }
