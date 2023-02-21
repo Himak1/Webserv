@@ -26,6 +26,9 @@ Configuration::Configuration( Node* serverNode )
 
 Configuration::~Configuration()
 {
+	for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+		delete *i;
+	}
 }
 
 //----------------------------------Accessors-------------------------------//
