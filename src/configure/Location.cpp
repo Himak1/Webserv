@@ -106,6 +106,9 @@ void	Location::convertLocation( Node* location )
 				case N_INDEX:
 					convertIndexFiles(*i);
 					break;
+				case N_RETURN:
+					convertReturn(*i);
+					break;
 				default:
 					std::cerr << "invalid Node type:" << (*i)->getNodeType() << std::endl;
 					throw std::exception();
@@ -113,7 +116,7 @@ void	Location::convertLocation( Node* location )
 			}
 		}
 		catch (std::exception& e) {
-		
+			std::cout << e.what() << std::endl;
 		}
 	}
 }

@@ -23,8 +23,8 @@ class AConfig
 
 		std::string				getRoot() const;
 		const std::string&		getErrorPage( int errorCode ) const;
-		/* int						getRedirect() const; // returns 0 if not a redirect */
-		/* std::string				getRedirectURI() const; // returns empty string if not a redirect */
+		int						getRedirect() const; // returns 0 if not a redirect
+		std::string				getRedirectURI() const; // returns empty string if not a redirect
 
 		std::list<std::string>	indexFiles;
 	protected:
@@ -35,13 +35,15 @@ class AConfig
 		unsigned int			convertNodeToUInt( Node* node );
 		void					convertIndexFiles( Node* node );
 		void					convertErrorPage( Node* node );
+		void					convertReturn( Node* node );
 	
 		bool					validatePath();
 		bool					validateNumberAndRange( int min, int max );	
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
-		
+		int						_redirectCode;
+		std::string				_redirectURI;
 };
 
 std::ostream&	operator<<( std::ostream& o, const AConfig& config );

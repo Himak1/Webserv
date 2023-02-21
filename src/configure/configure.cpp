@@ -43,8 +43,7 @@ static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 			std::exit(1);
 		}
 	}
-	return (serverConfigs);
-	
+	return (serverConfigs);	
 }
 
 std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )

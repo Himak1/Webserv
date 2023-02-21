@@ -74,6 +74,9 @@ void	Configuration::navigateNode( Node* serverNode )
 				case N_LOCATION:
 					locations.push_back(new Location(*i));
 					break;
+				case N_RETURN:
+					convertReturn(*i);
+					break;
 			}
 		}
 		catch (std::exception& e){
