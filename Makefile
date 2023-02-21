@@ -1,6 +1,6 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Isrc #-std=c++98 #-Wall -Wextra -Werror  -pedantic
+CFLAGS			:=	-Isrc -std=c++98 -Wall -Wextra -Werror  #-pedantic
 SANIT			:=  #-fsanitize=address -g
 CC				:=	c++
 
@@ -15,7 +15,7 @@ OBJ				:=	$(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 all				:	$(NAME)
 
 $(NAME)			: 	$(OBJ)
-					$(CC) $(OBJ) -o $@ $(SANIT)
+					$(CC) $(CFLAGS) $(OBJ) -o $@ $(SANIT)
 
 $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 					$(MKDIR_P) $(dir $@)

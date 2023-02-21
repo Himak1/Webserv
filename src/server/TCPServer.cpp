@@ -79,7 +79,7 @@ namespace
 	void exitWithError(const std::string &errorMessage)
 	{
 		log("ERROR: " + errorMessage);
-		exit(1);
+		std::exit(EXIT_FAILURE);
 	}
 }
 
@@ -89,16 +89,16 @@ namespace http
 			// CONSTRUCTORS
 
 TCPServer::TCPServer(std::vector<Configuration*> configList) :
-		_nbListeningSockets(0),
-		_configList(configList)
+		_configList(configList),
+		_nbListeningSockets(0)
 {
 	try {
 		setupListeningSockets();
 	} catch (std::exception& e) {
 		if (DEBUG_INFO)
-			cout << std::strerror(errno) << endl;
-		cout << e.what() << endl;
-		std::exit(1);
+			std::cout << std::strerror(errno) << std::endl;
+		std::cout << e.what() << std::endl;
+		std::exit(EXIT_FAILURE);
 	}	
 
 	_isServerRunning = true;	// tmp?
@@ -159,13 +159,12 @@ void	TCPServer::setupSocketStruct(t_socket *listener, int port)		// tmp?
 void TCPServer::startPolling()
 {
 	int	poll_count;
-	int i;
 
 	while (_isServerRunning) {
 		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
 			if (DEBUG_INFO)
-				cout << strerror(errno) << endl;
+				std::cout << strerror(errno) << std::endl;
 			exitWithError("poll failed. Exiting");
 		}
 		lookupActiveSocket();
@@ -174,7 +173,7 @@ void TCPServer::startPolling()
 
 void	TCPServer::lookupActiveSocket()
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < _nbListeningSockets; i++) {
 		if (_pollFds[i].revents == 0)
@@ -183,7 +182,7 @@ void	TCPServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
-	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
+	for (int j = 0; j < (int) (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
 		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i); 	
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
@@ -199,7 +198,6 @@ void TCPServer::newConnection(int idx)
 	struct pollfd	new_pollfd;
 	t_socket		new_socket;
 	socklen_t		socket_len;
-	int				re_use = 1;
 
 	// memset(&new_socket, 0, sizeof(t_socket));
 	new_socket.socket_address_len = sizeof(new_socket.socket_address_info);
@@ -209,7 +207,15 @@ void TCPServer::newConnection(int idx)
 	}
 	new_socket.socket_address_len = socket_len;
 
-	setFileDescrOptions(new_pollfd.fd);				
+	try {
+		setFileDescrOptions(new_pollfd.fd);				
+	} catch (std::exception& e) {
+		if (DEBUG_INFO)
+			std::cout << std::strerror(errno) << std::endl;
+		std::cout << e.what() << std::endl;
+		std::exit(1);
+	}	
+
 	new_pollfd.events = POLLIN;
 	new_socket.config_idx = idx;
 	_pollFds.push_back(new_pollfd);
@@ -224,8 +230,8 @@ void TCPServer::newConnection(int idx)
 void	TCPServer::closeConnection(int idx)
 {
 	if (DEBUG_INFO)
-		cout << "closeConnection called for idx " << idx << ", closing socket fd " << _pollFds[idx].fd 
-				<< " PORT: " << ntohs(_socketInfo[idx].socket_address_info.sin_port) << endl;
+		std::cout << "closeConnection called for idx " << idx << ", closing socket fd " << _pollFds[idx].fd 
+				<< " PORT: " << ntohs(_socketInfo[idx].socket_address_info.sin_port) << std::endl;
 	close(_pollFds[idx].fd);
 	_pollFds.erase(_pollFds.begin() + idx);						
 	_socketInfo.erase(_socketInfo.begin() + idx);
@@ -250,14 +256,13 @@ void TCPServer::receiveRequest(int idx)
 
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
 	if (bytes_received <= 0) {
-		if (bytes_received < 0)
-			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startPolling()" << std::endl;		// error
+		if (bytes_received < 0 && DEBUG_INFO)
+			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << std::endl;
 		closeConnection(idx);
 		return ;
 	} 
 	_request.initRequest(std::string(buff));
 	_pollFds[idx].events = POLLOUT;
-	// _pollFds[idx].events = POLLIN | POLLOUT;
 	std::ostringstream ss;
 	ss	<< "Received request: Method = " << _request.getMethod()
 		<< " URI = " 					 << _request.getURI()
@@ -281,7 +286,7 @@ void TCPServer::sendResponse(int idx)
 			closeConnection(idx);
 		}
 		else {
-			cout << "Zero bytes send. Need handler?" << endl;	// tmp
+			std::cout << "Zero bytes send. Need handler?" << std::endl;	// tmp
 		}
 	}	
 	_socketInfo[idx].server_message.erase(0, bytes_send);
@@ -300,11 +305,11 @@ void	TCPServer::setFileDescrOptions(int file_descr)
 	int	re_use = 1;
 
 	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1) 						// exceptions
-		exitWithError("set file descriptor as non blocking failed\n");
+		throw SockNoBlock();
 	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
-		exitWithError("setsockopt reuse address error\n");					
+		throw SockOptionsFail();			
 	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) == -1) 
-		exitWithError("setsockopt reuse port error\n");
+		throw SockOptionsFail();
 }
 
 
