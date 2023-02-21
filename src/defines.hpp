@@ -43,10 +43,10 @@
 #define CASE_302 "/temporary_unavailable"
 
 // CODAM
-#define PATH_TO_PHP_CGI "/Users/mweitenb/.brew/bin/php-cgi"
-#define PATH_TO_PHP_CGI_LENGTH 33
-#define PATH_TO_PY_CGI "/usr/bin/python"
-#define PATH_TO_PY_CGI_LENGTH 15
+#define PATH_TO_PHP_CGI "/usr/bin/php-cgi"
+#define PATH_TO_PHP_CGI_LENGTH 16
+#define PATH_TO_PY_CGI "/usr/bin/python3.8"
+#define PATH_TO_PY_CGI_LENGTH 18
 
 // THUIS
 // #define PATH_TO_PHP_CGI "/usr/bin/php-cgi"

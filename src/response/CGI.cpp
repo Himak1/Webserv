@@ -75,9 +75,10 @@ string CGI::ExecuteCGI()
 	if(pid == 0) {
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
+		std::cout << _path[0] << " <- path[0]" << std::endl;
 		execve(_path[0], _path, _env);
-		perror("execve failed: ");
-		cout << "Execve error" << endl;
+		cout << "Execve error " ;
+		perror(strerror(errno));
 		exit(0);
 	}
 	// TO DO: message can currently not be bigger than CGI_BUFSIZE

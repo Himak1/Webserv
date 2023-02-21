@@ -1,4 +1,5 @@
 #include "strings.hpp"
+#include <sstream>
 
 string safe_substr(string str, int start, int length)
 {
@@ -23,4 +24,19 @@ string trim_spaces(const string& str)
 		return str;
 	size_t last = str.find_last_not_of(' ');
 	return safe_substr(str, first, (last - first + 1));
+}
+
+size_t	ft_strlen(char *s)
+{
+	size_t	i;
+
+	for (i = 0; s[i]; i++) ;
+	return i;
+}
+
+std::string number_to_string (unsigned int number)
+{
+    std::ostringstream ss;
+    ss << number;
+    return ss.str();
 }
