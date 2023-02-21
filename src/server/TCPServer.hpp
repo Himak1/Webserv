@@ -18,7 +18,7 @@ namespace http
 
 typedef struct s_socket {
 	unsigned int		socket_address_len;
-	struct sockaddr_in	socket_info;
+	struct sockaddr_in	socket_address_info;
 	std::string			server_message;
 	unsigned int		config_idx;
 }	t_socket;
