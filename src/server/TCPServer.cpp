@@ -222,6 +222,8 @@ void TCPServer::newConnection(int idx)
 
 void	TCPServer::closeConnection(int idx)
 {
+	if (DEBUG_INFO)
+		cout << "Close connection called for idx " << idx << ", closing socket fd " << _pollFds[idx].fd << endl;
 	close(_pollFds[idx].fd);
 	_pollFds.erase(_pollFds.begin() + idx);						
 	_socketInfo.erase(_socketInfo.begin() + idx);
@@ -255,9 +257,6 @@ void TCPServer::receiveRequest(int idx)
 		return ;
 	} 
 	_request.initRequest(std::string(buff));
-
-	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
-
 	_pollFds[idx].events = POLLOUT;
 	// _pollFds[idx].events = POLLIN | POLLOUT;
 	std::ostringstream ss;
@@ -267,14 +266,19 @@ void TCPServer::receiveRequest(int idx)
 	log(ss.str());
 }
 
-// idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
 void TCPServer::sendResponse(int idx)
 {
 	size_t		bytes_send;
 	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
+	// cout << "test " << idx << endl;
+
+	cout << "config_idx = " << _socketInfo[idx].config_idx << endl;
+
 	if (serverMsgIsEmpty(idx))
+	{
 		_socketInfo[idx].server_message = respons.getMessage();
+	}	
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
