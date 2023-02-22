@@ -17,14 +17,6 @@ Location::Location( Node* locationNode )
 	}
 }
 
-Location::Location( const Location& src )
-	: AConfig(src)
-{
-	*this = src;
-	std::cout << "Location: copy constructor called" << std::endl;
-}
-
-
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
 */
@@ -36,20 +28,6 @@ Location::~Location()
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
-
-Location&	Location::operator=( const Location& src )
-{
-	_path = src._path;
-	_alias = src._alias;
-	_cgiExtension = src._cgiExtension;
-	_cgiPath = src._cgiPath;
-	_autoIndex = src._autoIndex;
-	for (int i = 0; i < 4; i++)
-	{
-		_acceptedMethods[i] = src._acceptedMethods[i];
-	}
-	return *this;
-}
 
 std::ostream&	operator<<( std::ostream& o, const Location& location )
 {
@@ -101,41 +79,37 @@ void	Location::convertAutoIndex( Node* autoIndex )
 void	Location::convertLocation( Node* location )
 {
 	for (NodeList::const_iterator i = location->getChildrenBegin(); i != location->getChildrenEnd(); ++i) {
-		try {
-			switch ((*i)->getNodeType())
-			{
-				case TERMINAL:
-					_path = (*i)->getTerminal();
-					break;
-				case N_ROOT:
-					_root = convertNodeToString(*i);
-					break;
-				case N_ALIAS:
-					_alias = convertNodeToString(*i);
-					break;
-				case N_CGI_PASS:
-					convertCgiPass(*i);
-					break;
-				case N_ALLOWED_METHODS:
-					convertAcceptedMethods(*i);
-					break;
-				case N_AUTOINDEX:
-					convertAutoIndex(*i);
-					break;
-				case N_ERROR_PAGE:
-					convertErrorPage(*i);
-					break;
-				case N_INDEX:
-					convertIndexFiles(*i);
-					break;
-				default:
-					std::cerr << "invalid Node type:" << (*i)->getNodeType() << std::endl;
-					throw std::exception();
-					break;
-			}
-		}
-		catch (std::exception& e) {
-		
+		switch ((*i)->getNodeType())
+		{
+			case TERMINAL:
+				_path = (*i)->getTerminal();
+				break;
+			case N_ROOT:
+				_root = convertNodeToString(*i);
+				break;
+			case N_ALIAS:
+				_alias = convertNodeToString(*i);
+				break;
+			case N_CGI_PASS:
+				convertCgiPass(*i);
+				break;
+			case N_ALLOWED_METHODS:
+				convertAcceptedMethods(*i);
+				break;
+			case N_AUTOINDEX:
+				convertAutoIndex(*i);
+				break;
+			case N_ERROR_PAGE:
+				convertErrorPage(*i);
+				break;
+			case N_INDEX:
+				convertIndexFiles(*i);
+				break;
+			case N_RETURN:
+				convertReturn(*i);
+				break;
+			default:
+				throw std::exception();
 		}
 	}
 }

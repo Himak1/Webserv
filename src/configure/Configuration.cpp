@@ -7,6 +7,7 @@
 #include "parser/parser.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 // ------------------------------------------------------------------------ //
 //							Constructors & Destructor						//
@@ -23,14 +24,11 @@ Configuration::Configuration( Node* serverNode )
 	}
 }
 
-/* Configuration::Configuration(const Configuration &src) */
-/* 	: */ 
-/* { */
-/* 	*this = src; */
-/* } */
-
 Configuration::~Configuration()
 {
+	for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+		delete *i;
+	}
 }
 
 //----------------------------------Accessors-------------------------------//
@@ -56,33 +54,33 @@ unsigned int	Configuration::getClientMaxBodySize() const
 void	Configuration::navigateNode( Node* serverNode )
 {
 	for (NodeList::const_iterator i = serverNode->getChildrenBegin(); i != serverNode->getChildrenEnd(); ++i) {
-		try {
-			switch ((*i)->getNodeType()) {
-				case N_SERVER_NAME:
-					_host = convertNodeToString(*i);
-					break;
-				case N_LISTEN:
-					_port = convertNodeToUInt(*i);
-					break;
-				case N_CLIENT_MAX_BODY:
-					_clientMaxBodySize = convertNodeToUInt(*i);
-					break;
-				case N_ROOT:
-					_root = convertNodeToString(*i);
-					break;
-				case N_INDEX:
-					convertIndexFiles(*i);
-					break;
-				case N_ERROR_PAGE:
-					convertErrorPage(*i);
-					break;
-				case N_LOCATION:
-					locations.push_back(new Location(*i));
-					break;
-			}
-		}
-		catch (std::exception& e){
-			throw;
+		switch ((*i)->getNodeType()) {
+			case N_SERVER_NAME:
+				_host = convertNodeToString(*i);
+				break;
+			case N_LISTEN:
+				_port = convertNodeToUInt(*i);
+				break;
+			case N_CLIENT_MAX_BODY:
+				_clientMaxBodySize = convertNodeToUInt(*i);
+				break;
+			case N_ROOT:
+				_root = convertNodeToString(*i);
+				break;
+			case N_INDEX:
+				convertIndexFiles(*i);
+				break;
+			case N_ERROR_PAGE:
+				convertErrorPage(*i);
+				break;
+			case N_LOCATION:
+				locations.push_back(new Location(*i));
+				break;
+			case N_RETURN:
+				convertReturn(*i);
+				break;
+			default:
+				throw std::exception();
 		}
 	}
 }

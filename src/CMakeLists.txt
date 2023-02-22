@@ -14,13 +14,14 @@ set(SRC_FILES
     configure/parser/parseLocation.cpp
     configure/parser/parser_utils.cpp
 
-    main.cpp
     server/TCPServer.cpp
     request/Request.cpp
     response/Response.cpp
 	response/CGI.cpp
 	utils/log.cpp
 	utils/strings.cpp
+
+    main.cpp
     # !Add new src files here! #
     CACHE INTERNAL ""
 )

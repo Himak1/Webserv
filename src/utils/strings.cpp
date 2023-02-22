@@ -1,4 +1,5 @@
 #include "strings.hpp"
+#include <sstream>
 
 string safe_substr(string str, int start, int length)
 {
