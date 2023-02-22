@@ -15,8 +15,8 @@
 			curl -v -X HEAD "127.0.0.1:4242"</br>
 
 			</br><h3 class="">UPLOAD FILES</h3>
-			curl -v -X GET "127.0.0.1:4242/upload_handler.php?file_to_upload=Makefile"</br></br>
-			curl -v -X GET "127.0.0.1:4242/upload_handler.php?file_to_upload=/Users/mweitenb/Desktop/test.txt"
+			curl -v -X GET "127.0.0.1:4242/upload?file=Makefile"</br></br>
+			curl -v -X GET "127.0.0.1:4242/upload?file=/Users/mweitenb/Desktop/test.txt"
 		</div>
 
 <?php include("templates/bottom.php");?>

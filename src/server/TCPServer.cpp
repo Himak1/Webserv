@@ -56,8 +56,6 @@
 
 using namespace std;
 
-const int BUFFER_SIZE = 30720;
-
 void logStartupMessage(struct sockaddr_in _socketAddress)
 {
 	std::ostringstream ss;

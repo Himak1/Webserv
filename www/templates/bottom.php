@@ -30,14 +30,13 @@
 			<div class="column">
 				<a class="item" href="/form_get">form (get)</a>
 				<a class="item" href="/form_post">form (post)</a>
-				<a class="item" href="/upload">file upload</a>
+				<a class="item" href="/upload_files">uploaded files</a>
 			</div>
 
 			<h3 class="">BONUS</h3>
 			<div class="column">
 				<a class="item" href="/cookies">cookies</a>
 				<a class="item" href="/session">session<br/>management</a>
-				<a class="item" href="/upload_files">uploaded files</a>
 			</div>
 
 		</div>

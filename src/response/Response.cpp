@@ -43,10 +43,10 @@ string 	Response::getMessage()
 			+ "Content-Length: "
 			+ to_string(_content.size()) + "\n\n"
 			+ _content;
-		// cout << _content << endl;
 	}
 
-	uploadFile();
+	if (_request.isFileUpload())
+		return uploadFile();
 
 	return  _request.getHTTPVersion() + " "
 			+ _status_codes[_status]
@@ -100,13 +100,11 @@ bool	Response::searchIndexFiles(list<string> index_files)
 void	Response::setLocation()
 {
 	string target = _request.getURI();
-	// cout << "TARGET " << target << endl;
 	list<Location*>::iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {
 		_status = INTERNAL_SERVER_ERROR;
 	}
 	_location = (*it);
-	// cout << "LOCATION " << _location->getCgiPath() << endl;
 }
 
 list<Location*>::iterator Response::findConfigLocation(string target) {
@@ -115,8 +113,6 @@ list<Location*>::iterator Response::findConfigLocation(string target) {
 
 	list<Location*>::iterator it = _config.locations.begin();
 	it = searchLocations(target);
-	// cout << "TARGET " << target << endl;
-	// cout << "LOCATION " << (*it)->getCgiPath() << endl;
 	if (it == _config.locations.end())
 		return findConfigLocation(go_one_directory_up(target));
 	return it;
@@ -168,27 +164,23 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
+	cout << "(*_location).getCgiPath()" << (*_location).getCgiPath() << endl;
+	cout << "(*_location).getRedirect()" << (*_location).getRedirect() << endl;
+	cout << "(*_location).getRedirectURI()" << (*_location).getRedirectURI() << endl;
 	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
 	bool is_accepted_method		= _location->isMethodAccepted(_method);
-	bool is_php_file			= _filepath.find(".php?") != string::npos;
-	bool is_301					= _request.getURI() == CASE_301;
-	bool is_302					= _request.getURI() == CASE_302;
+	bool is_redirect			= (*_location).getRedirect() > 0;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
-	// bool is_413					= _request.getURI() == "413_Request_Entity_Too_Large";
-
-	// cout << "_request.getURI() == " << _request.getURI() <<"|"<< endl;
-	// cout << "STATUS = " << _status << endl;
+	bool is_php_file			= _filepath.find(".php?") != string::npos;
 
 	if (_status == NOT_FOUND)		return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return NOT_IMPLEMENTED;
-	if (is_301)						return MOVED_PERMANENTLY;
-	if (is_302)						return FOUND;
+	if (is_redirect)				return (*_location).getRedirect();
 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
-	// if (is_413)						return REQUEST_ENTITY_TOO_LARGE;
 	if (is_php_file)				return OK;
 	if (isExistingFile(_filepath))	return OK;
-	return NOT_FOUND;
+	return NOT_FOUND;		
 }
 
 string	Response::getContent()
@@ -209,31 +201,36 @@ string	Response::deleteFile()
 	return "File " + _filepath + " has been deleted";
 }
 
-void	Response::uploadFile()
+string	Response::uploadFile()
 {
-	_request.setUploadSucces(false);
-
-	string input_path;
 	map<string, string> env = _request.getEnv();
-	if (env.find("file_to_upload") == env.end())
-		return;
-	else
-		input_path = env["file_to_upload"];
+	if (env.find("file") == env.end())
+		return "Upload failed: Invalid or non-existing file\n";
 
-	if (!isExistingFile(input_path)) {
-		_status = NOT_FOUND;
-		_content = returnErrorPage();
-		return;
-	}
+	string input_path = env["file"];
+	if (!isExistingFile(input_path))
+		return "Upload failed: Invalid or non-existing file\n";
 
 	string file_data = streamFileDataToString(input_path);
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
-	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
+	string upload_path = setUploadPath(filename);
 	writeStringToFile(file_data, upload_path);
 
-	if (isExistingFile(filename)
-		&& streamFileDataToString(filename) == file_data)
-		_request.setUploadSucces(true);
+	if (isExistingFile(upload_path))
+		return "File '" + filename + "' succesfully uploaded to '" + upload_path + "'\n";
+	return "Upload failed\n";
+}
+
+string	Response::setUploadPath(string filename)
+{
+	string upload_store;
+	if ((*_location).getUploadStore() != "")
+ 		upload_store = (*_location).getUploadStore();
+	else
+ 		upload_store = _config.getUploadStore();
+
+	mkdir(upload_store.c_str(), 0777);
+	return upload_store + filename;
 }
 
 string Response::returnErrorPage()

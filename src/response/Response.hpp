@@ -39,7 +39,8 @@ class Response
 		int							setStatus();
 		string						getContent();
 		string 						deleteFile();
-		void 						uploadFile();
+		string 						uploadFile();
+		string						setUploadPath(string filename);
 		string						getCGI();
 		string						setCookie();
 		string 						returnErrorPage();

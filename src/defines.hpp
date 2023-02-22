@@ -18,10 +18,6 @@
 
 // TEMPORARY 
 
-
-
-#define UPLOAD_FOLDER "uploads"
-
 #define CASE_301 "/permanently_moved"
 #define CASE_302 "/temporary_unavailable"
 
