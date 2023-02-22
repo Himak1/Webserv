@@ -42,6 +42,6 @@ class InvalidValueInLocationBlock : public std::exception
 		const char*	what() const throw() {
 			return "Invalid value specified in location block";
 		}
-}
+};
 
 #endif

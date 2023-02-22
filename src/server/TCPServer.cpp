@@ -1,6 +1,7 @@
 # include "TCPServer.hpp"
 # include "../response/Response.hpp"
 # include "../utils/strings.hpp"
+# include "../utils/log.hpp"
 
 # include <cstdlib>
 # include <cstring>
@@ -55,32 +56,18 @@
 
 using namespace std;
 
-namespace
-{;
-	const int BUFFER_SIZE = 30720;
+const int BUFFER_SIZE = 30720;
 
-	void log(const std::string &message)
-	{
-		std::cout << message << std::endl;
-	}
+void logStartupMessage(struct sockaddr_in _socketAddress)
+{
+	std::ostringstream ss;
 
-	void logStartupMessage(struct sockaddr_in _socketAddress)
-	{
-		std::ostringstream ss;
-
-		ss	<< "\n*** Listening on ADDRESS: "
-			<< inet_ntoa(_socketAddress.sin_addr) 
-			<< " PORT: "
-			<< ntohs(_socketAddress.sin_port) 
-			<< " ***\n\n";
-		log(ss.str());
-	}
-
-	void exitWithError(const std::string &errorMessage)
-	{
-		log("ERROR: " + errorMessage);
-		exit(1);
-	}
+	ss	<< "\n*** Listening on ADDRESS: "
+		<< inet_ntoa(_socketAddress.sin_addr) 
+		<< " PORT: "
+		<< ntohs(_socketAddress.sin_port) 
+		<< " ***\n\n";
+	log_receive(ss.str());
 }
 
 namespace http
@@ -213,9 +200,9 @@ void TCPServer::newConnection(int idx)
 	_pollFds.push_back(new_pollfd);
 	_socketInfo.push_back(new_socket);
 
-	std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
-			<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
+	// std::cout << "Server accepted incoming connection from ADDRESS: "
+	// 		<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
+	// 		<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
 void	TCPServer::closeConnection(int idx)
@@ -240,29 +227,27 @@ bool	TCPServer::serverMsgIsEmpty(int idx)
 // poll() zal aangeven dat er data verstuurd kan worden. 
 void TCPServer::receiveRequest(int idx)
 {
-	char	buff[BUFFER_SIZE];
-	size_t	bytes_received;
+	unsigned int buffer_size = _configList[_socketInfo[idx].config_idx]->getClientMaxBodySize();
+	char * buff = (char *)calloc(buffer_size + 1, sizeof(char));
+	// if (!buff)
+	// 	do iets
 
-	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
+	int bytes_received = read(_pollFds[idx].fd, buff, buffer_size);	
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
 			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startPolling()" << std::endl;		// error
-		// else
 		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
 		return ;
-	} 
-	_request.initRequest(std::string(buff));
+	}
+	string buffer = buff;
+	_request.initRequest(buffer);
 
 	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	_pollFds[idx].events = POLLOUT;
 	// _pollFds[idx].events = POLLIN | POLLOUT;
-	std::ostringstream ss;
-	ss	<< "Received request: Method = " << _request.getMethod()
-		<< " URI = " 					 << _request.getURI()
-		<< " HTTP Version = " 			 << _request.getHTTPVersion();
-	log(ss.str());
+	log_receive(_request.getMethod() + " " + _request.getURI() + " " + _request.getHTTPVersion());
 }
 
 // idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
@@ -271,8 +256,11 @@ void TCPServer::sendResponse(int idx)
 	size_t		bytes_send;
 	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
-	if (serverMsgIsEmpty(idx))
+	if (serverMsgIsEmpty(idx)) {
 		_socketInfo[idx].server_message = respons.getMessage();
+		log_response(_socketInfo[idx].server_message);
+	}
+	
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
@@ -282,11 +270,12 @@ void TCPServer::sendResponse(int idx)
 		else {
 			cout << "Zero bytes send. Need handler?" << endl;	// tmp
 		}
-	}	
+	}
 	_socketInfo[idx].server_message.erase(0, bytes_send);
-	if (serverMsgIsEmpty(idx))
+	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		// closeConnection(idx); 
+		closeConnection(idx); 
+	}
 	else {
 		_pollFds[idx].events = POLLOUT;
 	}	

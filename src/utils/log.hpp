@@ -1,10 +1,13 @@
 #ifndef LOG_H
 # define LOG_H
 
-#include <iostream>
+# include <iostream>
+# include <sstream>
 
 using namespace std;
 
-void		log(const std::string message);
+void	log_receive(const string &message);
+void	log_response(const string &message);
+void    exitWithError(const std::string &errorMessage);
 
 #endif

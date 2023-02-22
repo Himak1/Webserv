@@ -122,11 +122,11 @@ void	AConfig::convertReturn( Node* node )
 	std::string					numberString;
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
-	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
-	{
-		std::cerr << "DADADADADADDADA" << std::endl;
-		throw std::exception();
-	}
+	// if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
+	// {
+	// 	std::cerr << "DADADADADADDADA" << std::endl;
+	// 	throw std::exception();
+	// }
 	++i;
 	std::string	page = (*i)->getTerminal();
 }

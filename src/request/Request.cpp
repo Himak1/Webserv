@@ -30,7 +30,11 @@ Request &Request::operator = (const Request &src)
 // PUBLIC FUNCTIONS
 void Request::initRequest(string request)
 {
+	// cout << request << endl;
+	// cout << request.size() << endl;
 	parseHTTPInfoAndHeaders(request);
+	// if (_headers.size() >= 12)
+		// return;
 	parseEnv();
 	parseExtension();
 }
@@ -39,6 +43,7 @@ const string Request::getMethod() const { return _method; }
 const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
+const string Request::getHeader() const { return _headers; }
 map<string, string> Request::getEnv() const { return _env; };
 bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
 void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
@@ -46,6 +51,10 @@ void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result
 // PRIVATE FUNCTIONS
 void Request::parseHTTPInfoAndHeaders(string request)
 {
+	_headers = request;
+
+	// if (_headers.size() >= 12)
+		// return;
 	vector<string> strings;
 	stringstream ss(request);
 	string token;
@@ -61,8 +70,6 @@ void Request::parseHTTPInfoAndHeaders(string request)
 	if (strings.size() > 0) _method = strings[0];
 	if (strings.size() > 1) _uri = strings[1];
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
-
-	_headers = request;
 }
 
 void Request::parseExtension()
@@ -86,7 +93,7 @@ void Request::parseEnv()
 	parsePost();
 }
 
-void	Request::parseCookies()
+void Request::parseCookies()
 {
 	string	cookie_input = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
 	cookie_input = safe_substr(cookie_input, 0, cookie_input.find("\n"));

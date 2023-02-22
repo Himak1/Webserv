@@ -33,6 +33,19 @@ string 	Response::getFilepath() { return _filepath; }
 
 string 	Response::getMessage()
 {
+	int bytes_received = _request.getHeader().size();
+	if (bytes_received >= _config.getClientMaxBodySize()) {
+		_status = REQUEST_ENTITY_TOO_LARGE;
+		_content = getContent();
+		return  "HTTP/1.1 "
+			+ _status_codes[_status]
+			+ _content_types[".html"]
+			+ "Content-Length: "
+			+ to_string(_content.size()) + "\n\n"
+			+ _content;
+		// cout << _content << endl;
+	}
+
 	uploadFile();
 
 	return  _request.getHTTPVersion() + " "
@@ -161,6 +174,10 @@ int		Response::setStatus()
 	bool is_301					= _request.getURI() == CASE_301;
 	bool is_302					= _request.getURI() == CASE_302;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
+	// bool is_413					= _request.getURI() == "413_Request_Entity_Too_Large";
+
+	// cout << "_request.getURI() == " << _request.getURI() <<"|"<< endl;
+	// cout << "STATUS = " << _status << endl;
 
 	if (_status == NOT_FOUND)		return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
@@ -168,6 +185,7 @@ int		Response::setStatus()
 	if (is_301)						return MOVED_PERMANENTLY;
 	if (is_302)						return FOUND;
 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	// if (is_413)						return REQUEST_ENTITY_TOO_LARGE;
 	if (is_php_file)				return OK;
 	if (isExistingFile(_filepath))	return OK;
 	return NOT_FOUND;
@@ -176,7 +194,6 @@ int		Response::setStatus()
 string	Response::getContent()
 {
 	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
-
 	if (_request.getMethod() == "DELETE")	return deleteFile();
 	if (_status != OK)						return returnErrorPage();
 	if (isCGI)								return getCGI();
