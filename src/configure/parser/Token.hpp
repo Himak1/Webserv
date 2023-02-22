@@ -25,6 +25,7 @@ enum TokenTypes
 	T_CGI_PASS,
 	T_ALIAS,
 	T_AUTOINDEX,
+	T_UPLOAD_STORE,
 	// Punctuation and Seperators
 	T_BRACKET_OPEN,
 	T_BRACKET_CLOSE,

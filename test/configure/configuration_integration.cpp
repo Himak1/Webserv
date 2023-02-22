@@ -9,8 +9,8 @@ TEST(configuration_integration, test_1)
 {
 	std::ifstream	file("dummy_config/configuration_integration_1");
 
-	TokenStream	testInput = tokenizer(file);
-	Node*		ast = parser(testInput);
+	TokenStream*	testInput = tokenizer(file);
+	Node*		ast = parser(*testInput);
 
 	ASSERT_TRUE(ast != NULL);
 	NodeList::const_iterator i = ast->getChildrenBegin();
@@ -24,8 +24,8 @@ TEST(configuration_integration, test_2)
 {
 	std::ifstream	file("dummy_config/configuration_integration_2");
 
-	TokenStream	testInput = tokenizer(file);
-	Node*	ast = parser(testInput);
+	TokenStream*	testInput = tokenizer(file);
+	Node*	ast = parser(*testInput);
 
 	ASSERT_TRUE(ast !=NULL);
 	NodeList::const_iterator i = ast->getChildrenBegin();

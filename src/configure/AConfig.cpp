@@ -38,6 +38,7 @@ std::ostream&	operator<<( std::ostream& o, const AConfig& config )
 		o << *i << " ";
 	}
 	o	<< '\n' << "root: " << config.getRoot() << '\n'
+		<< "upload store:" << config.getUploadStore() << '\n'
 		<< "redirect code: " << config.getRedirect() << '\n'
 		<< "redirect URI: " << config.getRedirectURI();
 	return o;
@@ -50,7 +51,7 @@ std::string	AConfig::getRoot() const
 	return (_root);
 }
 
-const std::string&	AConfig::getErrorPage( int errorCode ) const
+std::string	AConfig::getErrorPage( int errorCode ) const
 {
 	std::list<ErrorPage>::const_iterator i = _errorPages.begin();
 
@@ -61,6 +62,11 @@ const std::string&	AConfig::getErrorPage( int errorCode ) const
 		++i;
 	}
 	throw std::exception();
+}
+
+std::string	AConfig::getUploadStore() const
+{
+	return (_uploadStore);
 }
 
 int	AConfig::getRedirect() const
@@ -116,6 +122,13 @@ void	AConfig::convertErrorPage( Node* node )
 	++i;
 	std::string	page = (*i)->getTerminal();
 	_errorPages.push_back(ErrorPage(code, page));
+}
+
+void	AConfig::convertUploadStore( Node* node )
+{
+	NodeList::const_iterator	i = node->getChildrenBegin();
+
+	_uploadStore = (*i)->getTerminal();
 }
 
 void	AConfig::convertReturn( Node* node )

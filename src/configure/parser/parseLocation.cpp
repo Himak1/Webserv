@@ -137,6 +137,9 @@ Node*	parseLocation( TokenStream& tokensToParse )
 			case T_ERROR_PAGE:
 				status = newNode->addChild(parseErrorPage(tokensToParse));
 				break;
+			case T_UPLOAD_STORE:
+				status = newNode->addChild(parseUploadStore(tokensToParse));
+				break;
 			default:
 				status = 0;
 				break;
