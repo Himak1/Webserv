@@ -90,7 +90,7 @@ void	CGI::createPath()
 		try {
 			char *path_to_cgi = new char[path_length + 1];
 			path_to_cgi = strcpy(path_to_cgi, (*_location).getCgiPath().c_str());
-			cout << path_to_cgi << endl;
+			// cout << path_to_cgi << endl;
 			_path[0] = &path_to_cgi[0];
 			_path[1] = &path_to_script[0];
 			_path[2] = NULL;
@@ -116,8 +116,9 @@ void	CGI::createEnv()
 	string temp_define_2 = UPLOAD_FOLDER;
 	addToEnv("upload_directory=" + temp_define_2, ++i);
 
-	if (_request.getUploadSucces() == true) addToEnv("upload_succes=true", ++i);
-	
+	if (_request.getUploadSucces() == true)
+		addToEnv("upload_succes=true", ++i);
+
 	_env[++i] = NULL;
 }
 

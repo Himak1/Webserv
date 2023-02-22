@@ -31,8 +31,8 @@ Request &Request::operator = (const Request &src)
 void Request::initRequest(string request)
 {
 	parseHTTPInfoAndHeaders(request);
-	parseExtension();
 	parseEnv();
+	parseExtension();
 }
 
 const string Request::getMethod() const { return _method; }
@@ -67,29 +67,15 @@ void Request::parseHTTPInfoAndHeaders(string request)
 
 void Request::parseExtension()
 {
-	const size_t extension_start = _uri.rfind('.');
-	if (extension_start == string::npos)
-		_extension = ".php";
-	else
+	if (_uri.find('?') != string::npos)
+		_uri = safe_substr(_uri, 0, _uri.find('?'));
+
+	size_t extension_start = _uri.rfind('.');
+	if (extension_start != string::npos)
 		_extension = safe_substr(_uri, extension_start, _uri.length());
-
-	// om ervoor te zorgen dat upload_handler.php?file_to_upload=filename goed wordt geladen
-	if (_uri.find(".php?") != string::npos)
+	else
 		_extension = ".php";
-
-	// size_t extension_start;
-	// string uri = _uri;
-	// if (uri.find('?') != string::npos)
-	// 	uri = safe_substr(uri, extension_start, uri.find('?'));
-
-	// cout << "uri = " << uri << endl;
-	// extension_start = uri.rfind('.');
-	// if (extension_start == string::npos)
-	// 	_extension = ".php";
-	// else
-	// 	_extension = safe_substr(uri, extension_start, uri.length());
 	
-	// cout << "extension = " << _extension << endl;
 }
 
 void Request::parseEnv()
@@ -139,8 +125,6 @@ void Request::parseGet()
 
 void Request::parsePost() 
 {
-	// TO DO? will not work if input fields are empty. 
-	// Currently solved with 'required' tag in html form
 	string	line;
 	if (_method == "POST") {
 		string query = _headers;

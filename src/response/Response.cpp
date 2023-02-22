@@ -266,7 +266,7 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	cout << cgi << endl;
+	// cout << cgi << endl;
 	if (cgi.find("<!doctype html>") == string::npos && _request.getExtension() != ".py")
 		return getCGI();
 	// if (cgi.find("<!doctype html>") == string::npos)
