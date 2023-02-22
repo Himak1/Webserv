@@ -11,9 +11,9 @@
 TEST(parseLocation_integration, basic_location)
 {
 	std::ifstream file("dummy_config/location_test.conf");
-	TokenStream testInput = tokenizer(file);
+	TokenStream* testInput = tokenizer(file);
 
-	Node*	output = parseLocation(testInput);
+	Node*	output = parseLocation(*testInput);
 	NodeList::const_iterator i = output->getChildrenBegin();
 	ASSERT_TRUE(output != NULL);
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
@@ -33,9 +33,9 @@ TEST(parseLocation_integration, basic_location)
 TEST(parseLocation_integration, valid_case)
 {
 	std::ifstream file("dummy_config/parseLocation_test_1");
-	TokenStream testInput = tokenizer(file);
+	TokenStream* testInput = tokenizer(file);
 
-	Node*	output = parseLocation(testInput);
+	Node*	output = parseLocation(*testInput);
 	NodeList::const_iterator i = output->getChildrenBegin();
 	ASSERT_TRUE(output != NULL);
 	EXPECT_EQ((*i)->getNodeType(), TERMINAL);

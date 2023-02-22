@@ -18,7 +18,6 @@ int main(int argc, char **argv)
 	std::vector<Configuration*>	serverConfigs = initializeConfigurations(argc, argv);
 	// std::cout << *serverConfigs.front() << std::endl;
 
-	// TCPServer server(*serverConfigs.front());
 
 	// try {
 		TCPServer server(serverConfigs);
