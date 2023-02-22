@@ -34,7 +34,7 @@ string 	Response::getFilepath() { return _filepath; }
 string 	Response::getMessage()
 {
 	int bytes_received = _request.getHeader().size();
-	if (bytes_received >= _config.getClientMaxBodySize()) {
+	if (bytes_received >= static_cast<int>(_config.getClientMaxBodySize())) {
 		_status = REQUEST_ENTITY_TOO_LARGE;
 		_content = getContent();
 		return  "HTTP/1.1 "
