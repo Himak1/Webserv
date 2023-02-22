@@ -49,11 +49,13 @@ static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 
 std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 {
+	TokenStream*	tokens;
+	Node*			ast;
 	std::ifstream	configFile;
-	openConfigFile(configFile, argc, argv);
 
-	TokenStream		tokens = tokenizer(configFile);
-	Node*			ast = parser(tokens);
+	openConfigFile(configFile, argc, argv);
+	tokens = tokenizer(configFile);
+	ast = parser(*tokens);
 	if (!ast) exit(1);
 
 	std::vector<Configuration*>	serverConfigs;
@@ -66,8 +68,8 @@ std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 		delete ast;
 		std::exit(1);
 	}
-
 	delete ast;
+	delete tokens;
 	return (serverConfigs);
 }
 

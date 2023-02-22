@@ -37,7 +37,9 @@ std::ostream&	operator<<( std::ostream& o, const AConfig& config )
 	{
 		o << *i << " ";
 	}
-	o << '\n' << "root: " << config.getRoot();
+	o	<< '\n' << "root: " << config.getRoot() << '\n'
+		<< "redirect code: " << config.getRedirect() << '\n'
+		<< "redirect URI: " << config.getRedirectURI();
 	return o;
 }
 
@@ -119,15 +121,13 @@ void	AConfig::convertErrorPage( Node* node )
 void	AConfig::convertReturn( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
-	std::string					numberString;
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
 	{
-		std::cerr << "DADADADADADDADA" << std::endl;
 		throw std::exception();
 	}
 	++i;
-	std::string	page = (*i)->getTerminal();
+	_redirectURI = (*i)->getTerminal();
 }
 

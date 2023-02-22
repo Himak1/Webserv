@@ -41,14 +41,14 @@ class Token
 	public:
 		Token();
 		Token( int type, std::string tokenString, int lineNumber );
-		Token( const Token& src );
+		Token( Token const& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
 
-		int					getTokenType() const;
-		const std::string&	getToken() const;
-		int					getLineNumber() const;
+		int			getTokenType() const;
+		std::string	getToken() const;
+		int			getLineNumber() const;
 	private:
 		int			_tokenType;
 		std::string	_token;

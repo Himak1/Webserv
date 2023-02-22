@@ -108,12 +108,11 @@ std::list<Token>	createTokenList( std::ifstream& file, TokenMap tokenMap )
 	return (tokenList);
 }
 
-TokenStream	tokenizer( std::ifstream& file )
+TokenStream*	tokenizer( std::ifstream& file )
 {
 	TokenMap				tokenMap;
 
 	initMap(tokenMap);
 	std::list<Token>	tokenList = createTokenList(file, tokenMap);
-	TokenStream	tokenStream(tokenList);
-	return (tokenStream);
+	return (new TokenStream(tokenList));
 }
