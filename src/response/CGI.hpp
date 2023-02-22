@@ -23,7 +23,7 @@ class CGI
 		string						_filepath;
 		unsigned int				_clientMaxBodySize;
 		char*						_buffer;
-		char*						_argument;
+		// char*						_argument;
 		char*						_path[4];
 		char**						_env;
 		bool						_allocation_has_failed;

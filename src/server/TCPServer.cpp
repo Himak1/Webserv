@@ -149,7 +149,7 @@ void	TCPServer::setupListeningSockets()
 	}
 }
 
-void	TCPServer::setupSocketStruct(t_socket *listener, int port)		// tmp?
+void	TCPServer::setupSocketStruct(t_socket *listener, int port)
 {
 	listener->socket_address_info.sin_addr.s_addr = INADDR_ANY;
 	listener->socket_address_info.sin_family = AF_INET;
@@ -161,7 +161,7 @@ void TCPServer::startPolling()
 	int	poll_count;
 
 	while (_isServerRunning) {
-		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
+		poll_count = poll(&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
 			if (DEBUG_INFO)
 				std::cout << strerror(errno) << std::endl;
@@ -178,8 +178,16 @@ void	TCPServer::lookupActiveSocket()
 	for (i = 0; i < _nbListeningSockets; i++) {
 		if (_pollFds[i].revents == 0)
 			continue ;
-		else
-			newConnection(i);	
+		else {
+			try {
+				newConnection(i);	
+			} catch (std::exception& e) {
+				if (DEBUG_INFO)
+					std::cout << std::strerror(errno) << std::endl;
+				std::cout << e.what() << std::endl;
+				std::exit(EXIT_FAILURE);
+			}	
+		}
 	}
 
 	for (int j = 0; j < (int) (_pollFds.size() - _nbListeningSockets); j++, i++) {
@@ -203,19 +211,11 @@ void TCPServer::newConnection(int idx)
 	new_socket.socket_address_len = sizeof(new_socket.socket_address_info);
 	new_pollfd.fd = accept(_pollFds[idx].fd, (sockaddr *)&new_socket.socket_address_info, &socket_len);	
 	if (new_pollfd.fd == -1) {
-		exitWithError("ERROR: accept() (TCPServer::newConnection");
+		throw AcceptFail();
 	}
 	new_socket.socket_address_len = socket_len;
 
-	try {
-		setFileDescrOptions(new_pollfd.fd);				
-	} catch (std::exception& e) {
-		if (DEBUG_INFO)
-			std::cout << std::strerror(errno) << std::endl;
-		std::cout << e.what() << std::endl;
-		std::exit(1);
-	}	
-
+	setFileDescrOptions(new_pollfd.fd);				
 	new_pollfd.events = POLLIN;
 	new_socket.config_idx = idx;
 	_pollFds.push_back(new_pollfd);
@@ -245,19 +245,17 @@ bool	TCPServer::serverMsgIsEmpty(int idx)
 		return false;	
 }
 
-// idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
-// Verder ontvangt receive request data op een socket en maakt (evt) een response aan.
-// Als er een response is zal de socket events op POLLOUT worden gezet, zodat in de volgende loop 
-// poll() zal aangeven dat er data verstuurd kan worden. 
+// 0 bytes received means connection hung up, so we close connection
 void TCPServer::receiveRequest(int idx)
 {
 	char	buff[BUFFER_SIZE];
-	size_t	bytes_received;
+	int		bytes_received;
 
 	bytes_received = recv(_pollFds[idx].fd, buff, sizeof(buff), 0);		
 	if (bytes_received <= 0) {
-		if (bytes_received < 0 && DEBUG_INFO)
-			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << std::endl;
+		if (bytes_received < 0 && DEBUG_INFO) {					// error handle?
+			std::cout << std::strerror(errno) << std::endl;
+		}
 		closeConnection(idx);
 		return ;
 	} 
@@ -272,7 +270,7 @@ void TCPServer::receiveRequest(int idx)
 
 void TCPServer::sendResponse(int idx)
 {
-	size_t		bytes_send;
+	int			bytes_send;
 	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	if (serverMsgIsEmpty(idx))
@@ -283,6 +281,7 @@ void TCPServer::sendResponse(int idx)
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
 			std::cout << "Send error in TCPServer::sendResponse()" << std::endl;
+			cout << "\t\t\t send nothing\n";
 			closeConnection(idx);
 		}
 		else {
@@ -292,7 +291,6 @@ void TCPServer::sendResponse(int idx)
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		closeConnection(idx); 		// tmp???
 	}	
 	else {
 		_pollFds[idx].events = POLLOUT;

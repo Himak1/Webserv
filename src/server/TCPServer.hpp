@@ -61,6 +61,11 @@ private:
     		return "Failure to listen to socket. Exiting program";
 		}
 	};	
+	struct AcceptFail : public exception {
+		const char * what () const throw () {
+    		return "Failure to accept incoming connection. Exiting program";
+		}
+	};	
 	struct SockBindingFail : public exception {
 		const char * what () const throw () {
     		return "Failed to bind socket. Exiting program";
@@ -81,10 +86,6 @@ private:
     		return "Failure to set socket option to re use socket. Exiting program";
 		}
 	};	
-
-
-
-
 };
 
 }			// namespace http
