@@ -4,15 +4,11 @@
 #include <iostream>
 #include <fstream>
 
-// CONSTRUCTOR
+// CONSTRUCTORS
 Request::Request() { }
 
 Request::Request(const Request &src) { *this = src; }
 
-// DESTRUCTOR
-Request::~Request() { }
-
-// Overload operator
 Request &Request::operator = (const Request &src)
 {
 	if (this != &src) {
@@ -26,6 +22,9 @@ Request &Request::operator = (const Request &src)
 	}
 	return (*this);
 }
+
+// DESTRUCTOR
+Request::~Request() { }
 
 // PUBLIC FUNCTIONS
 void Request::initRequest(string request)

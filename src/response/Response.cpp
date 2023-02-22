@@ -47,6 +47,8 @@ string 	Response::getMessage()
 
 	if (_request.isFileUpload())
 		return uploadFile();
+	if (_request.getMethod() == "DELETE")
+		return deleteFile();
 
 	return  _request.getHTTPVersion() + " "
 			+ _status_codes[_status]
@@ -61,6 +63,7 @@ string 	Response::getMessage()
 void	Response::setFilePath()
 {
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
+									&& (*_location).getRedirect() == 0
 									&& _request.getURI().rfind('.') == string::npos;
 
 	if (is_undefined_extension) {	
@@ -99,7 +102,7 @@ bool	Response::searchIndexFiles(list<string> index_files)
 
 void	Response::setLocation()
 {
-	string target = _request.getURI();
+	string target = _config.getRoot() + _request.getURI();
 	list<Location*>::iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {
 		_status = INTERNAL_SERVER_ERROR;
@@ -164,12 +167,9 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
-	cout << "(*_location).getCgiPath()" << (*_location).getCgiPath() << endl;
-	cout << "(*_location).getRedirect()" << (*_location).getRedirect() << endl;
-	cout << "(*_location).getRedirectURI()" << (*_location).getRedirectURI() << endl;
 	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
 	bool is_accepted_method		= _location->isMethodAccepted(_method);
-	bool is_redirect			= (*_location).getRedirect() > 0;
+	bool is_redirect			= (*_location).getRedirect() != 0;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
 	bool is_php_file			= _filepath.find(".php?") != string::npos;
 
@@ -186,7 +186,6 @@ int		Response::setStatus()
 string	Response::getContent()
 {
 	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
-	if (_request.getMethod() == "DELETE")	return deleteFile();
 	if (_status != OK)						return returnErrorPage();
 	if (isCGI)								return getCGI();
 	return(streamFileDataToString(_filepath));
@@ -194,10 +193,8 @@ string	Response::getContent()
 
 string	Response::deleteFile()
 {
-	if (remove(_filepath.c_str()) != 0) {
-		_status = NOT_FOUND;
-		return createErrorHTML();
-	}
+	if (remove(_filepath.c_str()) != 0)
+		return "Delete failed: Invalid or non-existing file\n";
 	return "File " + _filepath + " has been deleted";
 }
 
@@ -236,7 +233,11 @@ string	Response::setUploadPath(string filename)
 string Response::returnErrorPage()
 {
 	try {
-		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		if ((*_location).getErrorPage(_status) != "")
+			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
+		else
+			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		// cout << "error page" << _filepath << endl;
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}
@@ -262,14 +263,12 @@ string Response::setCookie()
 	string value;
 	if (_request.getURI() == "/session_logout.php")
 		return "Set-Cookie: sessionID=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-
 	if (_request.getURI() == "/cookies_delete.php")
 		return "Set-Cookie: cookie_value=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
 
 	map<string, string> env = _request.getEnv();
 	if (_request.getURI() == "/session_login.php" && env.find("username") != env.end())
 		return "Set-Cookie: sessionID=" + env["username"] + "\n";
-
 	if (_request.getURI() == "/cookies.php" && env.find("cookie_value") != env.end())
 		return "Set-Cookie: cookie_value=" + env["cookie_value"] + "\n";
 
@@ -280,11 +279,8 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	// cout << cgi << endl;
-	if (cgi.find("<!doctype html>") == string::npos && _request.getExtension() != ".py")
+	if (cgi.find("<!doctype html>") == string::npos)
 		return getCGI();
-	// if (cgi.find("<!doctype html>") == string::npos)
-	// 	return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
 	if (cgi.find("500 Internal Server Error") != string::npos)
