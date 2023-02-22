@@ -59,7 +59,7 @@ void	Configuration::navigateNode( Node* serverNode )
 				_host = convertNodeToString(*i);
 				break;
 			case N_LISTEN:
-				_port = convertNodeToUInt(*i);
+				convertPort(*i);
 				break;
 			case N_CLIENT_MAX_BODY:
 				_clientMaxBodySize = convertNodeToUInt(*i);

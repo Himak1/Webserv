@@ -5,6 +5,7 @@ set(SRC_FILES
     configure/configure.cpp
     configure/AConfig.cpp
     configure/Configuration.cpp
+    configure/Configuration_convert.cpp
     configure/Location.cpp
     configure/Node.cpp
     configure/parser/Token.cpp
@@ -20,6 +21,7 @@ set(SRC_FILES
 	response/CGI.cpp
 	utils/log.cpp
 	utils/strings.cpp
+    utils/fileHandling.cpp
 
     main.cpp
     # !Add new src files here! #

@@ -71,7 +71,7 @@ string CGI::ExecuteCGI()
 	close(fd[1]);
 
 	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
-	if (message_size >= _clientMaxBodySize)
+	if (message_size >= static_cast<int>(_clientMaxBodySize))
 		return "<!doctype html><html lang=\"en\"><head><title>" \
 				"413 Request Entity Too Large\n</title></head><body><center><h1>" \
 				"413 Request Entity Too Large\n</h1></center></body></html>";
