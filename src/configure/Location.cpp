@@ -49,11 +49,14 @@ void	Location::convertCgiPass( Node* cgiPass )
 
 	_cgiExtension = (*i)->getTerminal();
 	_cgiPath = (*++i)->getTerminal();
+	if (_cgiExtension != ".php" && _cgiExtension != ".py")
+		throw std::runtime_error("ERROR: invalid CGI extension");
 }
 
 void	Location::convertAcceptedMethods( Node* allowedMethods )
 {
 	NodeList::const_iterator iter = allowedMethods->getChildrenBegin();
+	std::string	supportedMethods[3] = {"GET", "POST", "DELETE"};
 	int	i = 0;
 
 	while (iter != allowedMethods->getChildrenEnd())
@@ -73,7 +76,7 @@ void	Location::convertAutoIndex( Node* autoIndex )
 	else if (boolString == "off")
 		_autoIndex = false;
 	else
-		throw std::exception();
+		throw std::runtime_error("ERROR: auto_index is not equal to 'on' or 'off'");
 }
 
 void	Location::convertLocation( Node* location )
