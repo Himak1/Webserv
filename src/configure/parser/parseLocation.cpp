@@ -5,21 +5,6 @@
 #include "TokenStream.hpp"
 #include "../Node.hpp"
 
-Node*	parseReturn( TokenStream& tokensToParse )
-{
-	Node*	newNode;
-
-	tokensToParse.moveToNextToken();
-	newNode = new Node(N_RETURN);
-	if (!acceptAndCreateTerminal(tokensToParse, newNode))
-		return (deleteNewNode(newNode));	
-	if (!acceptAndCreateTerminal(tokensToParse, newNode))
-		return (deleteNewNode(newNode));
-	if (!accept(tokensToParse, T_SEMICOLON))
-		return (deleteNewNode(newNode));
-	return (newNode);
-}
-
 Node*	parseAlias( TokenStream& tokensToParse )
 {
 	Node*	newNode;

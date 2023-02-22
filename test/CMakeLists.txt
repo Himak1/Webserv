@@ -1,13 +1,5 @@
 ### CPP Test Files ###
 set(TEST_FILES
-<<<<<<< HEAD
-	configuration_tests/config_test.cpp
-	request/RequestTest.cpp
-	response/ResponseTest.cpp
-	response/CGITest.cpp
-	server/Server.cpp
-	# !Add new test files here!
-=======
 	configure/Token_tests.cpp
 	configure/tokenizer_tests.cpp
 	configure/parser/parser_tests.cpp
@@ -18,7 +10,6 @@ set(TEST_FILES
 	request/RequestTest.cpp
 	response/ResponseTest.cpp
 	response/CGITest.cpp
->>>>>>> milan
 )
 
 ### Create Test Executables ###
@@ -37,9 +28,6 @@ foreach(file ${TEST_FILES})
 	add_test(NAME ${name} COMMAND ${name})
 endforeach()
 
-<<<<<<< HEAD
-=======
 add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/configure/dummy_config ${CMAKE_CURRENT_BINARY_DIR}/dummy_config
 )
->>>>>>> milan

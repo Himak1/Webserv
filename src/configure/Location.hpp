@@ -11,10 +11,7 @@ class Location : public AConfig
 {
 	public:
 		Location( Node* locationNode );
-		Location( const Location& src );
 		~Location();
-
-		Location&	operator=( const Location& src );
 
 		std::string	getPath() const;
 		std::string	getAlias() const;
@@ -38,5 +35,13 @@ class Location : public AConfig
 };
 
 std::ostream&	operator<<( std::ostream& o, const Location& location );
+
+class InvalidValueInLocationBlock : public std::exception
+{
+	public:
+		const char*	what() const throw() {
+			return "Invalid value specified in location block";
+		}
+}
 
 #endif

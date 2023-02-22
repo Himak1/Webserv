@@ -89,8 +89,8 @@ namespace http
 			// CONSTRUCTORS
 
 TCPServer::TCPServer(std::vector<Configuration*> configList) :
-		_nbListeningSockets(0),
-		_configList(configList)
+		_configList(configList),
+		_nbListeningSockets(0)
 {
 	try {
 		setupListeningSockets();
@@ -159,7 +159,6 @@ void	TCPServer::setupSocketStruct(t_socket *listener, int port)		// tmp?
 void TCPServer::startPolling()
 {
 	int	poll_count;
-	int i;
 
 	while (_isServerRunning) {
 		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
@@ -174,7 +173,7 @@ void TCPServer::startPolling()
 
 void	TCPServer::lookupActiveSocket()
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < _nbListeningSockets; i++) {
 		if (_pollFds[i].revents == 0)
@@ -183,7 +182,7 @@ void	TCPServer::lookupActiveSocket()
 			newConnection(i);	
 	}
 
-	for (int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
+	for (unsigned int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
 		if 	    (_pollFds[i].revents == 0)			continue;
 		else if (_pollFds[i].revents & POLLIN) 		receiveRequest(i); 	
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
@@ -199,7 +198,6 @@ void TCPServer::newConnection(int idx)
 	struct pollfd	new_pollfd;
 	t_socket		new_socket;
 	socklen_t		socket_len;
-	int				re_use = 1;
 
 	// memset(&new_socket, 0, sizeof(t_socket));
 	new_socket.socket_address_len = sizeof(new_socket.socket_info);

@@ -24,12 +24,6 @@ AConfig::AConfig()
 {
 }
 
-AConfig::AConfig( const AConfig& src )
-	: indexFiles(src.indexFiles), _root(src._root), _errorPages(src._errorPages)
-{
-	std::cout << "AConfig: copy constructor called!" << std::endl;
-}
-
 AConfig::~AConfig()
 {
 }
@@ -67,6 +61,17 @@ const std::string&	AConfig::getErrorPage( int errorCode ) const
 	throw std::exception();
 }
 
+int	AConfig::getRedirect() const
+{
+	return (_redirectCode);
+}
+
+std::string	AConfig::getRedirectURI() const
+{
+	return (_redirectURI);
+}
+
+//	Protected Methods	//
 
 std::string	AConfig::convertNodeToString( Node* node )
 {
@@ -87,8 +92,6 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 		throw std::exception();
 	return (output);
 }
-
-//	Protected Methods	//
 
 void	AConfig::convertIndexFiles( Node* node )
 {
@@ -112,3 +115,19 @@ void	AConfig::convertErrorPage( Node* node )
 	std::string	page = (*i)->getTerminal();
 	_errorPages.push_back(ErrorPage(code, page));
 }
+
+void	AConfig::convertReturn( Node* node )
+{
+	NodeList::const_iterator	i = node->getChildrenBegin();
+	std::string					numberString;
+
+	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
+	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
+	{
+		std::cerr << "DADADADADADDADA" << std::endl;
+		throw std::exception();
+	}
+	++i;
+	std::string	page = (*i)->getTerminal();
+}
+
