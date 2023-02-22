@@ -21,7 +21,7 @@ ErrorPage::~ErrorPage()
 //	AConfig Constructors & Destructors	//
 
 AConfig::AConfig()
-	: _uploadStore("/"), _redirectCode(0);
+	: _uploadStore("/"), _redirectCode(0)
 {
 }
 
