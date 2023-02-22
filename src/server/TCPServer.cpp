@@ -1,5 +1,6 @@
 # include "TCPServer.hpp"
 # include "../response/Response.hpp"
+# include "../utils/memory.hpp"
 # include "../utils/strings.hpp"
 
 # include <cstdlib>
@@ -121,7 +122,7 @@ void	TCPServer::setupListeningSockets()
 	int				re_use = 1, i = 0;
 
 	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
-		std::memset(&listener, 0, sizeof(listener));
+		ft_memset(&listener, 0, sizeof(listener));
 
 		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (poll_fd.fd == -1)
