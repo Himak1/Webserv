@@ -43,42 +43,6 @@ std::ostream&	operator<<( std::ostream& o, const Location& location )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Location::convertCgiPass( Node* cgiPass )
-{
-	NodeList::const_iterator i = cgiPass->getChildrenBegin();
-
-	_cgiExtension = (*i)->getTerminal();
-	_cgiPath = (*++i)->getTerminal();
-	if (_cgiExtension != ".php" && _cgiExtension != ".py")
-		throw std::runtime_error("ERROR: invalid CGI extension");
-}
-
-void	Location::convertAcceptedMethods( Node* allowedMethods )
-{
-	NodeList::const_iterator iter = allowedMethods->getChildrenBegin();
-	std::string	supportedMethods[3] = {"GET", "POST", "DELETE"};
-	int	i = 0;
-
-	while (iter != allowedMethods->getChildrenEnd())
-	{
-		_acceptedMethods[i] = (*iter)->getTerminal();
-		++iter;
-		i++;
-	}
-}
-
-void	Location::convertAutoIndex( Node* autoIndex )
-{
-	std::string	boolString = (*autoIndex->getChildrenBegin())->getTerminal();
-
-	if (boolString == "on")
-		_autoIndex = true;
-	else if (boolString == "off")
-		_autoIndex = false;
-	else
-		throw std::runtime_error("ERROR: auto_index is not equal to 'on' or 'off'");
-}
-
 void	Location::convertLocation( Node* location )
 {
 	for (NodeList::const_iterator i = location->getChildrenBegin(); i != location->getChildrenEnd(); ++i) {
@@ -145,14 +109,13 @@ std::string	Location::getCgiPath() const
 
 bool	Location::isMethodAccepted( std::string& httpMethod ) const
 {
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		if (httpMethod == _acceptedMethods[i])
 			return (true);
 	}
 	return (false);
 }
-
 bool	Location::autoIndexingOn() const
 {
 	return (_autoIndex);
