@@ -19,8 +19,9 @@
 
 
 
-# define POLL_TIMEOUT 200	 // in ms
-# define DEBUG_INFO 1
+# define POLL_TIMEOUT 200	 
+# define DEBUG_INFO true
+# define QUEU_LIMIT_LISTEN 20
 
 
 /* #################################################################################################### */
@@ -52,7 +53,7 @@
 /* #################################################################################################### */	
 
 
-#define QUEU_LIMIT_LISTEN 20
+
 
 using namespace std;
 
@@ -101,7 +102,6 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		std::cout << e.what() << std::endl;
 		std::exit(EXIT_FAILURE);
 	}	
-
 	_isServerRunning = true;	// tmp?
 	startPolling();
 }
