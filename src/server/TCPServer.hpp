@@ -14,7 +14,7 @@
 # include <poll.h>
 
 namespace http
-{;
+{
 
 typedef struct s_socket {
 	unsigned int		socket_address_len;
@@ -29,7 +29,6 @@ public:
 	TCPServer(std::vector<Configuration*>);
 	~TCPServer();
 
-	void				startPolling();
 	
 private:
 			// PRIVATE MEMBERS
@@ -42,18 +41,19 @@ private:
 	bool						_isServerRunning;
 
 			// PRIVATE FUNCTIONS
+	void						setListeningSockets();
+	void						setFileDescrOptions(int);
+	void						setSocketStruct(t_socket *, int);
+
+	void 						startPolling();
+	void						lookupActiveSocket();
  	void						newConnection(int);
+	void						receiveRequest(int);
+	void						sendResponse(int);
+
 	void						closeConnection(int);
 	void						closeServer();
-	void						receiveRequest(int);
-	void 						createServerMessage(int);
 	bool						serverMsgIsEmpty(int);
-	void						sendResponse(int);
-	int 						startServer();
-	void						setupListeningSockets();
-	void						setupSocketStruct(t_socket *, int);
-	void						setFileDescrOptions(int);
-	void						lookupActiveSocket();
 
 			// PRIVATE EXCEPTIONS
 	struct ListenFail : public exception {

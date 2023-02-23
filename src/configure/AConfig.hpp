@@ -22,27 +22,31 @@ class AConfig
 		~AConfig();
 
 		std::string				getRoot() const;
-		const std::string&		getErrorPage( int errorCode ) const;
-		/* int						getRedirect() const; // returns 0 if not a redirect */
-		/* std::string				getRedirectURI() const; // returns empty string if not a redirect */
+		std::string				getErrorPage( int errorCode ) const;
+		std::string				getUploadStore() const;
+		int						getRedirect() const; // returns 0 if not a redirect
+		std::string				getRedirectURI() const; // returns empty string if not a redirect
 
 		std::list<std::string>	indexFiles;
 	protected:
 		AConfig();
-		AConfig( const AConfig& src );
 
 		std::string				convertNodeToString( Node* node );
 		std::list<std::string>	convertMultiNodesToStrings( Node* node );
 		unsigned int			convertNodeToUInt( Node* node );
 		void					convertIndexFiles( Node* node );
 		void					convertErrorPage( Node* node );
+		void					convertUploadStore( Node* node );
+		void					convertReturn( Node* node );
 	
 		bool					validatePath();
 		bool					validateNumberAndRange( int min, int max );	
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
-		
+		std::string				_uploadStore;
+		int						_redirectCode;
+		std::string				_redirectURI;
 };
 
 std::ostream&	operator<<( std::ostream& o, const AConfig& config );

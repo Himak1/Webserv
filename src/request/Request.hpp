@@ -24,11 +24,11 @@ class Request
 		const string		getURI() const;
 		const string		getHTTPVersion() const;
 		const string		getExtension() const;
+		const string		getHeader() const;
 		map<string, string>	getEnv() const;
 		map<string, string>	getCookies() const;
 		bool				isCGI() const;
-		bool				getUploadSucces() const;
-		void				setUploadSucces(bool result);
+		bool				isFileUpload() const;
  
 	private:
 		string				_method;
@@ -37,7 +37,7 @@ class Request
 		string				_extension;
 		string				_headers;
 		map<string, string>	_env;
-		bool				_is_succesfull_uploaded;
+		bool				_is_upload;
 
 		void				parseHTTPInfoAndHeaders(string request);
 		void				parseExtension();

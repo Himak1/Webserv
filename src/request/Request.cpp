@@ -4,15 +4,11 @@
 #include <iostream>
 #include <fstream>
 
-// CONSTRUCTOR
+// CONSTRUCTORS
 Request::Request() { }
 
 Request::Request(const Request &src) { *this = src; }
 
-// DESTRUCTOR
-Request::~Request() { }
-
-// Overload operator
 Request &Request::operator = (const Request &src)
 {
 	if (this != &src) {
@@ -22,30 +18,39 @@ Request &Request::operator = (const Request &src)
 		this->_extension = src._extension;
 		this->_headers = src._headers;
 		this->_env = src._env;
-		this->_is_succesfull_uploaded = src._is_succesfull_uploaded;
+		this->_is_upload = src._is_upload;
 	}
 	return (*this);
 }
 
+// DESTRUCTOR
+Request::~Request() { }
+
 // PUBLIC FUNCTIONS
 void Request::initRequest(string request)
 {
+	_is_upload = false;
+	if (request.find("upload?file=") != string::npos)
+		_is_upload = true;
+
 	parseHTTPInfoAndHeaders(request);
-	parseExtension();
 	parseEnv();
+	parseExtension();
 }
 
 const string Request::getMethod() const { return _method; }
 const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
-map<string, string> Request::getEnv() const { return _env; };
-bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
-void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
+const string Request::getHeader() const { return _headers; }
+map<string, string> Request::getEnv() const { return _env; }
+bool 		 Request::isFileUpload() const { return _is_upload; }
 
 // PRIVATE FUNCTIONS
 void Request::parseHTTPInfoAndHeaders(string request)
 {
+	_headers = request;
+
 	vector<string> strings;
 	stringstream ss(request);
 	string token;
@@ -61,35 +66,19 @@ void Request::parseHTTPInfoAndHeaders(string request)
 	if (strings.size() > 0) _method = strings[0];
 	if (strings.size() > 1) _uri = strings[1];
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
-
-	_headers = request;
 }
 
 void Request::parseExtension()
 {
-	const size_t extension_start = _uri.rfind('.');
-	if (extension_start == string::npos)
-		_extension = ".php";
-	else
+	if (_uri.find('?') != string::npos)
+		_uri = safe_substr(_uri, 0, _uri.find('?'));
+
+	size_t extension_start = _uri.rfind('.');
+	if (extension_start != string::npos)
 		_extension = safe_substr(_uri, extension_start, _uri.length());
-
-	// om ervoor te zorgen dat upload_handler.php?file_to_upload=filename goed wordt geladen
-	if (_uri.find(".php?") != string::npos)
+	else
 		_extension = ".php";
-
-	// size_t extension_start;
-	// string uri = _uri;
-	// if (uri.find('?') != string::npos)
-	// 	uri = safe_substr(uri, extension_start, uri.find('?'));
-
-	// cout << "uri = " << uri << endl;
-	// extension_start = uri.rfind('.');
-	// if (extension_start == string::npos)
-	// 	_extension = ".php";
-	// else
-	// 	_extension = safe_substr(uri, extension_start, uri.length());
 	
-	// cout << "extension = " << _extension << endl;
 }
 
 void Request::parseEnv()
@@ -100,7 +89,7 @@ void Request::parseEnv()
 	parsePost();
 }
 
-void	Request::parseCookies()
+void Request::parseCookies()
 {
 	string	cookie_input = safe_substr(_headers, _headers.find("Cookie:") + 7, -1);
 	cookie_input = safe_substr(cookie_input, 0, cookie_input.find("\n"));
@@ -139,8 +128,6 @@ void Request::parseGet()
 
 void Request::parsePost() 
 {
-	// TO DO? will not work if input fields are empty. 
-	// Currently solved with 'required' tag in html form
 	string	line;
 	if (_method == "POST") {
 		string query = _headers;

@@ -12,7 +12,7 @@
 			$directory = getenv("upload_directory");
 			// echo "DIRECTORY = ". $directory . "<br>";
 			if (!is_dir($directory)) {
-				echo "Invalid upload directory";
+				echo "You haven't uploaded any files";
 				return;
 			}
 

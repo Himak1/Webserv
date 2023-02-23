@@ -4,6 +4,34 @@
 #include "Token.hpp"
 #include "TokenStream.hpp"
 
+Node*	parseUploadStore( TokenStream& tokensToParse )
+{
+	Node*	newNode;
+
+	tokensToParse.moveToNextToken();
+	newNode = new Node(N_UPLOAD_STORE);
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
+Node*	parseReturn( TokenStream& tokensToParse )
+{
+	Node*	newNode;
+
+	tokensToParse.moveToNextToken();
+	newNode = new Node(N_RETURN);
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));	
+	if (!acceptAndCreateTerminal(tokensToParse, newNode))
+		return (deleteNewNode(newNode));
+	if (!accept(tokensToParse, T_SEMICOLON))
+		return (deleteNewNode(newNode));
+	return (newNode);
+}
+
 Node*	parseClientMaxBodySize( TokenStream& tokensToParse )
 {
 	Node*	newNode;
@@ -106,6 +134,12 @@ Node*	parseServer( TokenStream& tokensToParse )
 				break;
 			case T_ERROR_PAGE:
 				status = newNode->addChild(parseErrorPage(tokensToParse));
+				break;
+			case T_RETURN:
+				status = newNode->addChild(parseReturn(tokensToParse));
+				break;
+			case T_UPLOAD_STORE:
+				status = newNode->addChild(parseUploadStore(tokensToParse));
 				break;
 			default:
 				status = 0;

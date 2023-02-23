@@ -15,6 +15,7 @@ Node*	parseListen( TokenStream& tokensToParse );
 Node*	parseIndex( TokenStream& tokensToParse );
 Node*	parseClientMaxBodySize( TokenStream& tokensToParse );
 Node*	parseErrorPage( TokenStream& tokensToParse );
+Node*	parseUploadStore( TokenStream& tokensToParse );
 
 Node*	parseLocation( TokenStream& tokensToParse );
 Node*	parseLocationPath( TokenStream& tokensToParse );

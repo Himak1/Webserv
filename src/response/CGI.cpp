@@ -28,7 +28,7 @@ CGI::CGI(class Request request, class Location* location, string filepath, int c
 
 	if (!_allocation_has_failed) {
 		try {
-			_env = new char*[_request.getEnv().size() + 4];
+			_env = new char*[_request.getEnv().size() + 3];
 		} catch (std::bad_alloc&) {
 			_allocation_has_failed = true;
 		}
@@ -64,16 +64,14 @@ string CGI::ExecuteCGI()
 	if(pid == 0) {
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
-		std::cout << _path[0] << " <- path[0]" << std::endl;
 		execve(_path[0], _path, _env);
-		perror("execve failed: ");
 		cout << INTERNAL_SERVER_ERROR_MSG << endl;
 		exit(0);
 	}
 	close(fd[1]);
 
 	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
-	if (message_size >= (int) _clientMaxBodySize)
+	if (message_size >= static_cast<int>(_clientMaxBodySize))
 		return "<!doctype html><html lang=\"en\"><head><title>" \
 				"413 Request Entity Too Large\n</title></head><body><center><h1>" \
 				"413 Request Entity Too Large\n</h1></center></body></html>";
@@ -91,7 +89,6 @@ void	CGI::createPath()
 		try {
 			char *path_to_cgi = new char[path_length + 1];
 			path_to_cgi = strcpy(path_to_cgi, (*_location).getCgiPath().c_str());
-			cout << path_to_cgi << endl;
 			_path[0] = &path_to_cgi[0];
 			_path[1] = &path_to_script[0];
 			_path[2] = NULL;
@@ -114,11 +111,8 @@ void	CGI::createEnv()
 	else
 		addToEnv("directory_listing=false", i);
 
-	string temp_define_2 = UPLOAD_FOLDER;
-	addToEnv("upload_directory=" + temp_define_2, ++i);
+	addToEnv("upload_directory=" + _location->getUploadStore(), ++i);
 
-	if (_request.getUploadSucces() == true) addToEnv("upload_succes=true", ++i);
-	
 	_env[++i] = NULL;
 }
 

@@ -13,7 +13,6 @@ class Configuration : public AConfig
 {
 	public:
 		Configuration( Node* serverNode );
-		/* Configuration( const Configuration& src ); */
 		~Configuration();
 
 		std::string		getHost() const;
@@ -23,6 +22,7 @@ class Configuration : public AConfig
 		std::list<Location*>	locations;
 	private:
 		void			navigateNode( Node* serverNode );
+		void			convertPort( Node* listen );
 
 		std::string				_host; // server_name
 		unsigned int			_port; // listen

@@ -1,7 +1,7 @@
 # VARIABLES
 NAME			:=	webserv
-CFLAGS			:=	-Isrc# -std=c++98 -Wall -Wextra -Werror  #-pedantic
-SANIT			:= #-fsanitize=address -g
+CFLAGS			:=	-Isrc -std=c++98 -Wall -Wextra -Werror  -pedantic
+SANIT			:=  -g -fsanitize=address
 CC				:=	c++
 
 # STATIC
@@ -22,9 +22,6 @@ $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 					$(CC) $(CFLAGS) -c $< -o $@
 
 bonus			:	$(NAME)
-
-test			:	re
-					./webserv default.conf
 
 clean			:
 					$(RM) -rf $(OBJ_DIR) 

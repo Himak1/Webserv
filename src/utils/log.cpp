@@ -1,5 +1,5 @@
 #include "log.hpp"
-
+#include "strings.hpp"
 #include <ctime>
 #include <iomanip>
 #include <sys/time.h>
@@ -15,8 +15,24 @@ void printTimestamp()
 	cout 	<< buf;
 }
 
-void log(const string message)
+void log_response(const string &message)
+{
+	string msg = safe_substr(message, 0, message.find('\n'));
+	if (message.find('\n') != string::npos) {
+		printTimestamp();
+		cout << " < " << msg << endl;
+	}
+}
+
+void log_receive(const string &message)
 {
 	printTimestamp();
-	cout << "   " << message << endl;
+	cout << " > " << message << endl;
+}
+
+void exitWithError(const std::string &errorMessage)
+{
+	printTimestamp();
+	cout << " ERROR    " << errorMessage << endl;
+	std::exit(1);
 }

@@ -11,7 +11,6 @@ using namespace std;
 class CGI
 {
 	public:
-		// CGI(class Request request, class Configuration config, string filepath);
 		CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize);
 		~CGI();
 		string						ExecuteCGI();
@@ -23,7 +22,6 @@ class CGI
 		string						_filepath;
 		unsigned int				_clientMaxBodySize;
 		char*						_buffer;
-		// char*						_argument;
 		char*						_path[4];
 		char**						_env;
 		bool						_allocation_has_failed;
