@@ -40,20 +40,20 @@ private:
 	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
-			// PRIVATE FUNCTIONS
+			// SERVER SETUP
 	void						setListeningSockets();
 	void						setFileDescrOptions(int);
 	void						setSocketStruct(t_socket *, int);
 
+			// SERVER LOOP + EVENTS
 	void 						startPolling();
 	void						lookupActiveSocket();
  	void						newConnection(int);
 	void						receiveRequest(int);
 	void						sendResponse(int);
-
 	void						closeConnection(int);
-	void						closeServer();
 	bool						serverMsgIsEmpty(int);
+
 
 			// PRIVATE EXCEPTIONS
 	struct ListenFail : public exception {

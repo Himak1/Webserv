@@ -5,7 +5,6 @@
 # include "../utils/strings.hpp"
 # include "../utils/log.hpp"
 
-
 # include <cstdlib>
 # include <cstring>
 # include <sys/socket.h>
@@ -19,35 +18,6 @@
 # include <unistd.h>
 # include <fstream>
 # include <string.h>
-
-
-/* #################################################################################################### */
-/* #################################################################################################### */	//		TMP		
-/* #################################################################################################### */	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########		WERKT WEL (leidt example.com naar onze localhost)						###########	*/	//		TMP
-/* ###########		curl --resolve example.com:80:127.0.0.1 http://example.com/index.html	###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########		WERKT NIET (bezoekt example.com)										###########	*/	//		TMP
-/* ###########		curl --resolve example.com:8000:127.0.0.1 http://example.com/index.html	########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########		Voordat we runnen moet het max aantal open file descriptors van 		###########	*/	//		TMP
-/* ###########		het OS gecheckt worden (wij hebben per connectie een file descriptor 	###########	*/	//		TMP
-/* ###########		nodig).																 	###########	*/	//		TMP
-/* ###########		Dit doe je door in terminal 'ulimit -n' in te typen.					###########	*/	//		TMP
-/* ###########		Om de limiet te verhogen type je: 'ulimit -n X'	met X voor aantal fds	###########	*/	//		TMP
-/* ###########		Voor 1000 connecties heb je ca 1020+ fds nodig							###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* ###########		In siege.conf (root/.siege/)											###########	*/	//		TMP
-/* ###########		connection = keep-alive													###########	*/	//		TMP
-/* ###########		Siege set een port die gesloten wordt op TIMEOUT, die poort kan dan 	###########	*/	//		TMP
-/* ###########		een tijdje niet meer gebruikt worden. Door 'connection = keep-alive'	###########	*/	//		TMP
-/* ###########		kan dit wel. omdat wij poorten hergebruiken moet dit dus				###########	*/	//		TMP
-/* ###########																				###########	*/	//		TMP
-/* #################################################################################################### */	//		TMP
-/* #################################################################################################### */
-/* #################################################################################################### */	
 
 using namespace std;
 
@@ -87,7 +57,7 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 
 TCPServer::~TCPServer()
 {
-	closeServer();
+	std::cout << "Closed server" << std::endl;
 }
 			
 			// SETUP SERVER
@@ -185,9 +155,7 @@ void	TCPServer::lookupActiveSocket()
 		else if (_pollFds[i].revents & POLLOUT) 	sendResponse(i);	
 		else if (_pollFds[i].revents & POLLHUP) 	closeConnection(i);	
 		else if (_pollFds[i].revents & POLLNVAL) 	closeConnection(i);
-		else if (_pollFds[i].revents & POLLERR) 	cout << "socket fd " << _pollFds[i].fd << " ###########poll error! (POLLERR event) needs handler" << endl;	// tmp
 	}	
-	  													 		
 }
 
 			//	SERVER EVENT HANDLING
@@ -256,7 +224,6 @@ void TCPServer::newConnection(int idx)
 	t_socket		new_socket;
 	socklen_t		socket_len;
 
-	// memset(&new_socket, 0, sizeof(t_socket));
 	new_socket.socket_address_len = sizeof(new_socket.socket_address_info);
 	new_pollfd.fd = accept(_pollFds[idx].fd, (sockaddr *)&new_socket.socket_address_info, &socket_len);	
 	if (new_pollfd.fd == -1) {
@@ -284,11 +251,6 @@ void	TCPServer::closeConnection(int idx)
 	close(_pollFds[idx].fd);
 	_pollFds.erase(_pollFds.begin() + idx);						
 	_socketInfo.erase(_socketInfo.begin() + idx);
-}
-
-void 	TCPServer::closeServer()			// tmp
-{
-	std::exit(0);
 }
 
 bool	TCPServer::serverMsgIsEmpty(int idx)
