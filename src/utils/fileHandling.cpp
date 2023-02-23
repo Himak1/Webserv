@@ -1,4 +1,5 @@
 #include "fileHandling.hpp"
+#include "strings.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -29,4 +30,15 @@ void	writeStringToFile(string file_data, string upload_path)
 	ofstream fout(upload_path);
 	fout << file_data << endl;
     fout.close();
+}
+
+string parseExtension(string uri)
+{
+	if (uri.find('?') != string::npos)
+		uri = safe_substr(uri, 0, uri.find('?'));
+
+	size_t extension_start = uri.rfind('.');
+	if (extension_start != string::npos)
+		return safe_substr(uri, extension_start, uri.length());
+	return "";
 }

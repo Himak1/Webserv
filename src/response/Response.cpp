@@ -17,6 +17,7 @@
 Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
+	_extension = _request.getExtension();
 	initStatusCodes();
 	initContentTypes();
 	setLocation();
@@ -37,7 +38,7 @@ string 	Response::getMessage()
 	if (bytes_received >= static_cast<int>(_config.getClientMaxBodySize())) {
 		_status = REQUEST_ENTITY_TOO_LARGE;
 		_content = getContent();
-		return  "HTTP/1.1 "
+		return  "HTTP/1.1 " 
 			+ _status_codes[_status]
 			+ _content_types[".html"]
 			+ "Content-Length: "
@@ -49,10 +50,9 @@ string 	Response::getMessage()
 		return uploadFile();
 	if (_request.getMethod() == "DELETE")
 		return deleteFile();
-
 	return  _request.getHTTPVersion() + " "
 			+ _status_codes[_status]
-			+ _content_types[ _request.getExtension()]
+			+ _content_types[ _extension]
 			+ setCookie()
 			+ "Content-Length: "
 			+ to_string(_content.size()) + "\n\n"
@@ -62,26 +62,35 @@ string 	Response::getMessage()
 // PRIVATE FUNCTIONS
 void	Response::setFilePath()
 {
+	if ((*_location).getAlias() != "") {
+		_filepath = (*_location).getAlias();
+		_extension = parseExtension(_filepath);
+		cout << _filepath << endl;
+		return;
+	}
+
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
 									&& (*_location).getRedirect() == 0
-									&& _request.getURI().rfind('.') == string::npos;
+									&& _extension == "";
 
 	if (is_undefined_extension) {	
-		if (searchExtension(".html")) 					return;
-		if (searchExtension(".htm")) 					return;
-		if (searchExtension(".php")) 					return;
-		if (searchExtension(".py")) 					return;
+		if (tryAndSetExtension(".html")) 				return;
+		if (tryAndSetExtension(".htm")) 				return;
+		if (tryAndSetExtension(".php")) 				return;
+		if (tryAndSetExtension(".py")) 					return;
 		if (searchIndexFiles((*_location).indexFiles)) 	return;
 		if (searchIndexFiles(_config.indexFiles)) 		return;
 	}
 	_filepath = _config.getRoot() + _request.getURI();
 }
 
-bool	Response::searchExtension(string extension)
+bool	Response::tryAndSetExtension(string extension)
 {
 	_filepath = _config.getRoot() + _request.getURI() + extension;
-		if (isExistingFile(_filepath))
-			return true;
+	if (isExistingFile(_filepath)) {
+		_extension = extension;
+		return true;
+	}
 	return false;
 }
 
@@ -91,8 +100,10 @@ bool	Response::searchIndexFiles(list<string> index_files)
 	list<string>::iterator it = index_files.begin();
 	while (it != index_files.end()) {
 		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
-		if (isExistingFile(_filepath))
+		if (isExistingFile(_filepath)) {
+			_extension = parseExtension(_filepath);
 			return true;
+		}
 		++it;
 	}
 	if (it == index_files.end())
@@ -113,9 +124,7 @@ void	Response::setLocation()
 list<Location*>::const_iterator Response::findConfigLocation(string target) {
 	if (target.rfind("/") == 0)
 		return searchLocations("/");
-
-	list<Location*>::const_iterator it = _config.locations.begin();
-	it = searchLocations(target);
+	list<Location*>::const_iterator it = searchLocations(target);
 	if (it == _config.locations.end())
 		return findConfigLocation(go_one_directory_up(target));
 	return it;
@@ -124,8 +133,9 @@ list<Location*>::const_iterator Response::findConfigLocation(string target) {
 list<Location*>::const_iterator Response::searchLocations(string target) {
 	list<Location*>::const_iterator it = _config.locations.begin();
 	while (it != _config.locations.end()) {
-		if ((*it)->getPath() == target)
+		if ((*it)->getPath() == target) {
 			return it;
+		}
 		++it;
 	}
 	return it;
@@ -142,7 +152,7 @@ void	Response::initStatusCodes()
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
 	_status_codes[413] = "413 Request Entity Too Large\n";
-	_status_codes[415] = "415 Unsupported Media Type\n";
+	_status_codes[415] = "200 OK\n";
 	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
@@ -167,31 +177,28 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
+	bool is_page_not_found			= _status == NOT_FOUND
+									&& _extension != ".png"
+									&& _extension != ".jpg"
+									&& _extension != ".ico";
+	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
 	string method = _request.getMethod();
-	bool is_page_not_found		= _status == NOT_FOUND
-									&& (_request.getExtension()==".html"
-										|| _request.getExtension()==".htm"
-										|| _request.getExtension()==".php"
-										|| _request.getExtension()==".py");
-	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_accepted_method		= (*_location).isMethodAccepted(method);
-	bool is_redirect			= (*_location).getRedirect() != 0;
-	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
-	bool is_php_file			= _filepath.find(".php?") != string::npos;
+	bool is_accepted_method			= (*_location).isMethodAccepted(method);
+	bool is_redirect				= (*_location).getRedirect() != 0;
+	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
 
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
-	if (!is_accepted_method)		return NOT_IMPLEMENTED;
+	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
 	if (is_redirect)				return (*_location).getRedirect();
 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
-	if (is_php_file)				return OK;
 	if (isExistingFile(_filepath))	return OK;
 	return NOT_FOUND;		
 }
 
 string	Response::getContent()
 {
-	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
+	bool isCGI = _extension == ".php" || _extension == ".py";
 	if (_status != OK)						return returnErrorPage();
 	if (isCGI)								return getCGI();
 	return(streamFileDataToString(_filepath));

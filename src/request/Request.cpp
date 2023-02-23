@@ -1,5 +1,6 @@
 #include "Request.hpp"
 #include "../utils/strings.hpp"
+#include "../utils/fileHandling.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -34,13 +35,13 @@ void Request::initRequest(const string &request)
 		_is_upload = true;
 	parseHTTPInfoAndHeaders(request);
 	parseEnv();
-	parseExtension();
+	_extension = parseExtension(_uri);
 }
 
 const string Request::getMethod() const { return _method; }
 const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
-const string Request::getExtension() const { return _extension; }
+string 		 Request::getExtension() const { return _extension; }
 const string Request::getHeader() const { return _headers; }
 map<string, string> Request::getEnv() const { return _env; }
 bool 		 Request::isFileUpload() const { return _is_upload; }
@@ -64,19 +65,6 @@ void Request::parseHTTPInfoAndHeaders(const string& request)
 	if (strings.size() > 0) _method = strings[0];
 	if (strings.size() > 1) _uri = strings[1];
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
-}
-
-void Request::parseExtension()
-{
-	if (_uri.find('?') != string::npos)
-		_uri = safe_substr(_uri, 0, _uri.find('?'));
-
-	size_t extension_start = _uri.rfind('.');
-	if (extension_start != string::npos)
-		_extension = safe_substr(_uri, extension_start, _uri.length());
-	else
-		_extension = ".php";
-	
 }
 
 void Request::parseEnv()

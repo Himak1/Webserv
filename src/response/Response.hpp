@@ -21,6 +21,7 @@ class Response
 
 	private:
 		string							_filepath;
+		string							_extension;
 		int								_status;
 		string							_content;
 		const class Request&			_request;
@@ -30,7 +31,7 @@ class Response
 		map<string, string>				_content_types;
 	
 		void							setFilePath();
-		bool							searchExtension(string extension);
+		bool							tryAndSetExtension(string extension);
 		bool							searchIndexFiles(list<string> index_files);
 		void							setLocation();
 		void							initStatusCodes();

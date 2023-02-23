@@ -1,6 +1,9 @@
 <?php include("templates/top.php");?>
 	
 		<div id="middle">
+			<h3 class="">RESOLVE</h3>
+			curl -v  --resolve example.com:4242:0.0.0.0 http://example.com:4242</br></br>
+
 			<h3 class="">GET</h3>
 			curl -v -X GET "127.0.0.1:4242/"</br></br>
 			curl -v -X GET "127.0.0.1:4242/form_handler.php?first_name=CODAM\&last_name=42"</br>
