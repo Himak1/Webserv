@@ -1,4 +1,5 @@
 #include <exception>
+#include <algorithm>
 #include <sys/stat.h>
 #include "Location.hpp"
 #include "Node.hpp"

@@ -14,7 +14,7 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
-	: _host("localhost"), _port(80), _clientMaxBodySize(2)
+	: _host("localhost"), _port(80)
 {
 	try {
 		navigateNode(serverNode);
@@ -43,10 +43,6 @@ unsigned int	Configuration::getPort() const
 	return (_port);
 }
 
-unsigned int	Configuration::getClientMaxBodySize() const
-{
-	return (_clientMaxBodySize);
-}
 
 
 //----------------------------------Methods---------------------------------//
@@ -62,7 +58,7 @@ void	Configuration::navigateNode( Node* serverNode )
 				convertPort(*i);
 				break;
 			case N_CLIENT_MAX_BODY:
-				_clientMaxBodySize = convertNodeToUInt(*i);
+				convertClientMaxBodySize(*i);
 				break;
 			case N_ROOT:
 				_root = convertNodeToString(*i);
@@ -94,7 +90,6 @@ std::ostream&	operator<<( std::ostream& o, const Configuration& config )
 {
 	o	<< "host: " << config.getHost() << '\n'
 		<< "port: " << config.getPort() << '\n'
-		<< "client max body size: " << config.getClientMaxBodySize() << '\n'
 		<< (AConfig&)config << "\n\n";
 	for (std::list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
 	{

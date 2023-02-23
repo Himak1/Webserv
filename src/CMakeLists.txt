@@ -17,12 +17,15 @@ set(SRC_FILES
     configure/parser/parser_utils.cpp
 
     server/TCPServer.cpp
+
     request/Request.cpp
     response/Response.cpp
 	response/CGI.cpp
+
 	utils/log.cpp
 	utils/strings.cpp
     utils/fileHandling.cpp
+	utils/memory.cpp
 
     main.cpp
     # !Add new src files here! #

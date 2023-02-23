@@ -17,7 +17,6 @@ class Configuration : public AConfig
 
 		std::string		getHost() const;
 		unsigned int	getPort() const;
-		unsigned int	getClientMaxBodySize() const;
 
 		std::list<Location*>	locations;
 	private:
@@ -26,7 +25,6 @@ class Configuration : public AConfig
 
 		std::string				_host; // server_name
 		unsigned int			_port; // listen
-		unsigned int			_clientMaxBodySize;
 };
 
 std::ostream&	operator<<( std::ostream& o, const Configuration& config );

@@ -75,6 +75,9 @@ void	Location::convertLocation( Node* location )
 			case N_UPLOAD_STORE:
 				convertUploadStore(*i);
 				break;
+			case N_CLIENT_MAX_BODY:
+				convertClientMaxBodySize(*i);
+				break;
 			case N_RETURN:
 				convertReturn(*i);
 				break;
