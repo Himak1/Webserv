@@ -16,10 +16,10 @@ class Request
 	public:
 		Request();
 		~Request();
-		Request(const Request &src);
-		Request &operator = (const Request &src);
+		Request(const Request& src);
+		Request &operator = (const Request& src);
 
-		void				initRequest(string request);
+		void				initRequest(const string& request);
 		const string		getMethod() const;
 		const string		getURI() const;
 		const string		getHTTPVersion() const;
@@ -39,13 +39,12 @@ class Request
 		map<string, string>	_env;
 		bool				_is_upload;
 
-		void				parseHTTPInfoAndHeaders(string request);
+		void				parseHTTPInfoAndHeaders(const string& request);
 		void				parseExtension();
 		void				parseEnv();
 		void				parseGet();
 		void				parsePost();
 		void				parseCookies();
-		// void 				handleFileUpload(string request);
 };
 
 #endif

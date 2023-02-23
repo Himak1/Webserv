@@ -14,39 +14,38 @@ using namespace std;
 class Response
 {
 	public:
-		Response(class Request request, class Configuration& config);
+		Response(const class Request& request, const class Configuration& config);
 		~Response();
-		string						getMessage();
-		string						getFilepath();
+		string							getMessage();
+		string							getFilepath();
 
 	private:
-		string						_method;
-		string						_filepath;
-		int							_status;
-		string						_content;
-		class Request				_request;
-		class Configuration&		_config;
-		class Location*				_location;
-		map<int, string>			_status_codes;
-		map<string, string>			_content_types;
+		string							_filepath;
+		int								_status;
+		string							_content;
+		const class Request&			_request;
+		const class Configuration&		_config;
+		class Location*					_location;
+		map<int, string>				_status_codes;
+		map<string, string>				_content_types;
 	
-		void						setFilePath();
-		bool						searchExtension(string extension);
-		bool						searchIndexFiles(list<string> index_files);
-		void						setLocation();
-		void						initStatusCodes();
-		void						initContentTypes();
-		int							setStatus();
-		string						getContent();
-		string 						deleteFile();
-		string 						uploadFile();
-		string						setUploadPath(string filename);
-		string						getCGI();
-		string						setCookie();
-		string 						returnErrorPage();
-		string						createErrorHTML();
-		list<Location*>::iterator 	findConfigLocation(string target);
-		list<Location*>::iterator 	searchLocations(string target);
+		void							setFilePath();
+		bool							searchExtension(string extension);
+		bool							searchIndexFiles(list<string> index_files);
+		void							setLocation();
+		void							initStatusCodes();
+		void							initContentTypes();
+		int								setStatus();
+		string							getContent();
+		string 							deleteFile();
+		string 							uploadFile();
+		string							setUploadPath(string filename);
+		string							getCGI();
+		string							setCookie();
+		string 							returnErrorPage();
+		string							createErrorHTML();
+		list<Location*>::const_iterator	findConfigLocation(string target);
+		list<Location*>::const_iterator	searchLocations(string target);
 };
 
 #endif

@@ -62,7 +62,7 @@ std::string	AConfig::getErrorPage( int errorCode ) const
 			return ((*i).page);
 		++i;
 	}
-	throw std::exception();
+	return ("");
 }
 
 std::string	AConfig::getUploadStore() const
@@ -138,9 +138,9 @@ void	AConfig::convertReturn( Node* node )
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
-	{
-		throw std::exception();
-	}
+		throw std::runtime_error("ERROR: return parameter cannot be converted to number");
+	if (_redirectCode < 199 || _redirectCode > 599)
+		throw std::runtime_error("ERROR: invalid return code");
 	++i;
 	_redirectURI = (*i)->getTerminal();
 }

@@ -14,7 +14,7 @@
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(class Request request, class Configuration& config)
+Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
 	initStatusCodes();
@@ -103,26 +103,26 @@ bool	Response::searchIndexFiles(list<string> index_files)
 void	Response::setLocation()
 {
 	string target = _config.getRoot() + _request.getURI();
-	list<Location*>::iterator it = findConfigLocation(target);
+	list<Location*>::const_iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {
 		_status = INTERNAL_SERVER_ERROR;
 	}
 	_location = (*it);
 }
 
-list<Location*>::iterator Response::findConfigLocation(string target) {
+list<Location*>::const_iterator Response::findConfigLocation(string target) {
 	if (target.rfind("/") == 0)
 		return searchLocations("/");
 
-	list<Location*>::iterator it = _config.locations.begin();
+	list<Location*>::const_iterator it = _config.locations.begin();
 	it = searchLocations(target);
 	if (it == _config.locations.end())
 		return findConfigLocation(go_one_directory_up(target));
 	return it;
 }
 
-list<Location*>::iterator Response::searchLocations(string target) {
-	list<Location*>::iterator it = _config.locations.begin();
+list<Location*>::const_iterator Response::searchLocations(string target) {
+	list<Location*>::const_iterator it = _config.locations.begin();
 	while (it != _config.locations.end()) {
 		if ((*it)->getPath() == target)
 			return it;
@@ -167,13 +167,19 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
+	string method = _request.getMethod();
+	bool is_page_not_found		= _status == NOT_FOUND
+									&& (_request.getExtension()==".html"
+										|| _request.getExtension()==".htm"
+										|| _request.getExtension()==".php"
+										|| _request.getExtension()==".py");
 	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_accepted_method		= _location->isMethodAccepted(_method);
+	bool is_accepted_method		= (*_location).isMethodAccepted(method);
 	bool is_redirect			= (*_location).getRedirect() != 0;
 	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
 	bool is_php_file			= _filepath.find(".php?") != string::npos;
 
-	if (_status == NOT_FOUND)		return NOT_FOUND;
+	if (is_page_not_found)			return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return NOT_IMPLEMENTED;
 	if (is_redirect)				return (*_location).getRedirect();
@@ -232,17 +238,14 @@ string	Response::setUploadPath(string filename)
 
 string Response::returnErrorPage()
 {
-	try {
+	if ((*_location).getRedirect() != 0 || _config.getErrorPage(_status) != "") {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
 		else
 			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-		// cout << "error page" << _filepath << endl;
+
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
-	}
-	catch (const std::exception& e) {
-		return createErrorHTML();
 	}
 	return createErrorHTML();
 }
@@ -251,7 +254,7 @@ string Response::createErrorHTML()
 {
 	string meta  = "";
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
+		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=" + (*_location).getRedirectURI() + "\"/>";
 
 	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
 			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"
@@ -279,7 +282,8 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
+	static int count = 0;
+	if (cgi.find("<!doctype html>") == string::npos && count++ < 5)
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;

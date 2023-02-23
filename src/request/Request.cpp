@@ -27,12 +27,11 @@ Request &Request::operator = (const Request &src)
 Request::~Request() { }
 
 // PUBLIC FUNCTIONS
-void Request::initRequest(string request)
+void Request::initRequest(const string &request)
 {
 	_is_upload = false;
 	if (request.find("upload?file=") != string::npos)
 		_is_upload = true;
-
 	parseHTTPInfoAndHeaders(request);
 	parseEnv();
 	parseExtension();
@@ -47,7 +46,7 @@ map<string, string> Request::getEnv() const { return _env; }
 bool 		 Request::isFileUpload() const { return _is_upload; }
 
 // PRIVATE FUNCTIONS
-void Request::parseHTTPInfoAndHeaders(string request)
+void Request::parseHTTPInfoAndHeaders(const string& request)
 {
 	_headers = request;
 
@@ -62,7 +61,6 @@ void Request::parseHTTPInfoAndHeaders(string request)
 			strings.push_back(sub_token);
 		}
 	}
-
 	if (strings.size() > 0) _method = strings[0];
 	if (strings.size() > 1) _uri = strings[1];
 	if (strings.size() > 2) _http_version = safe_substr(strings[2], 0, 8);
