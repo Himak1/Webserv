@@ -34,5 +34,5 @@ void exitWithError(const std::string &errorMessage)
 {
 	printTimestamp();
 	cout << " ERROR    " << errorMessage << endl;
-	exit(1);
+	std::exit(1);
 }

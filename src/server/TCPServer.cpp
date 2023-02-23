@@ -1,7 +1,10 @@
+# include "defines.hpp"
 # include "TCPServer.hpp"
 # include "../response/Response.hpp"
+# include "../utils/memory.hpp"
 # include "../utils/strings.hpp"
 # include "../utils/log.hpp"
+
 
 # include <cstdlib>
 # include <cstring>
@@ -16,11 +19,6 @@
 # include <unistd.h>
 # include <fstream>
 # include <string.h>
-
-
-
-# define POLL_TIMEOUT 200	 // in ms
-# define DEBUG_INFO 1
 
 
 /* #################################################################################################### */
@@ -51,9 +49,6 @@
 /* #################################################################################################### */
 /* #################################################################################################### */	
 
-
-#define QUEU_LIMIT_LISTEN 20
-
 using namespace std;
 
 void logStartupMessage(struct sockaddr_in _socketAddress)
@@ -68,7 +63,7 @@ void logStartupMessage(struct sockaddr_in _socketAddress)
 }
 
 namespace http
-{;
+{
 
 			// CONSTRUCTORS
 
@@ -77,14 +72,13 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		_nbListeningSockets(0)
 {
 	try {
-		setupListeningSockets();
+		setListeningSockets();
 	} catch (std::exception& e) {
 		if (DEBUG_INFO)
-			cout << std::strerror(errno) << endl;
-		cout << e.what() << endl;
-		std::exit(1);
+			std::cout << std::strerror(errno) << std::endl;
+		std::cout << e.what() << std::endl;
+		std::exit(EXIT_FAILURE);
 	}	
-
 	_isServerRunning = true;	// tmp?
 	startPolling();
 }
@@ -95,17 +89,16 @@ TCPServer::~TCPServer()
 {
 	closeServer();
 }
-
-			// PRIVATE FUNCTIONS
-
-void	TCPServer::setupListeningSockets()
+			
+			// SETUP SERVER
+void	TCPServer::setListeningSockets()
 {
 	struct pollfd	poll_fd;
 	t_socket		listener;
 	int				re_use = 1, i = 0;
 
 	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
-		std::memset(&listener, 0, sizeof(listener));
+		ft_memset(&listener, 0, sizeof(listener));
 
 		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (poll_fd.fd == -1)
@@ -113,42 +106,55 @@ void	TCPServer::setupListeningSockets()
 		if (setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1)
 			throw SockOptionsFail();
 
-		setupSocketStruct(&listener, (*it)->getPort());
+		setSocketStruct(&listener, (*it)->getPort());
 
-		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_info, sizeof(listener.socket_info)) == -1)
+		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_address_info, sizeof(listener.socket_address_info)) == -1)
 			throw SockBindingFail();
 		if (listen(poll_fd.fd, SOMAXCONN) == -1)
 			throw ListenFail();
 		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
 			throw SockNoBlock();
 
-		listener.socket_address_len = sizeof(listener.socket_info);		// nodig?
+		listener.socket_address_len = sizeof(listener.socket_address_info);		// nodig?
 
 		poll_fd.events = POLLIN;
 		_socketInfo.push_back(listener);
 		_pollFds.push_back(poll_fd);
 		_nbListeningSockets++;
 
-		logStartupMessage(_socketInfo[i].socket_info);
+		logStartupMessage(_socketInfo[i].socket_address_info);
 	}
 }
 
-void	TCPServer::setupSocketStruct(t_socket *listener, int port)		// tmp?
+void	TCPServer::setSocketStruct(t_socket *listener, int port)
 {
-	listener->socket_info.sin_addr.s_addr = INADDR_ANY;
-	listener->socket_info.sin_family = AF_INET;
-	listener->socket_info.sin_port = htons(port);
+	listener->socket_address_info.sin_addr.s_addr = INADDR_ANY;
+	listener->socket_address_info.sin_family = AF_INET;
+	listener->socket_address_info.sin_port = htons(port);
 }
 
-void TCPServer::startPolling()
+void	TCPServer::setFileDescrOptions(int file_descr)
+{
+	int	re_use = 1;
+
+	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1)
+		throw SockNoBlock();
+	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
+		throw SockOptionsFail();			
+	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) == -1) 
+		throw SockOptionsFail();
+}
+
+			// SERVER LOOP
+void	TCPServer::startPolling()
 {
 	int	poll_count;
 
 	while (_isServerRunning) {
-		poll_count = poll (&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
+		poll_count = poll(&_pollFds[0], _pollFds.size(), POLL_TIMEOUT);		
 		if (poll_count == -1) {
 			if (DEBUG_INFO)
-				cout << strerror(errno) << endl;
+				std::cout << strerror(errno) << std::endl;
 			exitWithError("poll failed. Exiting");
 		}
 		lookupActiveSocket();
@@ -162,8 +168,15 @@ void	TCPServer::lookupActiveSocket()
 	for (i = 0; i < _nbListeningSockets; i++) {
 		if (_pollFds[i].revents == 0)
 			continue ;
-		else
-			newConnection(i);	
+		else {
+			try {
+				newConnection(i);	
+			} catch (std::exception& e) {
+				if (DEBUG_INFO)
+					std::cout << std::strerror(errno) << std::endl;
+				std::cout << e.what() << std::endl;
+			}	
+		}
 	}
 
 	for (unsigned int j = 0; j < (_pollFds.size() - _nbListeningSockets); j++, i++) {
@@ -177,80 +190,39 @@ void	TCPServer::lookupActiveSocket()
 	  													 		
 }
 
-void TCPServer::newConnection(int idx)
-{
-	struct pollfd	new_pollfd;
-	t_socket		new_socket;
-	socklen_t		socket_len;
-
-	// memset(&new_socket, 0, sizeof(t_socket));
-	new_socket.socket_address_len = sizeof(new_socket.socket_info);
-	new_pollfd.fd = accept(_pollFds[idx].fd, (sockaddr *)&new_socket.socket_info, &socket_len);	
-	if (new_pollfd.fd == -1) {
-		exitWithError("ERROR: accept() (TCPServer::newConnection");
-	}
-	new_socket.socket_address_len = socket_len;
-
-	setFileDescrOptions(new_pollfd.fd);				
-	new_pollfd.events = POLLIN;
-	new_socket.config_idx = idx;
-	_pollFds.push_back(new_pollfd);
-	_socketInfo.push_back(new_socket);
-
-	// std::cout << "Server accepted incoming connection from ADDRESS: "
-	// 		<< inet_ntoa(new_socket.socket_info.sin_addr) << "; PORT: " 
-	// 		<< ntohs(new_socket.socket_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
-}
-
-void	TCPServer::closeConnection(int idx)
-{
-	close(_pollFds[idx].fd);
-	_pollFds.erase(_pollFds.begin() + idx);						
-	_socketInfo.erase(_socketInfo.begin() + idx);
-
-}
-
-bool	TCPServer::serverMsgIsEmpty(int idx)
-{
-	if (_socketInfo[idx].server_message.empty())
-		return true;
-	else
-		return false;	
-}
-
-// idx geeft aan welke socket in de vector een POLLIN (read activity) heeft
-// Verder ontvangt receive request data op een socket en maakt (evt) een response aan.
-// Als er een response is zal de socket events op POLLOUT worden gezet, zodat in de volgende loop 
-// poll() zal aangeven dat er data verstuurd kan worden. 
+			//	SERVER EVENT HANDLING
 void TCPServer::receiveRequest(int idx)
 {
 	unsigned int buffer_size = _configList[_socketInfo[idx].config_idx]->getClientMaxBodySize();
-	char * buff = (char *)calloc(buffer_size + 1, sizeof(char));
-	// if (!buff)
-	// 	do iets
+	char * buff = (char *)calloc(buffer_size, sizeof(char));
+	if (!buff) {
+		if (DEBUG_INFO)
+			std::cout << "Calloc failure: " << std::strerror(errno) << std::endl;
+		return ;
+	}
 
 	int bytes_received = read(_pollFds[idx].fd, buff, buffer_size);	
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
-			std::cout << "Recv() error on socket fd " << _pollFds[idx].fd << " in TCPServer::startPolling()" << std::endl;		// error
-		std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
+			std::cout << std::strerror(errno) << std::endl;
+		else if (DEBUG_INFO)	
+			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
+		free (buff);
 		return ;
 	}
 	string buffer = buff;
-	_request.initRequest(buffer);
-
-	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
+	free (buff);
+	_request.initRequest(buffer);										
+	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);					// tmp?
 
 	_pollFds[idx].events = POLLOUT;
-	// _pollFds[idx].events = POLLIN | POLLOUT;
 	log_receive(_request.getMethod() + " " + _request.getURI() + " " + _request.getHTTPVersion());
 }
 
-// idx geeft aan welke socket in de vector een POLLOUT (write activity) heeft
 void TCPServer::sendResponse(int idx)
 {
-	size_t		bytes_send;
+	int			bytes_send;
 	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	if (serverMsgIsEmpty(idx)) {
@@ -265,36 +237,66 @@ void TCPServer::sendResponse(int idx)
 			closeConnection(idx);
 		}
 		else {
-			cout << "Zero bytes send. Need handler?" << endl;	// tmp
+			std::cout << "Zero bytes send. Need handler?" << std::endl;							// tmp
 		}
 	}
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		closeConnection(idx); 
+		// closeConnection(idx); 				// php error?
 	}
 	else {
 		_pollFds[idx].events = POLLOUT;
 	}	
 }
 
-
-void	TCPServer::setFileDescrOptions(int file_descr)
+void TCPServer::newConnection(int idx)
 {
-	int	re_use = 1;
+	struct pollfd	new_pollfd;
+	t_socket		new_socket;
+	socklen_t		socket_len;
 
-	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1) 						// exceptions
-		exitWithError("set file descriptor as non blocking failed\n");
-	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
-		exitWithError("setsockopt reuse address error\n");					
-	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) == -1) 
-		exitWithError("setsockopt reuse port error\n");
+	// memset(&new_socket, 0, sizeof(t_socket));
+	new_socket.socket_address_len = sizeof(new_socket.socket_address_info);
+	new_pollfd.fd = accept(_pollFds[idx].fd, (sockaddr *)&new_socket.socket_address_info, &socket_len);	
+	if (new_pollfd.fd == -1) {
+		throw AcceptFail();
+	}
+	new_socket.socket_address_len = socket_len;
+
+	setFileDescrOptions(new_pollfd.fd);				
+	new_pollfd.events = POLLIN;
+	new_socket.config_idx = idx;
+	_pollFds.push_back(new_pollfd);
+	_socketInfo.push_back(new_socket);
+
+	if (DEBUG_INFO)
+		std::cout << "Server accepted incoming connection from ADDRESS: "
+			<< inet_ntoa(new_socket.socket_address_info.sin_addr) << "; PORT: " 
+			<< ntohs(new_socket.socket_address_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
+void	TCPServer::closeConnection(int idx)
+{
+	if (DEBUG_INFO)
+		std::cout << "closeConnection called for idx " << idx << ", closing socket fd " << _pollFds[idx].fd 
+				<< " PORT: " << ntohs(_socketInfo[idx].socket_address_info.sin_port) << std::endl;
+	close(_pollFds[idx].fd);
+	_pollFds.erase(_pollFds.begin() + idx);						
+	_socketInfo.erase(_socketInfo.begin() + idx);
+}
 
-void 	TCPServer::closeServer()
+void 	TCPServer::closeServer()			// tmp
 {
 	std::exit(0);
+}
+
+bool	TCPServer::serverMsgIsEmpty(int idx)
+{
+	if (_socketInfo[idx].server_message.empty())
+		return true;
+	else
+		return false;	
 }
 
 } // namespace http
