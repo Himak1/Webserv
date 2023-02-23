@@ -32,7 +32,6 @@ void Request::initRequest(const string &request)
 	_is_upload = false;
 	if (request.find("upload?file=") != string::npos)
 		_is_upload = true;
-
 	parseHTTPInfoAndHeaders(request);
 	parseEnv();
 	parseExtension();

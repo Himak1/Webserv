@@ -18,6 +18,6 @@
 
 // TCPServer defines
 # define POLL_TIMEOUT 200	 
-# define DEBUG_INFO true
+# define DEBUG_INFO false
 
 #endif

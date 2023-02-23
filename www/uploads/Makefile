@@ -15,16 +15,13 @@ OBJ				:=	$(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 all				:	$(NAME)
 
 $(NAME)			: 	$(OBJ)
-					$(CC) $(OBJ) -o $@ $(SANIT)
+					$(CC) $(CFLAGS) $(OBJ) -o $@ $(SANIT)
 
 $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 					$(MKDIR_P) $(dir $@)
 					$(CC) $(CFLAGS) -c $< -o $@
 
 bonus			:	$(NAME)
-
-test			:	re
-					./webserv default.conf
 
 clean			:
 					$(RM) -rf $(OBJ_DIR) 

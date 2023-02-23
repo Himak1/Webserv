@@ -162,7 +162,7 @@ void	TCPServer::lookupActiveSocket()
 void TCPServer::receiveRequest(int idx)
 {
 	unsigned int buffer_size = _configList[_socketInfo[idx].config_idx]->getClientMaxBodySize();
-	char * buff = (char *)calloc(buffer_size, sizeof(char));
+	char * buff = (char *)calloc(buffer_size + 1, sizeof(char));
 	if (!buff) {
 		if (DEBUG_INFO)
 			std::cout << "Calloc failure: " << std::strerror(errno) << std::endl;
@@ -211,7 +211,7 @@ void TCPServer::sendResponse(int idx)
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		// closeConnection(idx); 				// php error?
+		closeConnection(idx); 				// php error?
 	}
 	else {
 		_pollFds[idx].events = POLLOUT;

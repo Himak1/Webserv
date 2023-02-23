@@ -238,17 +238,14 @@ string	Response::setUploadPath(string filename)
 
 string Response::returnErrorPage()
 {
-	try {
+	if ((*_location).getRedirect() != 0 || _config.getErrorPage(_status) != "") {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
 		else
 			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-		// cout << "error page" << _filepath << endl;
+
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
-	}
-	catch (const std::exception& e) {
-		return createErrorHTML();
 	}
 	return createErrorHTML();
 }
@@ -285,7 +282,8 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
+	static int count = 0;
+	if (cgi.find("<!doctype html>") == string::npos && count++ < 5)
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
