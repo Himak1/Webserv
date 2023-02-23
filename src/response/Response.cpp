@@ -237,7 +237,7 @@ string Response::returnErrorPage()
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
 		else
 			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-		// cout << "error page" << _filepath << endl;
+		cout << "error page" << _filepath << endl;
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}
@@ -251,7 +251,7 @@ string Response::createErrorHTML()
 {
 	string meta  = "";
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
+		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=" + (*_location).getRedirectURI() + "\"/>";
 
 	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
 			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"

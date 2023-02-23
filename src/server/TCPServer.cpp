@@ -60,11 +60,10 @@ void logStartupMessage(struct sockaddr_in _socketAddress)
 {
 	std::ostringstream ss;
 
-	ss	<< "\n*** Listening on ADDRESS: "
+	ss	<< "Listening on ADDRESS: "
 		<< inet_ntoa(_socketAddress.sin_addr) 
 		<< " PORT: "
-		<< ntohs(_socketAddress.sin_port) 
-		<< " ***\n\n";
+		<< ntohs(_socketAddress.sin_port);
 	log_receive(ss.str());
 }
 
