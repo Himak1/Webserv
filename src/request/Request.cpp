@@ -4,15 +4,11 @@
 #include <iostream>
 #include <fstream>
 
-// CONSTRUCTOR
+// CONSTRUCTORS
 Request::Request() { }
 
 Request::Request(const Request &src) { *this = src; }
 
-// DESTRUCTOR
-Request::~Request() { }
-
-// Overload operator
 Request &Request::operator = (const Request &src)
 {
 	if (this != &src) {
@@ -22,19 +18,22 @@ Request &Request::operator = (const Request &src)
 		this->_extension = src._extension;
 		this->_headers = src._headers;
 		this->_env = src._env;
-		this->_is_succesfull_uploaded = src._is_succesfull_uploaded;
+		this->_is_upload = src._is_upload;
 	}
 	return (*this);
 }
 
+// DESTRUCTOR
+Request::~Request() { }
+
 // PUBLIC FUNCTIONS
 void Request::initRequest(string request)
 {
-	// cout << request << endl;
-	// cout << request.size() << endl;
+	_is_upload = false;
+	if (request.find("upload?file=") != string::npos)
+		_is_upload = true;
+
 	parseHTTPInfoAndHeaders(request);
-	// if (_headers.size() >= 12)
-		// return;
 	parseEnv();
 	parseExtension();
 }
@@ -45,16 +44,13 @@ const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
 const string Request::getHeader() const { return _headers; }
 map<string, string> Request::getEnv() const { return _env; };
-bool 		 Request::getUploadSucces() const { return _is_succesfull_uploaded; }
-void 		 Request::setUploadSucces(bool result) { _is_succesfull_uploaded = result; }
+bool 		 Request::isFileUpload() const { return _is_upload; }
 
 // PRIVATE FUNCTIONS
 void Request::parseHTTPInfoAndHeaders(string request)
 {
 	_headers = request;
 
-	// if (_headers.size() >= 12)
-		// return;
 	vector<string> strings;
 	stringstream ss(request);
 	string token;

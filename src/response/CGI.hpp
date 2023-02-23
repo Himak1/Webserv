@@ -11,7 +11,6 @@ using namespace std;
 class CGI
 {
 	public:
-		// CGI(class Request request, class Configuration config, string filepath);
 		CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize);
 		~CGI();
 		string						ExecuteCGI();

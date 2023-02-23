@@ -16,14 +16,4 @@
 # define NOT_IMPLEMENTED 501
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
-// TEMPORARY 
-
-
-
-#define UPLOAD_FOLDER "uploads"
-
-#define CASE_301 "/permanently_moved"
-#define CASE_302 "/temporary_unavailable"
-
-
 #endif
