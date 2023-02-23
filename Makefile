@@ -23,6 +23,9 @@ $(OBJ_DIR)/%.o	:	$(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 
 bonus			:	$(NAME)
 
+test			: 	re
+					./webserv jonathan.conf
+
 clean			:
 					$(RM) -rf $(OBJ_DIR) 
 
