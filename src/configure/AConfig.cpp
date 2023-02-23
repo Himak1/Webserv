@@ -62,7 +62,7 @@ std::string	AConfig::getErrorPage( int errorCode ) const
 			return ((*i).page);
 		++i;
 	}
-	throw std::exception();
+	return ("");
 }
 
 std::string	AConfig::getUploadStore() const
