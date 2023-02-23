@@ -45,7 +45,6 @@ class Request
 		void				parseGet();
 		void				parsePost();
 		void				parseCookies();
-		// void 				handleFileUpload(string request);
 };
 
 #endif

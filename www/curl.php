@@ -15,7 +15,6 @@
 			curl -v -X HEAD "127.0.0.1:4242"</br>
 
 			</br><h3 class="">UPLOAD FILES</h3>
-			curl -v -X GET "127.0.0.1:4242/upload?file=Makefile"</br></br>
 			curl -v -X GET "127.0.0.1:4242/upload?file=/Users/mweitenb/Desktop/test.txt"
 		</div>
 

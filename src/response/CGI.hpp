@@ -11,7 +11,7 @@ using namespace std;
 class CGI
 {
 	public:
-		CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize);
+		CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize);
 		~CGI();
 		string						ExecuteCGI();
 		char** 						getFormEnv() const;

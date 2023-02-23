@@ -17,7 +17,7 @@
 						"500 Internal Server Error\n</h1></center></body></html>"
 
 // CONSTRUCTOR
-CGI::CGI(class Request request, class Location* location, string filepath, int clientMaxBodySize)
+CGI::CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize)
 	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
 	_allocation_has_failed = false;
