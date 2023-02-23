@@ -43,7 +43,7 @@ const string Request::getURI() const { return _uri; }
 const string Request::getHTTPVersion() const { return _http_version; }
 const string Request::getExtension() const { return _extension; }
 const string Request::getHeader() const { return _headers; }
-map<string, string> Request::getEnv() const { return _env; };
+map<string, string> Request::getEnv() const { return _env; }
 bool 		 Request::isFileUpload() const { return _is_upload; }
 
 // PRIVATE FUNCTIONS

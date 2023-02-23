@@ -16,7 +16,6 @@ string safe_substr(string str, int start, int length)
 	return (str.substr(start, length));
 }
 
-
 string trim_spaces(const string& str)
 {
 	size_t first = str.find_first_not_of(' ');

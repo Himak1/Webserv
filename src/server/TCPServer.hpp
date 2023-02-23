@@ -14,11 +14,11 @@
 # include <poll.h>
 
 namespace http
-{;
+{
 
 typedef struct s_socket {
 	unsigned int		socket_address_len;
-	struct sockaddr_in	socket_info;
+	struct sockaddr_in	socket_address_info;
 	std::string			server_message;
 	unsigned int		config_idx;
 }	t_socket;
@@ -29,7 +29,6 @@ public:
 	TCPServer(std::vector<Configuration*>);
 	~TCPServer();
 
-	void				startPolling();
 	
 private:
 			// PRIVATE MEMBERS
@@ -41,24 +40,30 @@ private:
 	unsigned int				_nbListeningSockets;
 	bool						_isServerRunning;
 
-			// PRIVATE FUNCTIONS
- 	void						newConnection(int);
-	void						closeConnection(int);
-	void						closeServer();
-	void						receiveRequest(int);
-	void 						createServerMessage(int);
-	bool						serverMsgIsEmpty(int);
-	void						sendResponse(int);
-	int 						startServer();
-	void						setupListeningSockets();
-	void						setupSocketStruct(t_socket *, int);
+			// SERVER SETUP
+	void						setListeningSockets();
 	void						setFileDescrOptions(int);
+	void						setSocketStruct(t_socket *, int);
+
+			// SERVER LOOP + EVENTS
+	void 						startPolling();
 	void						lookupActiveSocket();
+ 	void						newConnection(int);
+	void						receiveRequest(int);
+	void						sendResponse(int);
+	void						closeConnection(int);
+	bool						serverMsgIsEmpty(int);
+
 
 			// PRIVATE EXCEPTIONS
 	struct ListenFail : public exception {
 		const char * what () const throw () {
     		return "Failure to listen to socket. Exiting program";
+		}
+	};	
+	struct AcceptFail : public exception {
+		const char * what () const throw () {
+    		return "Failure to accept incoming connection. Exiting program";
 		}
 	};	
 	struct SockBindingFail : public exception {
@@ -81,10 +86,6 @@ private:
     		return "Failure to set socket option to re use socket. Exiting program";
 		}
 	};	
-
-
-
-
 };
 
 }			// namespace http
