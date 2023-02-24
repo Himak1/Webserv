@@ -63,7 +63,7 @@ std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 		serverConfigs = convertASTtoConfigVector(ast);
 	}
 	catch (std::exception& e) {
-		std::cerr << e.what() << '\n';
+		std::cerr << "ERROR: " << e.what() << '\n';
 		deleteAllElementsInVector(serverConfigs);
 		delete ast;
 		std::exit(1);

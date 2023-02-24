@@ -104,7 +104,7 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 	numberString = (*i)->getTerminal();
 	output = strtoul(numberString.c_str(), NULL, 10);
 	if (output == 0 && numberString != "0")
-		throw std::exception();
+		throw std::runtime_error("cannot convert parameter to number");
 	return (output);
 }
 
@@ -125,7 +125,7 @@ void	AConfig::convertErrorPage( Node* node )
 
 	unsigned int code = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (code == 0 && (*i)->getTerminal()[0] != '0')
-		throw std::exception();
+		throw std::runtime_error("cannot convert parameter to number");
 	++i;
 	std::string	page = (*i)->getTerminal();
 	_errorPages.push_back(ErrorPage(code, page));
@@ -142,7 +142,7 @@ void	AConfig::convertClientMaxBodySize( Node* node )
 {
 	_clientMaxBodySize = convertNodeToUInt(node);
 	if (_clientMaxBodySize == 0)
-		throw std::runtime_error("ERROR: invalid client max body size");
+		throw std::runtime_error("invalid client max body size");
 }
 
 void	AConfig::convertReturn( Node* node )
@@ -151,9 +151,9 @@ void	AConfig::convertReturn( Node* node )
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
-		throw std::runtime_error("ERROR: return parameter cannot be converted to number");
+		throw std::runtime_error("return parameter cannot be converted to number");
 	if (_redirectCode < 199 || _redirectCode > 599)
-		throw std::runtime_error("ERROR: invalid return code");
+		throw std::runtime_error("invalid return code");
 	++i;
 	_redirectURI = (*i)->getTerminal();
 }
