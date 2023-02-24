@@ -108,7 +108,7 @@ Node*	parseLocation( TokenStream& tokensToParse )
 	if (!acceptAndCreateTerminal(tokensToParse, newNode))
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
-		deleteNewNode(newNode);
+		return (deleteNewNode(newNode));
 	while (blockIsOpen(tokensToParse, status))
 	{
 		switch (tokensToParse.getTokenType())
