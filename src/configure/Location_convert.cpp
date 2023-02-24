@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include "Location.hpp"
 #include "Node.hpp"
+#include <algorithm>
 
 void	Location::convertCgiPass( Node* cgiPass )
 {

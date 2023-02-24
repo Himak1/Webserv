@@ -10,7 +10,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <cstdio>
-
+#include <string>
 #include <list>
 
 // CONSTRUCTOR
@@ -42,7 +42,7 @@ string 	Response::getMessage()
 			+ _status_codes[_status]
 			+ _content_types[".html"]
 			+ "Content-Length: "
-			+ to_string(_content.size()) + "\n\n"
+			+ convertToString(_content.size()) + "\n\n"
 			+ _content;
 	}
 
@@ -55,7 +55,7 @@ string 	Response::getMessage()
 			+ _content_types[ _extension]
 			+ setCookie()
 			+ "Content-Length: "
-			+ to_string(_content.size()) + "\n\n"
+			+ convertToString(_content.size()) + "\n\n"
 			+ _content;
 }
 
