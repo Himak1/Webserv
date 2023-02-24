@@ -142,7 +142,7 @@ void	AConfig::convertClientMaxBodySize( Node* node )
 {
 	_clientMaxBodySize = convertNodeToUInt(node);
 	if (_clientMaxBodySize == 0)
-		throw std::runtime_error("invalid client max body size");
+		throw std::runtime_error("client_max_body_size cannot be set to 0");
 }
 
 void	AConfig::convertReturn( Node* node )
