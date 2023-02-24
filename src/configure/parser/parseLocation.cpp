@@ -140,6 +140,9 @@ Node*	parseLocation( TokenStream& tokensToParse )
 			case T_UPLOAD_STORE:
 				status = newNode->addChild(parseUploadStore(tokensToParse));
 				break;
+			case T_CLIENT_MAX_BODY:
+				status = newNode->addChild(parseClientMaxBodySize(tokensToParse));
+				break;
 			default:
 				status = 0;
 				break;

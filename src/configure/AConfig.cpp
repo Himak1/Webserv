@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <climits>
 #include "AConfig.hpp"
 #include "Node.hpp"
 
@@ -21,7 +22,7 @@ ErrorPage::~ErrorPage()
 //	AConfig Constructors & Destructors	//
 
 AConfig::AConfig()
-	: _uploadStore("/"), _redirectCode(0)
+	: _uploadStore("/"), _clientMaxBodySize(UINT_MAX), _redirectCode(0)
 {
 }
 
@@ -39,6 +40,7 @@ std::ostream&	operator<<( std::ostream& o, const AConfig& config )
 		o << *i << " ";
 	}
 	o	<< '\n' << "root: " << config.getRoot() << '\n'
+		<< "client max body size: " << config.getClientMaxBodySize() << '\n'
 		<< "upload store:" << config.getUploadStore() << '\n'
 		<< "redirect code: " << config.getRedirect() << '\n'
 		<< "redirect URI: " << config.getRedirectURI();
@@ -70,6 +72,10 @@ std::string	AConfig::getUploadStore() const
 	return (_uploadStore);
 }
 
+unsigned int	AConfig::getClientMaxBodySize() const
+{
+	return (_clientMaxBodySize);
+}
 int	AConfig::getRedirect() const
 {
 	return (_redirectCode);
@@ -130,6 +136,13 @@ void	AConfig::convertUploadStore( Node* node )
 	NodeList::const_iterator	i = node->getChildrenBegin();
 
 	_uploadStore = (*i)->getTerminal();
+}
+
+void	AConfig::convertClientMaxBodySize( Node* node )
+{
+	_clientMaxBodySize = convertNodeToUInt(node);
+	if (_clientMaxBodySize == 0)
+		throw std::runtime_error("ERROR: invalid client max body size");
 }
 
 void	AConfig::convertReturn( Node* node )
