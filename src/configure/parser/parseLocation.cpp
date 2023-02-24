@@ -109,7 +109,7 @@ Node*	parseLocation( TokenStream& tokensToParse )
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
 		deleteNewNode(newNode);
-	while (tokensToParse.getTokenType() != T_BRACKET_CLOSE && status != 0)
+	while (blockIsOpen(tokensToParse, status))
 	{
 		switch (tokensToParse.getTokenType())
 		{
@@ -144,6 +144,7 @@ Node*	parseLocation( TokenStream& tokensToParse )
 				status = newNode->addChild(parseClientMaxBodySize(tokensToParse));
 				break;
 			default:
+				printUnexpectedChar(tokensToParse);
 				status = 0;
 				break;
 		}

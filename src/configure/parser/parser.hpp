@@ -26,9 +26,13 @@ Node*	parseCgiPass( TokenStream& tokensToParse );
 Node*	parseAutoIndex( TokenStream& tokensToParse );
 Node*	parseReturn( TokenStream& tokensToParse );
 
+bool	blockIsOpen( TokenStream& tokensToParse, int& status );
+void	printIncompleteBlock();
+void	printUnexpectedChar( TokenStream& tokensToParse );
 bool	accept( TokenStream& tokensToParse, int expected_token );
 bool	expect( TokenStream& tokensToParse, int expected_token );
 bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node );
 void	acceptAndCreateNewNode( TokenStream& tokensToParse, Node* node );
 Node*	deleteNewNode( Node* newNode );
+
 #endif
