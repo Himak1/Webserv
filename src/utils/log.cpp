@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sys/time.h>
+#include <cstdlib>
 
 void printTimestamp()
 {
@@ -34,5 +35,5 @@ void exitWithError(const std::string &errorMessage)
 {
 	printTimestamp();
 	cout << " ERROR    " << errorMessage << endl;
-	std::exit(1);
+	exit(1);
 }
