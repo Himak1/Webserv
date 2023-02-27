@@ -20,6 +20,9 @@ Configuration::Configuration( Node* serverNode )
 		navigateNode(serverNode);
 	}
 	catch (std::exception& e) {
+		for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+			delete *i;
+		}
 		throw;
 	}
 }

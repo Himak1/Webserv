@@ -17,6 +17,7 @@
 Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
+	_cgi_count = 0;
 	_extension = _request.getExtension();
 	initStatusCodes();
 	initContentTypes();
@@ -50,6 +51,7 @@ string 	Response::getMessage()
 		return uploadFile();
 	if (_request.getMethod() == "DELETE")
 		return deleteFile();
+
 	return  _request.getHTTPVersion() + " "
 			+ _status_codes[_status]
 			+ _content_types[ _extension]
@@ -65,7 +67,6 @@ void	Response::setFilePath()
 	if ((*_location).getAlias() != "") {
 		_filepath = (*_location).getAlias();
 		_extension = parseExtension(_filepath);
-		cout << _filepath << endl;
 		return;
 	}
 
@@ -177,21 +178,22 @@ void	Response::initContentTypes()
 
 int		Response::setStatus()
 {
+	string method = _request.getMethod();
+	bool is_accepted_method			= (*_location).isMethodAccepted(method);
 	bool is_page_not_found			= _status == NOT_FOUND
 									&& _extension != ".png"
 									&& _extension != ".jpg"
-									&& _extension != ".ico";
+									&& _extension != ".ico"
+									&& _extension != ".css";
 	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
-	string method = _request.getMethod();
-	bool is_accepted_method			= (*_location).isMethodAccepted(method);
 	bool is_redirect				= (*_location).getRedirect() != 0;
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
-
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
 	if (is_redirect)				return (*_location).getRedirect();
 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	if (_extension == ".php")		return OK;
 	if (isExistingFile(_filepath))	return OK;
 	return NOT_FOUND;		
 }
@@ -245,12 +247,15 @@ string	Response::setUploadPath(string filename)
 
 string Response::returnErrorPage()
 {
-	if ((*_location).getRedirect() != 0 || _config.getErrorPage(_status) != "") {
+	bool costum_error_page_is_defined = _config.getErrorPage(_status) != ""
+										|| (*_location).getErrorPage(_status) != "";
+
+	if ((*_location).getRedirect() != 0 || costum_error_page_is_defined) {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
-		else
+		else if (_config.getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-
+		
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}
@@ -260,9 +265,11 @@ string Response::returnErrorPage()
 string Response::createErrorHTML()
 {
 	string meta  = "";
+	string url = (*_location).getRedirectURI();
+	if (url == "")
+		url = "/index.html";
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=" + (*_location).getRedirectURI() + "\"/>";
-
+		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"3; url=" + url + "\"/>";
 	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
 			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"
 			+ _status_codes[_status] + "</h1></center></body></html>";
@@ -289,8 +296,7 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	static int count = 0;
-	if (cgi.find("<!doctype html>") == string::npos && count++ < 5)
+	if (cgi.find("<!doctype html>") == string::npos && _cgi_count++ < 10)
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
