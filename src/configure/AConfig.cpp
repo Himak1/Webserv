@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <climits>
+#include <cctype>
 #include "AConfig.hpp"
 #include "Node.hpp"
 
@@ -105,6 +106,9 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 	output = strtoul(numberString.c_str(), NULL, 10);
 	if (output == 0 && numberString != "0")
 		throw std::runtime_error("cannot convert parameter to number");
+	for (int it = 1; it < static_cast<int>(numberString.size()); it++) {
+		if (!isdigit(numberString[it])) throw std::runtime_error("cannot convert parameter to number");
+	}
 	return (output);
 }
 
