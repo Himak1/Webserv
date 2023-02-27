@@ -166,7 +166,7 @@ void TCPServer::receiveRequest(int idx)
 	int bytes_received = read(_pollFds[idx].fd, buff, buffer_size);	
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
-			exitWithError("Read error. ");
+			std::cerr << "Read error on socket " << idx << std::endl;
 		else if (DEBUG_INFO)	
 			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
@@ -195,7 +195,7 @@ void TCPServer::sendResponse(int idx)
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
-			exitWithError("Send error in TCPServer::sendResponse()");
+			std::cerr << "Send error on socket " << idx << std::endl;
 		} else {
 			closeConnection(idx);
 		}
