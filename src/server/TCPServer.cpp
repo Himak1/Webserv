@@ -5,19 +5,15 @@
 # include "../utils/strings.hpp"
 # include "../utils/log.hpp"
 
-# include <cstdlib>
-# include <cstring>
 # include <sys/socket.h>
 # include <sys/types.h>
 # include <netdb.h>
-# include <errno.h>
 # include <poll.h>
 # include <fcntl.h>
 # include <iostream>
 # include <sstream>
 # include <unistd.h>
 # include <fstream>
-# include <string.h>
 
 using namespace std;
 
@@ -25,9 +21,7 @@ void logStartupMessage(struct sockaddr_in _socketAddress)
 {
 	std::ostringstream ss;
 
-	ss	<< "Listening on ADDRESS: "
-		<< inet_ntoa(_socketAddress.sin_addr) 
-		<< " PORT: "
+	ss	<< "Listening on PORT: "
 		<< ntohs(_socketAddress.sin_port);
 	log_receive(ss.str());
 }
@@ -172,7 +166,7 @@ void TCPServer::receiveRequest(int idx)
 	int bytes_received = read(_pollFds[idx].fd, buff, buffer_size);	
 	if (bytes_received <= 0) {
 		if (bytes_received < 0)
-			std::cout << std::strerror(errno) << std::endl;
+			exitWithError("Read error. ");
 		else if (DEBUG_INFO)	
 			std::cout << "Socket fd " << _pollFds[idx].fd << " closed their connection." << std::endl;
 		closeConnection(idx);
@@ -201,13 +195,14 @@ void TCPServer::sendResponse(int idx)
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send <= 0) {
 		if (bytes_send < 0) {
-			std::cout << "Send error in TCPServer::sendResponse()" << std::endl;
+			exitWithError("Send error in TCPServer::sendResponse()");
+		} else {
 			closeConnection(idx);
 		}
+
 	}
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 	if (serverMsgIsEmpty(idx)) {
-		_pollFds[idx].events = POLLIN;
 		closeConnection(idx);
 	}
 	else {
@@ -235,8 +230,7 @@ void TCPServer::newConnection(int idx)
 	_socketInfo.push_back(new_socket);
 
 	if (DEBUG_INFO)
-		std::cout << "Server accepted incoming connection from ADDRESS: "
-			<< inet_ntoa(new_socket.socket_address_info.sin_addr) << "; PORT: " 
+		std::cout << "New connection on PORT: " 
 			<< ntohs(new_socket.socket_address_info.sin_port) << "; Socket fd: " << _pollFds.back().fd << std::endl;
 }
 
