@@ -134,9 +134,8 @@ list<Location*>::const_iterator Response::findConfigLocation(string target) {
 list<Location*>::const_iterator Response::searchLocations(string target) {
 	list<Location*>::const_iterator it = _config.locations.begin();
 	while (it != _config.locations.end()) {
-		if ((*it)->getPath() == target) {
+		if ((*it)->getPath() == target)
 			return it;
-		}
 		++it;
 	}
 	return it;
@@ -187,7 +186,9 @@ int		Response::setStatus()
 									&& _extension != ".css";
 	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
 	bool is_redirect				= (*_location).getRedirect() != 0;
+
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
+
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
@@ -249,7 +250,6 @@ string Response::returnErrorPage()
 {
 	bool costum_error_page_is_defined = _config.getErrorPage(_status) != ""
 										|| (*_location).getErrorPage(_status) != "";
-
 	if ((*_location).getRedirect() != 0 || costum_error_page_is_defined) {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
@@ -266,8 +266,6 @@ string Response::createErrorHTML()
 {
 	string meta  = "";
 	string url = (*_location).getRedirectURI();
-	if (url == "")
-		url = "/index.html";
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
 		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"3; url=" + url + "\"/>";
 	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
