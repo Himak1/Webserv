@@ -9,7 +9,6 @@
 			<div class="column">
 				<a class="item" href="/index.html">index.html</a>
 				<a class="item" href="/index.php">index.php</a>
-				<a class="item" href="/python/">index.py</a>
 			</div>
 
 			<h3 class="">SUPPORTED FILES</h3>
@@ -37,6 +36,7 @@
 			<div class="column">
 				<a class="item" href="/cookies">cookies</a>
 				<a class="item" href="/session">session<br/>management</a>
+				<a class="item" href="/python/">index.py</a>
 			</div>
 
 		</div>

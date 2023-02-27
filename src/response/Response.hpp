@@ -29,6 +29,7 @@ class Response
 		class Location*					_location;
 		map<int, string>				_status_codes;
 		map<string, string>				_content_types;
+		int								_cgi_count;
 	
 		void							setFilePath();
 		bool							tryAndSetExtension(string extension);
