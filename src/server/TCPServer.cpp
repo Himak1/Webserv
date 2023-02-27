@@ -49,7 +49,7 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		std::cout << e.what() << std::endl;
 		std::exit(EXIT_FAILURE);
 	}	
-	_isServerRunning = true;	// tmp?
+	_isServerRunning = true;
 	startPolling();
 }
 
@@ -85,7 +85,7 @@ void	TCPServer::setListeningSockets()
 		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
 			throw SockNoBlock();
 
-		listener.socket_address_len = sizeof(listener.socket_address_info);		// nodig?
+		listener.socket_address_len = sizeof(listener.socket_address_info);
 
 		poll_fd.events = POLLIN;
 		_socketInfo.push_back(listener);
@@ -182,7 +182,7 @@ void TCPServer::receiveRequest(int idx)
 	string buffer = buff;
 	free (buff);
 	_request.initRequest(buffer);										
-	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);					// tmp?
+	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	_pollFds[idx].events = POLLOUT;
 	log_receive(_request.getMethod() + " " + _request.getURI() + " " + _request.getHTTPVersion());
@@ -204,14 +204,11 @@ void TCPServer::sendResponse(int idx)
 			std::cout << "Send error in TCPServer::sendResponse()" << std::endl;
 			closeConnection(idx);
 		}
-		else {
-			std::cout << "Zero bytes send. Need handler?" << std::endl;							// tmp
-		}
 	}
 	_socketInfo[idx].server_message.erase(0, bytes_send);
 	if (serverMsgIsEmpty(idx)) {
 		_pollFds[idx].events = POLLIN;
-		closeConnection(idx); 				// php error?
+		closeConnection(idx);
 	}
 	else {
 		_pollFds[idx].events = POLLOUT;
