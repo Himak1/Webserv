@@ -155,6 +155,7 @@ void	Response::initStatusCodes()
 	_status_codes[415] = "200 OK\n";
 	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
+	_status_codes[502] = "502 Bad Gateway\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
 
@@ -202,20 +203,29 @@ int		Response::setStatus()
 string	Response::getContent()
 {
 	bool isCGI = _extension == ".php" || _extension == ".py";
-	if (_status != OK)						return returnErrorPage();
-	if (isCGI)								return getCGI();
+
+	if (_status != OK)	return returnErrorPage();
+	if (isCGI)			return getCGI();
 	return(streamFileDataToString(_filepath));
 }
 
 string	Response::deleteFile()
 {
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
+
 	if (remove(_filepath.c_str()) != 0)
 		return "Delete failed: Invalid or non-existing file\n";
-	return "File " + _filepath + " has been deleted";
+	return "File " + _filepath + " has been deleted\n";
 }
 
 string	Response::uploadFile()
 {
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
+
 	map<string, string> env = _request.getEnv();
 	if (env.find("file") == env.end())
 		return "Upload failed: Invalid or non-existing file\n";
@@ -250,6 +260,7 @@ string Response::returnErrorPage()
 {
 	bool costum_error_page_is_defined = _config.getErrorPage(_status) != ""
 										|| (*_location).getErrorPage(_status) != "";
+
 	if ((*_location).getRedirect() != 0 || costum_error_page_is_defined) {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
@@ -298,7 +309,12 @@ string Response::getCGI()
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
+	if (cgi.find("502 Bad Gateway") != string::npos)
+		_status = BAD_GATEWAY;
 	if (cgi.find("500 Internal Server Error") != string::npos)
 		_status = INTERNAL_SERVER_ERROR;
+	
+	if (_status != OK)
+		return returnErrorPage();
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
 }

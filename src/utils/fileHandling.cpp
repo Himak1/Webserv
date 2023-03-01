@@ -26,6 +26,17 @@ string	streamFileDataToString(string input_path)
 	return ss.str();
 }
 
+string	streamPhpFileDataToString(string input_path)
+{
+	ifstream input_stream(input_path.c_str());
+	ostringstream ss;
+	string line;
+	while (getline(input_stream, line))
+		if (line.find("//") == string::npos)
+			ss << line << endl;
+	return ss.str();
+}
+
 void	writeStringToFile(string file_data, string upload_path) 
 {
 	ofstream fout(upload_path.c_str());

@@ -1,6 +1,7 @@
 #include "CGI.hpp"
 #include "Response.hpp"
 #include "../utils/log.hpp"
+#include "../utils/fileHandling.hpp"
 #include "../configure/Location.hpp"
 
 #include <list>
@@ -11,10 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-
-# define INTERNAL_SERVER_ERROR_MSG "<!doctype html><html lang=\"en\"><head><title>" \
-						"500 Internal Server Error\n</title></head><body><center><h1>" \
-						"500 Internal Server Error\n</h1></center></body></html>"
+#include <fstream>
 
 // CONSTRUCTOR
 CGI::CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize)
@@ -29,7 +27,7 @@ CGI::CGI(const class Request& request, class Location* location, string filepath
 	if (!_allocation_has_failed) {
 		try {
 			_env = new char*[_request.getEnv().size() + 3];
-		} catch (std::bad_alloc&) {
+		} catch (bad_alloc&) {
 			_allocation_has_failed = true;
 		}
 	}
@@ -48,22 +46,46 @@ CGI::~CGI() {
 
 // PUBLIC FUNTIONS
 char** 	CGI::getFormEnv() const { return _env; }
+#include "../utils/strings.hpp"
 
 string CGI::ExecuteCGI()
 {
 	if (_allocation_has_failed)
 		return INTERNAL_SERVER_ERROR_MSG;
+
+	if ((*_location).getCgiExtension() == ".php") {
+		if (hasInfiniteLoop("(true)"))
+			return BAD_GATEWAY_MSG;
+		if (hasInfiniteLoop("(1)"))
+			return BAD_GATEWAY_MSG;
+
+		string errors = pipeAndFork(STDERR_FILENO);
+		if (errors.size() > 1)
+			return BAD_GATEWAY_MSG;
+	}
+
+	return pipeAndFork(STDOUT_FILENO);
+}
+
+// PRIVATE FUNCTIONS
+string	CGI::pipeAndFork(int output)
+{
 	int		fd[2] = {0};
+
 	dup2(fd[0], STDIN_FILENO);
 	close(fd[0]);
+
 	if (pipe(fd) < 0)
 		return "Error: pipe";
 	pid_t pid = fork();
 	if (pid < 0)
-		return "Error: fork";
+		return "Error: pipe";
+
 	if(pid == 0) {
-		dup2(fd[1], STDOUT_FILENO);
+		dup2(fd[1], output);
 		close(fd[1]);
+		if (output == STDERR_FILENO)
+			close(STDOUT_FILENO);
 		execve(_path[0], _path, _env);
 		cout << INTERNAL_SERVER_ERROR_MSG << endl;
 		exit(0);
@@ -72,13 +94,41 @@ string CGI::ExecuteCGI()
 
 	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
 	if (message_size >= static_cast<int>(_clientMaxBodySize))
-		return "<!doctype html><html lang=\"en\"><head><title>" \
-				"413 Request Entity Too Large\n</title></head><body><center><h1>" \
-				"413 Request Entity Too Large\n</h1></center></body></html>";
+		return REQUEST_ENTITY_TOO_LARGE_MSG;
+
 	return _buffer;
 }
 
-// PRIVATE FUNCTIONS
+bool CGI::hasInfiniteLoop(string condition)
+{
+	string code = streamPhpFileDataToString(_filepath);
+	remove(code.begin(), code.end(), ' ');
+
+	string::size_type whilePos = code.find("while");
+	while (whilePos != string::npos) {
+		string::size_type truePos = code.find(condition, whilePos);
+		if (truePos == string::npos) {
+			whilePos = code.find("while", whilePos + 1);
+			continue;
+		}
+
+		string::size_type closeBracePos = code.find("}", truePos);
+		if (closeBracePos == string::npos) {
+			whilePos = code.find("while", whilePos + 1);
+			continue;
+		}
+
+		string loopBody = code.substr(truePos, closeBracePos - truePos + 1);
+		if (loopBody.find("break") == string::npos &&
+			loopBody.find("return") == string::npos) {
+			return true;
+		}
+
+		whilePos = code.find("while", whilePos + 1);
+	}
+	return false;
+}
+
 void	CGI::createPath()
 {
 	_filepath = _filepath.substr(0, _filepath.find("?"));
@@ -92,7 +142,7 @@ void	CGI::createPath()
 			_path[0] = &path_to_cgi[0];
 			_path[1] = &path_to_script[0];
 			_path[2] = NULL;
-		} catch (std::bad_alloc&) {
+		} catch (bad_alloc&) {
 			_allocation_has_failed = true;
 		}
 	}
@@ -122,7 +172,7 @@ void	CGI::addToEnv(string value, int i)
 		try {
 			_env[i] = new char[value.length() + 1];
 			strcpy(_env[i], value.c_str());
-		} catch (std::bad_alloc&) {
+		} catch (bad_alloc&) {
 			_allocation_has_failed = true;
 		}
 	}
