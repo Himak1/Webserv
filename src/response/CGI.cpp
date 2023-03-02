@@ -93,6 +93,8 @@ string	CGI::pipeAndFork(int output)
 	close(fd[1]);
 
 	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
+	if (message_size <= 0)
+		return INTERNAL_SERVER_ERROR_MSG;
 	if (message_size >= static_cast<int>(_clientMaxBodySize))
 		return REQUEST_ENTITY_TOO_LARGE_MSG;
 

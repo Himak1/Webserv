@@ -25,6 +25,7 @@ class CGI
 		char*						_path[4];
 		char**						_env;
 		bool						_allocation_has_failed;
+		map<string, string>			_env_map;
 
 		string						pipeAndFork(int output);
 		bool						hasInfiniteLoop(string condition);
