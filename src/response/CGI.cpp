@@ -87,15 +87,7 @@ string	CGI::pipeAndFork(int output)
 		if (output == STDERR_FILENO)
 			close(STDOUT_FILENO);
 		execve(_path[0], _path, _env);
-<<<<<<< HEAD
-		cout << "<!doctype html><html lang=\"en\"><head><title>"
-			<< "500 Internal Server Error\n"
-			<< "</title></head><body><center><h1>"
-			<< "500 Internal Server Error\n"
-			<< "</h1></center></body></html>" << endl;
-=======
 		cout << INTERNAL_SERVER_ERROR_MSG << endl;
->>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47
 		exit(0);
 	}
 	close(fd[1]);

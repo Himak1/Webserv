@@ -27,10 +27,6 @@ string trim_spaces(const string& str)
 	return safe_substr(str, first, (last - first + 1));
 }
 
-<<<<<<< HEAD
-#include <iostream>
-=======
->>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47
 string go_one_directory_up(string str)
 {
 	size_t length = str.rfind("/");
@@ -39,12 +35,9 @@ string go_one_directory_up(string str)
 	return safe_substr(str, 0, length);
 }
 
-<<<<<<< HEAD
-=======
 string convertToString (size_t Number)
 {
 	ostringstream ss;
 	ss << Number;
 	return ss.str();
 }
->>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47

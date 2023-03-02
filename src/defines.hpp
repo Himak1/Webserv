@@ -17,15 +17,6 @@
 # define BAD_GATEWAY 502
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
-<<<<<<< HEAD
-// TEMPORARY 
-
-#define UPLOAD_FOLDER "uploads"
-
-#define CASE_301 "/permanently_moved"
-#define CASE_302 "/temporary_unavailable"
-
-=======
 // TCPServer defines
 # define POLL_TIMEOUT 200	 
 
@@ -46,6 +37,5 @@
     "<!doctype html><html lang=\"en\"><head><title>" \
     "413 Request Entity Too Large\n</title></head><body><center><h1>" \
     "413 Request Entity Too Large\n</h1></center></body></html>"
->>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47
 
 #endif

@@ -41,12 +41,7 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 		std::cout << e.what() << std::endl;
 		std::exit(EXIT_FAILURE);
 	}	
-<<<<<<< HEAD
-
-	_isServerRunning = true;	// tmp?
-=======
 	_isServerRunning = true;
->>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47
 	startPolling();
 }
 
