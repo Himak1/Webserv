@@ -4,6 +4,21 @@
 #include "../../../src/configure/parser/parser.hpp"
 #include "../../../src/configure/parser/TokenStream.hpp"
 
+TEST(parseServer, upload_store)
+{
+	std::list<Token> lst = {
+		Token(T_UPLOAD_STORE, "upload_store", 1),
+		Token(T_STRING, "/uploads", 1),
+		Token(T_SEMICOLON, ";", 1)};
+	TokenStream	testInput(lst);
+
+	Node*	output = parseUploadStore(testInput);
+	ASSERT_TRUE(output != NULL);
+	NodeList::const_iterator i = output->getChildrenBegin();
+	EXPECT_EQ((*i)->getNodeType(), TERMINAL);
+	EXPECT_EQ((*i)->getTerminal(), "/uploads");
+}
+
 TEST(parseServer, client_max_body_size)
 {
 	std::list<Token> lst = {

@@ -1,4 +1,6 @@
 #include <cstdlib>
+#include <climits>
+#include <cctype>
 #include "AConfig.hpp"
 #include "Node.hpp"
 
@@ -21,6 +23,7 @@ ErrorPage::~ErrorPage()
 //	AConfig Constructors & Destructors	//
 
 AConfig::AConfig()
+	: _uploadStore("/"), _clientMaxBodySize(UINT_MAX), _redirectCode(0)
 {
 }
 
@@ -37,7 +40,11 @@ std::ostream&	operator<<( std::ostream& o, const AConfig& config )
 	{
 		o << *i << " ";
 	}
-	o << '\n' << "root: " << config.getRoot();
+	o	<< '\n' << "root: " << config.getRoot() << '\n'
+		<< "client max body size: " << config.getClientMaxBodySize() << '\n'
+		<< "upload store:" << config.getUploadStore() << '\n'
+		<< "redirect code: " << config.getRedirect() << '\n'
+		<< "redirect URI: " << config.getRedirectURI();
 	return o;
 }
 
@@ -48,7 +55,7 @@ std::string	AConfig::getRoot() const
 	return (_root);
 }
 
-const std::string&	AConfig::getErrorPage( int errorCode ) const
+std::string	AConfig::getErrorPage( int errorCode ) const
 {
 	std::list<ErrorPage>::const_iterator i = _errorPages.begin();
 
@@ -58,9 +65,18 @@ const std::string&	AConfig::getErrorPage( int errorCode ) const
 			return ((*i).page);
 		++i;
 	}
-	throw std::exception();
+	return ("");
 }
 
+std::string	AConfig::getUploadStore() const
+{
+	return (_uploadStore);
+}
+
+unsigned int	AConfig::getClientMaxBodySize() const
+{
+	return (_clientMaxBodySize);
+}
 int	AConfig::getRedirect() const
 {
 	return (_redirectCode);
@@ -89,7 +105,10 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 	numberString = (*i)->getTerminal();
 	output = strtoul(numberString.c_str(), NULL, 10);
 	if (output == 0 && numberString != "0")
-		throw std::exception();
+		throw std::runtime_error("cannot convert parameter to number");
+	for (int it = 1; it < static_cast<int>(numberString.size()); it++) {
+		if (!isdigit(numberString[it])) throw std::runtime_error("cannot convert parameter to number");
+	}
 	return (output);
 }
 
@@ -110,24 +129,36 @@ void	AConfig::convertErrorPage( Node* node )
 
 	unsigned int code = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (code == 0 && (*i)->getTerminal()[0] != '0')
-		throw std::exception();
+		throw std::runtime_error("cannot convert parameter to number");
 	++i;
 	std::string	page = (*i)->getTerminal();
 	_errorPages.push_back(ErrorPage(code, page));
 }
 
+void	AConfig::convertUploadStore( Node* node )
+{
+	NodeList::const_iterator	i = node->getChildrenBegin();
+
+	_uploadStore = (*i)->getTerminal();
+}
+
+void	AConfig::convertClientMaxBodySize( Node* node )
+{
+	_clientMaxBodySize = convertNodeToUInt(node);
+	if (_clientMaxBodySize == 0)
+		throw std::runtime_error("client_max_body_size cannot be set to 0");
+}
+
 void	AConfig::convertReturn( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
-	std::string					numberString;
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
-	{
-		std::cerr << "DADADADADADDADA" << std::endl;
-		throw std::exception();
-	}
+		throw std::runtime_error("return parameter cannot be converted to number");
+	if (_redirectCode < 199 || _redirectCode > 599)
+		throw std::runtime_error("invalid return code");
 	++i;
-	std::string	page = (*i)->getTerminal();
+	_redirectURI = (*i)->getTerminal();
 }
 

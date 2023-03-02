@@ -10,19 +10,19 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <cstdio>
-
+#include <string>
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(class Request request, class Configuration& config)
+Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
-	// std::cout << "\n\nRESPONSE\n" <<_config << std::endl;
-
+	_cgi_count = 0;
+	_extension = _request.getExtension();
 	initStatusCodes();
 	initContentTypes();
-	setFilePath();
 	setLocation();
+	setFilePath();
 	_status = setStatus();
 	_content = getContent();
 }
@@ -35,64 +35,110 @@ string 	Response::getFilepath() { return _filepath; }
 
 string 	Response::getMessage()
 {
-	uploadFile();
+	int bytes_received = _request.getHeader().size();
+	if (bytes_received >= static_cast<int>(_config.getClientMaxBodySize())) {
+		_status = REQUEST_ENTITY_TOO_LARGE;
+		_content = getContent();
+		return  "HTTP/1.1 " 
+			+ _status_codes[_status]
+			+ _content_types[".html"]
+			+ "Content-Length: "
+			+ convertToString(_content.size()) + "\n\n"
+			+ _content;
+	}
 
-	ostringstream ss;
-	ss	<< _request.getHTTPVersion() << " "
-		<< _status_codes[_status]
-		<< _content_types[ _request.getExtension()]
-		<< setCookie()
-		<< "Content-Length: "
-		<< _content.size() << "\n\n"
-		<< _content;
-	return ss.str();
+	if (_request.isFileUpload())
+		return uploadFile();
+	if (_request.getMethod() == "DELETE")
+		return deleteFile();
+
+	return  _request.getHTTPVersion() + " "
+			+ _status_codes[_status]
+			+ _content_types[ _extension]
+			+ setCookie()
+			+ "Content-Length: "
+			+ convertToString(_content.size()) + "\n\n"
+			+ _content;
 }
 
 // PRIVATE FUNCTIONS
 void	Response::setFilePath()
 {
+	if ((*_location).getAlias() != "") {
+		_filepath = (*_location).getAlias();
+		_extension = parseExtension(_filepath);
+		return;
+	}
+
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
-									&& _request.getURI().rfind('.') == string::npos;
+									&& (*_location).getRedirect() == 0
+									&& _extension == "";
 
-	if (_request.getURI() == "/" || is_undefined_extension) {		
-		list<string>::iterator it = _config.indexFiles.begin();
-
-		cout << "front: " << _config.indexFiles.front() << std::endl;
-
-		while (it != _config.indexFiles.end()) {
-			cout << "SETPATHFILE |" << *it << endl;
-			_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
-			if (isExistingFile(_filepath))
-				return;
-			++it;
-		}
-		if (it == _config.indexFiles.end())
-			_status = NOT_FOUND;
+	if (is_undefined_extension) {	
+		if (tryAndSetExtension(".html")) 				return;
+		if (tryAndSetExtension(".htm")) 				return;
+		if (tryAndSetExtension(".php")) 				return;
+		if (tryAndSetExtension(".py")) 					return;
+		if (searchIndexFiles((*_location).indexFiles)) 	return;
+		if (searchIndexFiles(_config.indexFiles)) 		return;
 	}
 	_filepath = _config.getRoot() + _request.getURI();
-	// if (_request.getURI() == "/"
-	// 	|| ((_request.getMethod() != "DELETE"
-	// 	&& _request.getURI().rfind('.') == string::npos))) {
-	// 	list<string> indexFiles = _config.indexFiles;
-	// 	list<string>::iterator it;
-	// 	for (it = indexFiles.begin(); it != indexFiles.end(); ++it) {
-	// 		_filepath = _config.getRoot() + _request.getURI() + "/" + it->c_str();
-	// 		if (isExistingFile(_filepath))
-	// 			break;
-	// 	}
-	// }
-	// else
-	// 	_filepath = _config.getRoot() + _request.getURI();
+}
+
+bool	Response::tryAndSetExtension(string extension)
+{
+	_filepath = _config.getRoot() + _request.getURI() + extension;
+	if (isExistingFile(_filepath)) {
+		_extension = extension;
+		return true;
+	}
+	return false;
+}
+
+bool	Response::searchIndexFiles(list<string> index_files)
+{
+	_status = OK;
+	list<string>::iterator it = index_files.begin();
+	while (it != index_files.end()) {
+		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
+		if (isExistingFile(_filepath)) {
+			_extension = parseExtension(_filepath);
+			return true;
+		}
+		++it;
+	}
+	if (it == index_files.end())
+		_status = NOT_FOUND;
+	return false;
 }
 
 void	Response::setLocation()
 {
-	string target = _request.getURI();
-	list<Location*>::iterator it = findConfigLocation(target);
+	string target = _config.getRoot() + _request.getURI();
+	list<Location*>::const_iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {
 		_status = INTERNAL_SERVER_ERROR;
 	}
 	_location = (*it);
+}
+
+list<Location*>::const_iterator Response::findConfigLocation(string target) {
+	if (target.rfind("/") == 0)
+		return searchLocations("/");
+	list<Location*>::const_iterator it = searchLocations(target);
+	if (it == _config.locations.end())
+		return findConfigLocation(go_one_directory_up(target));
+	return it;
+}
+
+list<Location*>::const_iterator Response::searchLocations(string target) {
+	list<Location*>::const_iterator it = _config.locations.begin();
+	while (it != _config.locations.end()) {
+		if ((*it)->getPath() == target)
+			return it;
+		++it;
+	}
+	return it;
 }
 
 void	Response::initStatusCodes()
@@ -106,9 +152,10 @@ void	Response::initStatusCodes()
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
 	_status_codes[413] = "413 Request Entity Too Large\n";
-	_status_codes[415] = "415 Unsupported Media Type\n";
+	_status_codes[415] = "200 OK\n";
 	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
+	_status_codes[502] = "502 Bad Gateway\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
 
@@ -126,85 +173,102 @@ void	Response::initContentTypes()
 	_content_types[".php"] 	= "Content-Type: text/html; charset=utf-8\n";
 	_content_types[".js"] 	= "Content-Type: application/javascript\n";
 	_content_types[".gif"] 	= "Content-Type: image/gif\n";
+	_content_types[".py"] 	= "Content-Type: text/html; charset=utf-8\n";
 }
 
 int		Response::setStatus()
 {
-	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_accepted_method		= _location->isMethodAccepted(_method);
-	bool is_php_file			= _filepath.find(".php?") != string::npos;
-	bool is_301					= _request.getURI() == CASE_301;
-	bool is_302					= _request.getURI() == CASE_302;
-	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
-	bool is_existing_file		= isExistingFile(_filepath);
+	string method = _request.getMethod();
+	bool is_accepted_method			= (*_location).isMethodAccepted(method);
+	bool is_page_not_found			= _status == NOT_FOUND
+									&& _extension != ".png"
+									&& _extension != ".jpg"
+									&& _extension != ".ico"
+									&& _extension != ".css";
+	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
+	bool is_redirect				= (*_location).getRedirect() != 0;
 
-	if (_status == NOT_FOUND)	return NOT_FOUND;
-	if (is_correct_HTTP)		return HTTP_VERSION_NOT_SUPPORTED;
-	if (!is_accepted_method)	return NOT_IMPLEMENTED;
-	if (is_301)					return MOVED_PERMANENTLY;
-	if (is_302)					return FOUND;
-	if (is_unsupported_type)	return UNSUPPORTED_MEDIA_TYPE;
-	if (is_php_file)			return OK;
-	if (is_existing_file)		return OK;
-	return NOT_FOUND;
+	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
+
+	if (is_page_not_found)			return NOT_FOUND;
+	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
+	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
+	if (is_redirect)				return (*_location).getRedirect();
+	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	if (_extension == ".php")		return OK;
+	if (isExistingFile(_filepath))	return OK;
+	return NOT_FOUND;		
 }
 
 string	Response::getContent()
 {
-	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
+	bool isCGI = _extension == ".php" || _extension == ".py";
 
-	if (_request.getMethod() == "DELETE")	return deleteFile();
-	if (_status != OK)						return returnErrorPage();
-	if (isCGI)								return getCGI();
+	if (_status != OK)	return returnErrorPage();
+	if (isCGI)			return getCGI();
 	return(streamFileDataToString(_filepath));
 }
 
 string	Response::deleteFile()
 {
-	if (remove(_filepath.c_str()) != 0) {
-		_status = NOT_FOUND;
-		return createErrorHTML();
-	}
-	return "File " + _filepath + " has been deleted";
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
+
+	if (remove(_filepath.c_str()) != 0)
+		return "Delete failed: Invalid or non-existing file\n";
+	return "File " + _filepath + " has been deleted\n";
 }
 
-void	Response::uploadFile()
+string	Response::uploadFile()
 {
-	_request.setUploadSucces(false);
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
 
-	string input_path;
 	map<string, string> env = _request.getEnv();
-	if (env.find("file_to_upload") == env.end())
-		return;
-	else
-		input_path = env["file_to_upload"];
+	if (env.find("file") == env.end())
+		return "Upload failed: Invalid or non-existing file\n";
 
-	if (!isExistingFile(input_path)) {
-		_status = NOT_FOUND;
-		_content = returnErrorPage();
-		return;
-	}
+	string input_path = env["file"];
+	if (!isExistingFile(input_path))
+		return "Upload failed: Invalid or non-existing file\n";
 
 	string file_data = streamFileDataToString(input_path);
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
-	string upload_path = _config.getRoot() + "/" + UPLOAD_FOLDER + "/" + filename;
+	string upload_path = setUploadPath(filename);
 	writeStringToFile(file_data, upload_path);
 
-	if (isExistingFile(filename)
-		&& streamFileDataToString(filename) == file_data)
-		_request.setUploadSucces(true);
+	if (isExistingFile(upload_path))
+		return "File '" + filename + "' succesfully uploaded to '" + upload_path + "'\n";
+	return "Upload failed\n";
+}
+
+string	Response::setUploadPath(string filename)
+{
+	string upload_store;
+	if ((*_location).getUploadStore() != "")
+ 		upload_store = (*_location).getUploadStore();
+	else
+ 		upload_store = _config.getUploadStore();
+
+	mkdir(upload_store.c_str(), 0777);
+	return upload_store + filename;
 }
 
 string Response::returnErrorPage()
 {
-	try {
-		_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-		// cout << _filepath << endl;
+	bool costum_error_page_is_defined = _config.getErrorPage(_status) != ""
+										|| (*_location).getErrorPage(_status) != "";
+
+	if ((*_location).getRedirect() != 0 || costum_error_page_is_defined) {
+		if ((*_location).getErrorPage(_status) != "")
+			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
+		else if (_config.getErrorPage(_status) != "")
+			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
+		
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
-	}
-	catch (const std::exception& e) {
-		return createErrorHTML();
 	}
 	return createErrorHTML();
 }
@@ -212,43 +276,27 @@ string Response::returnErrorPage()
 string Response::createErrorHTML()
 {
 	string meta  = "";
+	string url = (*_location).getRedirectURI();
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=/\"/>";
-
-	ostringstream ss;
-	ss	<< "<!DOCTYPE html><html lang=\"en\"><head><title>"
-		<< _status_codes[_status]
-		<< "</title>"
-		<< meta
-		<< "</head><body><center><h1>"
-		<< _status_codes[_status]
-		<< "</h1></center></body></html>";
-	return ss.str();
+		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"3; url=" + url + "\"/>";
+	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
+			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"
+			+ _status_codes[_status] + "</h1></center></body></html>";
 }
 
 string Response::setCookie()
 {
 	string value;
-	if (_request.getURI() == "/session_logout.php") {
-		value = "deleted";
-		return "Set-Cookie: sessionID=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
-	if (_request.getURI() == "/cookies_delete.php") {
-		value = "deleted";
-		return "Set-Cookie: cookie_value=" + value + "; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
-	}
+	if (_request.getURI() == "/session_logout.php")
+		return "Set-Cookie: sessionID=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
+	if (_request.getURI() == "/cookies_delete.php")
+		return "Set-Cookie: cookie_value=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT\n";
 
 	map<string, string> env = _request.getEnv();
-	if (_request.getURI() == "/session_login.php") {
-		if (env.find("username") != env.end())
-			value = env["username"];
-		return "Set-Cookie: sessionID=" + value + "\n";
-	}
-	if (_request.getURI() == "/cookies.php") {
-		if (env.find("cookie_value") != env.end())
-			value = env["cookie_value"];
-		return "Set-Cookie: cookie_value=" + value + "\n";
-	}
+	if (_request.getURI() == "/session_login.php" && env.find("username") != env.end())
+		return "Set-Cookie: sessionID=" + env["username"] + "\n";
+	if (_request.getURI() == "/cookies.php" && env.find("cookie_value") != env.end())
+		return "Set-Cookie: cookie_value=" + env["cookie_value"] + "\n";
 
 	return "";
 }
@@ -257,32 +305,16 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	if (cgi.find("<!doctype html>") == string::npos)
+	if (cgi.find("<!doctype html>") == string::npos && _cgi_count++ < 10)
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
+	if (cgi.find("502 Bad Gateway") != string::npos)
+		_status = BAD_GATEWAY;
 	if (cgi.find("500 Internal Server Error") != string::npos)
 		_status = INTERNAL_SERVER_ERROR;
+	
+	if (_status != OK)
+		return returnErrorPage();
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
-}
-
-list<Location*>::iterator Response::findConfigLocation(string target) {
-	if (target.rfind("/") == 0)
-		return searchLocations("/");
-
-	list<Location*>::iterator it = _config.locations.begin();
-	it = searchLocations(target);
-	if (it == _config.locations.end())
-		return findConfigLocation(go_one_directory_up(target));
-	return it;
-}
-
-list<Location*>::iterator Response::searchLocations(string target) {
-	list<Location*>::iterator it = _config.locations.begin();
-	while (it != _config.locations.end()) {
-		if ((*it)->getPath() == target)
-			return it;
-		++it;
-	}
-	return it;
 }

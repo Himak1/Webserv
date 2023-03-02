@@ -22,7 +22,9 @@ class AConfig
 		~AConfig();
 
 		std::string				getRoot() const;
-		const std::string&		getErrorPage( int errorCode ) const;
+		std::string				getErrorPage( int errorCode ) const;
+		std::string				getUploadStore() const;
+		unsigned int			getClientMaxBodySize() const;
 		int						getRedirect() const; // returns 0 if not a redirect
 		std::string				getRedirectURI() const; // returns empty string if not a redirect
 
@@ -35,6 +37,8 @@ class AConfig
 		unsigned int			convertNodeToUInt( Node* node );
 		void					convertIndexFiles( Node* node );
 		void					convertErrorPage( Node* node );
+		void					convertUploadStore( Node* node );
+		void					convertClientMaxBodySize( Node* node );
 		void					convertReturn( Node* node );
 	
 		bool					validatePath();
@@ -42,6 +46,8 @@ class AConfig
 
 		std::string				_root;
 		std::list<ErrorPage>	_errorPages;
+		std::string				_uploadStore;
+		unsigned int			_clientMaxBodySize;
 		int						_redirectCode;
 		std::string				_redirectURI;
 };

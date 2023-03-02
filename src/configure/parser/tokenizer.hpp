@@ -10,7 +10,7 @@ typedef std::map<std::string, int> TokenMap;
 class Token;
 class TokenStream;
 
-TokenStream				tokenizer( std::ifstream& file );
+TokenStream*			tokenizer( std::ifstream& file );
 std::list<Token>		createTokenList( std::ifstream& file, TokenMap tokenMap );
 std::list<std::string>	splitLineByDelimiters( std::string line );
 std::list<Token>		createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap );

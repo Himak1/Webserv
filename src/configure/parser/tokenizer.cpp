@@ -24,6 +24,7 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	tokenMap["cgi_pass"]		= T_CGI_PASS;
 	tokenMap["alias"]			= T_ALIAS;
 	tokenMap["autoindex"]		= T_AUTOINDEX;
+	tokenMap["upload_store"]	= T_UPLOAD_STORE;
 	// Punctuation and Seperators
 	tokenMap["{"]				= T_BRACKET_OPEN;
 	tokenMap["}"]				= T_BRACKET_CLOSE;
@@ -108,12 +109,11 @@ std::list<Token>	createTokenList( std::ifstream& file, TokenMap tokenMap )
 	return (tokenList);
 }
 
-TokenStream	tokenizer( std::ifstream& file )
+TokenStream*	tokenizer( std::ifstream& file )
 {
 	TokenMap				tokenMap;
 
 	initMap(tokenMap);
 	std::list<Token>	tokenList = createTokenList(file, tokenMap);
-	TokenStream	tokenStream(tokenList);
-	return (tokenStream);
+	return (new TokenStream(tokenList));
 }

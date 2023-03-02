@@ -14,12 +14,15 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
-	: _host("localhost"), _port(80), _clientMaxBodySize(2)
+	: _host("localhost"), _port(80)
 {
 	try {
 		navigateNode(serverNode);
 	}
 	catch (std::exception& e) {
+		for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+			delete *i;
+		}
 		throw;
 	}
 }
@@ -43,47 +46,10 @@ unsigned int	Configuration::getPort() const
 	return (_port);
 }
 
-unsigned int	Configuration::getClientMaxBodySize() const
-{
-	return (_clientMaxBodySize);
-}
 
 
 //----------------------------------Methods---------------------------------//
 
-void	Configuration::navigateNode( Node* serverNode )
-{
-	for (NodeList::const_iterator i = serverNode->getChildrenBegin(); i != serverNode->getChildrenEnd(); ++i) {
-		switch ((*i)->getNodeType()) {
-			case N_SERVER_NAME:
-				_host = convertNodeToString(*i);
-				break;
-			case N_LISTEN:
-				_port = convertNodeToUInt(*i);
-				break;
-			case N_CLIENT_MAX_BODY:
-				_clientMaxBodySize = convertNodeToUInt(*i);
-				break;
-			case N_ROOT:
-				_root = convertNodeToString(*i);
-				break;
-			case N_INDEX:
-				convertIndexFiles(*i);
-				break;
-			case N_ERROR_PAGE:
-				convertErrorPage(*i);
-				break;
-			case N_LOCATION:
-				locations.push_back(new Location(*i));
-				break;
-			case N_RETURN:
-				convertReturn(*i);
-				break;
-			default:
-				throw std::exception();
-		}
-	}
-}
 
 //----------------------------------External Functions----------------------//
 
@@ -91,7 +57,6 @@ std::ostream&	operator<<( std::ostream& o, const Configuration& config )
 {
 	o	<< "host: " << config.getHost() << '\n'
 		<< "port: " << config.getPort() << '\n'
-		<< "client max body size: " << config.getClientMaxBodySize() << '\n'
 		<< (AConfig&)config << "\n\n";
 	for (std::list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
 	{

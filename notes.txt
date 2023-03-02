@@ -1,7 +1,0 @@
-curl -v GET 127.0.0.1:4242
-curl -v GET 127.0.0.1:4242/upload_handler.php?file_to_upload=Makefile
-curl -v GET 127.0.0.1:4242/upload_handler.php?file_to_upload=notes.txt
-curl -v GET 127.0.0.1:4242/form_handler.php?first_name=Codam&last_name=42
-curl -v -X DELETE 127.0.0.1:4242/uploads/php.ini
-curl -v -X DELETE 127.0.0.1:4242/uploads/notes.txt
-

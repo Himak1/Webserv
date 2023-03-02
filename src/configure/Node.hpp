@@ -22,6 +22,7 @@ enum NodeTypes
 	N_CGI_PASS,
 	N_ALIAS,
 	N_AUTOINDEX,
+	N_UPLOAD_STORE,
 	TERMINAL,
 	AST
 };

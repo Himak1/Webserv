@@ -14,8 +14,10 @@
 # define UNSUPPORTED_MEDIA_TYPE 415
 # define INTERNAL_SERVER_ERROR 500
 # define NOT_IMPLEMENTED 501
+# define BAD_GATEWAY 502
 # define HTTP_VERSION_NOT_SUPPORTED 505
 
+<<<<<<< HEAD
 // TEMPORARY 
 
 #define UPLOAD_FOLDER "uploads"
@@ -23,5 +25,27 @@
 #define CASE_301 "/permanently_moved"
 #define CASE_302 "/temporary_unavailable"
 
+=======
+// TCPServer defines
+# define POLL_TIMEOUT 200	 
+
+// CGI defines
+# define BUFFER_ERROR_SIZE 100
+# define CGI_TIMEOUT 10
+# define INTERNAL_SERVER_ERROR_MSG \
+    "<!doctype html><html lang=\"en\"><head><title>" \
+	"500 Internal Server Error\n</title></head><body><center><h1>" \
+	"500 Internal Server Error\n</h1></center></body></html>"
+
+# define BAD_GATEWAY_MSG \
+    "<!doctype html><html lang=\"en\"><head><title>" \
+	"502 Bad Gateway\n</title></head><body><center><h1>" \
+	"502 Bad Gateway\n</h1></center></body></html>"
+
+# define REQUEST_ENTITY_TOO_LARGE_MSG \
+    "<!doctype html><html lang=\"en\"><head><title>" \
+    "413 Request Entity Too Large\n</title></head><body><center><h1>" \
+    "413 Request Entity Too Large\n</h1></center></body></html>"
+>>>>>>> 0928f3a5965d699c527e8911dacee32ba625fb47
 
 #endif

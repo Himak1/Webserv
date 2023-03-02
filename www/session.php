@@ -3,24 +3,6 @@
 			<h3>SESSION MANAGEMENT</h3>
 
 			<?php
-				// https://www.tutorialspoint.com/php/php_function_session_start.htm
-
-				// session_start();
-
-				// if ($_POST)
-				// 	$username = $_POST["username"];
-				// else
-				// 	$username = "";
-
-				// if ($username)
-					// $_SESSION["username"] = $username;
-
-				// echo "cookie = ". $cookie;
-				// echo "<br>username = ". $username;
-
-				// if (isset($_SESSION["username"]))
-				// 	echo "<br>". $_SESSION["username"]. 'is logged in.';
-
 				$sessionID = getenv("sessionID");
 				if ($sessionID)
 					echo "<br>". $sessionID. ' is logged in.';
