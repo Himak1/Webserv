@@ -110,7 +110,7 @@ Node*	parseServer( TokenStream& tokensToParse )
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
 		return (NULL);
 	newNode = new Node(N_SERVER);
-	while (tokensToParse.getTokenType() != T_BRACKET_CLOSE && status != 0)
+	while (blockIsOpen(tokensToParse, status))
 	{
 		switch (tokensToParse.getTokenType())
 		{
@@ -142,6 +142,7 @@ Node*	parseServer( TokenStream& tokensToParse )
 				status = newNode->addChild(parseUploadStore(tokensToParse));
 				break;
 			default:
+				printUnexpectedChar(tokensToParse);
 				status = 0;
 				break;
 		}

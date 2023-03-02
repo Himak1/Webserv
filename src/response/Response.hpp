@@ -21,6 +21,7 @@ class Response
 
 	private:
 		string							_filepath;
+		string							_extension;
 		int								_status;
 		string							_content;
 		const class Request&			_request;
@@ -28,9 +29,10 @@ class Response
 		class Location*					_location;
 		map<int, string>				_status_codes;
 		map<string, string>				_content_types;
+		int								_cgi_count;
 	
 		void							setFilePath();
-		bool							searchExtension(string extension);
+		bool							tryAndSetExtension(string extension);
 		bool							searchIndexFiles(list<string> index_files);
 		void							setLocation();
 		void							initStatusCodes();

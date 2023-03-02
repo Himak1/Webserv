@@ -52,24 +52,28 @@ std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 	TokenStream*	tokens;
 	Node*			ast;
 	std::ifstream	configFile;
+	bool			exceptionCaught;
 
+	exceptionCaught = false;
 	openConfigFile(configFile, argc, argv);
 	tokens = tokenizer(configFile);
 	ast = parser(*tokens);
-	if (!ast) exit(1);
-
+	if (!ast) {
+		delete tokens;
+		std::exit(1);
+	}
 	std::vector<Configuration*>	serverConfigs;
 	try {
 		serverConfigs = convertASTtoConfigVector(ast);
 	}
 	catch (std::exception& e) {
-		std::cerr << e.what() << '\n';
+		std::cerr << "ERROR: " << e.what() << '\n';
 		deleteAllElementsInVector(serverConfigs);
-		delete ast;
-		std::exit(1);
+		exceptionCaught = true;
 	}
 	delete ast;
 	delete tokens;
+	if (exceptionCaught) std::exit(1);
 	return (serverConfigs);
 }
 

@@ -1,5 +1,7 @@
 #include "strings.hpp"
 #include <sstream>
+#include <iostream>
+#include <string>
 
 string safe_substr(string str, int start, int length)
 {
@@ -25,11 +27,17 @@ string trim_spaces(const string& str)
 	return safe_substr(str, first, (last - first + 1));
 }
 
-#include <iostream>
 string go_one_directory_up(string str)
 {
 	size_t length = str.rfind("/");
 	if (length == 0 || length == string::npos)
 		return "/";
 	return safe_substr(str, 0, length);
+}
+
+string convertToString (size_t Number)
+{
+	ostringstream ss;
+	ss << Number;
+	return ss.str();
 }

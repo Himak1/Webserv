@@ -10,13 +10,15 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <cstdio>
-
+#include <string>
 #include <list>
 
 // CONSTRUCTOR
 Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
+	_cgi_count = 0;
+	_extension = _request.getExtension();
 	initStatusCodes();
 	initContentTypes();
 	setLocation();
@@ -37,11 +39,11 @@ string 	Response::getMessage()
 	if (bytes_received >= static_cast<int>(_config.getClientMaxBodySize())) {
 		_status = REQUEST_ENTITY_TOO_LARGE;
 		_content = getContent();
-		return  "HTTP/1.1 "
+		return  "HTTP/1.1 " 
 			+ _status_codes[_status]
 			+ _content_types[".html"]
 			+ "Content-Length: "
-			+ to_string(_content.size()) + "\n\n"
+			+ convertToString(_content.size()) + "\n\n"
 			+ _content;
 	}
 
@@ -52,36 +54,44 @@ string 	Response::getMessage()
 
 	return  _request.getHTTPVersion() + " "
 			+ _status_codes[_status]
-			+ _content_types[ _request.getExtension()]
+			+ _content_types[ _extension]
 			+ setCookie()
 			+ "Content-Length: "
-			+ to_string(_content.size()) + "\n\n"
+			+ convertToString(_content.size()) + "\n\n"
 			+ _content;
 }
 
 // PRIVATE FUNCTIONS
 void	Response::setFilePath()
 {
+	if ((*_location).getAlias() != "") {
+		_filepath = (*_location).getAlias();
+		_extension = parseExtension(_filepath);
+		return;
+	}
+
 	bool is_undefined_extension = _request.getMethod() != "DELETE"
 									&& (*_location).getRedirect() == 0
-									&& _request.getURI().rfind('.') == string::npos;
+									&& _extension == "";
 
 	if (is_undefined_extension) {	
-		if (searchExtension(".html")) 					return;
-		if (searchExtension(".htm")) 					return;
-		if (searchExtension(".php")) 					return;
-		if (searchExtension(".py")) 					return;
+		if (tryAndSetExtension(".html")) 				return;
+		if (tryAndSetExtension(".htm")) 				return;
+		if (tryAndSetExtension(".php")) 				return;
+		if (tryAndSetExtension(".py")) 					return;
 		if (searchIndexFiles((*_location).indexFiles)) 	return;
 		if (searchIndexFiles(_config.indexFiles)) 		return;
 	}
 	_filepath = _config.getRoot() + _request.getURI();
 }
 
-bool	Response::searchExtension(string extension)
+bool	Response::tryAndSetExtension(string extension)
 {
 	_filepath = _config.getRoot() + _request.getURI() + extension;
-		if (isExistingFile(_filepath))
-			return true;
+	if (isExistingFile(_filepath)) {
+		_extension = extension;
+		return true;
+	}
 	return false;
 }
 
@@ -91,8 +101,10 @@ bool	Response::searchIndexFiles(list<string> index_files)
 	list<string>::iterator it = index_files.begin();
 	while (it != index_files.end()) {
 		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
-		if (isExistingFile(_filepath))
+		if (isExistingFile(_filepath)) {
+			_extension = parseExtension(_filepath);
 			return true;
+		}
 		++it;
 	}
 	if (it == index_files.end())
@@ -113,9 +125,7 @@ void	Response::setLocation()
 list<Location*>::const_iterator Response::findConfigLocation(string target) {
 	if (target.rfind("/") == 0)
 		return searchLocations("/");
-
-	list<Location*>::const_iterator it = _config.locations.begin();
-	it = searchLocations(target);
+	list<Location*>::const_iterator it = searchLocations(target);
 	if (it == _config.locations.end())
 		return findConfigLocation(go_one_directory_up(target));
 	return it;
@@ -142,9 +152,10 @@ void	Response::initStatusCodes()
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
 	_status_codes[413] = "413 Request Entity Too Large\n";
-	_status_codes[415] = "415 Unsupported Media Type\n";
+	_status_codes[415] = "200 OK\n";
 	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
+	_status_codes[502] = "502 Bad Gateway\n";
 	_status_codes[505] = "505 HTTP Version Not Supported\n";
 }
 
@@ -168,44 +179,53 @@ void	Response::initContentTypes()
 int		Response::setStatus()
 {
 	string method = _request.getMethod();
-	bool is_page_not_found		= _status == NOT_FOUND
-									&& (_request.getExtension()==".html"
-										|| _request.getExtension()==".htm"
-										|| _request.getExtension()==".php"
-										|| _request.getExtension()==".py");
-	bool is_correct_HTTP		= _request.getHTTPVersion() != "HTTP/1.1";
-	bool is_accepted_method		= (*_location).isMethodAccepted(method);
-	bool is_redirect			= (*_location).getRedirect() != 0;
-	bool is_unsupported_type	= _content_types.find(_request.getExtension()) == _content_types.end();
-	bool is_php_file			= _filepath.find(".php?") != string::npos;
+	bool is_accepted_method			= (*_location).isMethodAccepted(method);
+	bool is_page_not_found			= _status == NOT_FOUND
+									&& _extension != ".png"
+									&& _extension != ".jpg"
+									&& _extension != ".ico"
+									&& _extension != ".css";
+	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
+	bool is_redirect				= (*_location).getRedirect() != 0;
+
+	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
 
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
-	if (!is_accepted_method)		return NOT_IMPLEMENTED;
+	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
 	if (is_redirect)				return (*_location).getRedirect();
 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
-	if (is_php_file)				return OK;
+	if (_extension == ".php")		return OK;
 	if (isExistingFile(_filepath))	return OK;
 	return NOT_FOUND;		
 }
 
 string	Response::getContent()
 {
-	bool isCGI = _request.getExtension() == ".php" ||  _request.getExtension() == ".py";
-	if (_status != OK)						return returnErrorPage();
-	if (isCGI)								return getCGI();
+	bool isCGI = _extension == ".php" || _extension == ".py";
+
+	if (_status != OK)	return returnErrorPage();
+	if (isCGI)			return getCGI();
 	return(streamFileDataToString(_filepath));
 }
 
 string	Response::deleteFile()
 {
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
+
 	if (remove(_filepath.c_str()) != 0)
 		return "Delete failed: Invalid or non-existing file\n";
-	return "File " + _filepath + " has been deleted";
+	return "File " + _filepath + " has been deleted\n";
 }
 
 string	Response::uploadFile()
 {
+	string method = _request.getMethod();
+	if (!(*_location).isMethodAccepted(method))
+		return "405 Method Not Allowed\n";
+
 	map<string, string> env = _request.getEnv();
 	if (env.find("file") == env.end())
 		return "Upload failed: Invalid or non-existing file\n";
@@ -238,12 +258,15 @@ string	Response::setUploadPath(string filename)
 
 string Response::returnErrorPage()
 {
-	if ((*_location).getRedirect() != 0 || _config.getErrorPage(_status) != "") {
+	bool costum_error_page_is_defined = _config.getErrorPage(_status) != ""
+										|| (*_location).getErrorPage(_status) != "";
+
+	if ((*_location).getRedirect() != 0 || costum_error_page_is_defined) {
 		if ((*_location).getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + (*_location).getErrorPage(_status);
-		else
+		else if (_config.getErrorPage(_status) != "")
 			_filepath = _config.getRoot() + "/" + _config.getErrorPage(_status);
-
+		
 		if (isExistingFile(_filepath))
 			return streamFileDataToString(_filepath);
 	}
@@ -253,9 +276,9 @@ string Response::returnErrorPage()
 string Response::createErrorHTML()
 {
 	string meta  = "";
+	string url = (*_location).getRedirectURI();
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
-		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"5; url=" + (*_location).getRedirectURI() + "\"/>";
-
+		meta = "<meta charset=\"utf-8\"/><meta http-equiv=\"refresh\" content=\"3; url=" + url + "\"/>";
 	return "<!DOCTYPE html><html lang=\"en\"><head><title>"
 			+ _status_codes[_status] + "</title>" + meta + "</head><body><center><h1>"
 			+ _status_codes[_status] + "</h1></center></body></html>";
@@ -282,12 +305,16 @@ string Response::getCGI()
 {
 	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
 	string cgi = CGI.ExecuteCGI();
-	static int count = 0;
-	if (cgi.find("<!doctype html>") == string::npos && count++ < 5)
+	if (cgi.find("<!doctype html>") == string::npos && _cgi_count++ < 10)
 		return getCGI();
 	if (cgi.find("413 Request Entity Too Large") != string::npos)
 		_status = REQUEST_ENTITY_TOO_LARGE;
+	if (cgi.find("502 Bad Gateway") != string::npos)
+		_status = BAD_GATEWAY;
 	if (cgi.find("500 Internal Server Error") != string::npos)
 		_status = INTERNAL_SERVER_ERROR;
+	
+	if (_status != OK)
+		return returnErrorPage();
 	return(safe_substr(cgi, cgi.find("<!doctype html>"), -1));
 }

@@ -23,7 +23,7 @@ class Request
 		const string		getMethod() const;
 		const string		getURI() const;
 		const string		getHTTPVersion() const;
-		const string		getExtension() const;
+		string				getExtension() const;
 		const string		getHeader() const;
 		map<string, string>	getEnv() const;
 		map<string, string>	getCookies() const;
@@ -40,7 +40,6 @@ class Request
 		bool				_is_upload;
 
 		void				parseHTTPInfoAndHeaders(const string& request);
-		void				parseExtension();
 		void				parseEnv();
 		void				parseGet();
 		void				parsePost();

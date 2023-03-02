@@ -108,8 +108,8 @@ Node*	parseLocation( TokenStream& tokensToParse )
 	if (!acceptAndCreateTerminal(tokensToParse, newNode))
 		return (deleteNewNode(newNode));
 	if (!accept(tokensToParse, T_BRACKET_OPEN))
-		deleteNewNode(newNode);
-	while (tokensToParse.getTokenType() != T_BRACKET_CLOSE && status != 0)
+		return (deleteNewNode(newNode));
+	while (blockIsOpen(tokensToParse, status))
 	{
 		switch (tokensToParse.getTokenType())
 		{
@@ -140,7 +140,11 @@ Node*	parseLocation( TokenStream& tokensToParse )
 			case T_UPLOAD_STORE:
 				status = newNode->addChild(parseUploadStore(tokensToParse));
 				break;
+			case T_CLIENT_MAX_BODY:
+				status = newNode->addChild(parseClientMaxBodySize(tokensToParse));
+				break;
 			default:
+				printUnexpectedChar(tokensToParse);
 				status = 0;
 				break;
 		}

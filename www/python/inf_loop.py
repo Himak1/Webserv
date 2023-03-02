@@ -7,7 +7,8 @@ def read_and_print(src):
 	text_file.close()
 	print (data)
 
-read_and_print("www/templates/top.php")
+while True:
+	print("")
 
 print ('''<div id="middle"><h3 class="">PYTHON</h3>4.2 * 10 =''')
 print (4.2 * 10)
