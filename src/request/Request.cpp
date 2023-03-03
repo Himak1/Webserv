@@ -49,16 +49,16 @@ void Request::initRequest(const string &request)
 	parseEnv();
 }
 
-const string 	Request::getMethod() const { return _method; }
-const string 	Request::getURI() const { return _uri; }
-const string 	Request::getHTTPVersion() const { return _http_version; }
-string 		 	Request::getExtension() const { return _extension; }
-const string 	Request::getHeader() const { return _headers; }
-map<string, string> Request::getEnv() const { return _env; }
-bool 		 	Request::isFileUpload() const { return _is_upload; }
-class Location*	Request::getLocation() const { return _location; }
-const string 	Request::getFilepath() const { return _filepath; }
-int 			Request::getStatus() const { return _status; }
+const string 		Request::getMethod() 	  const { return _method; }
+const string 		Request::getURI() 		  const { return _uri; }
+const string 		Request::getHTTPVersion() const { return _http_version; }
+	  string 		Request::getExtension()   const { return _extension; }
+const string 		Request::getHeader() 	  const { return _headers; }
+map<string, string> Request::getEnv() 	  	  const { return _env; }
+bool 		 		Request::isFileUpload()   const { return _is_upload; }
+class Location*		Request::getLocation() 	  const { return _location; }
+const string 		Request::getFilepath() 	  const { return _filepath; }
+int 				Request::getStatus() 	  const { return _status; }
 
 // PRIVATE FUNCTIONS
 void Request::parseHTTPInfoAndHeaders(const string& request)
@@ -160,6 +160,7 @@ void Request::parsePost()
 void	Request::setLocation()
 {
 	string target = "www/" + _uri;
+	cout << "_config.getRoot()" << _config.getRoot() << endl;
 	// string target = _config.getRoot() + _uri;
 	list<Location*>::const_iterator it = findConfigLocation(target);
 	if (it == _config.locations.end()) {

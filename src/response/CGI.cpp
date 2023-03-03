@@ -59,9 +59,12 @@ string CGI::ExecuteCGI()
 		if (hasInfiniteLoop("(1)"))
 			return BAD_GATEWAY_MSG;
 
-		string errors = pipeAndFork(STDERR_FILENO);
-		if (errors.size() > 1)
-			return BAD_GATEWAY_MSG;
+		// string errors = pipeAndFork(STDERR_FILENO);
+		// if (errors.size() > 1) {
+
+		// 	cout << "ERRORS" << errors << endl;
+		// 	return BAD_GATEWAY_MSG;
+		// }
 	}
 
 	return pipeAndFork(STDOUT_FILENO);
@@ -87,6 +90,7 @@ string	CGI::pipeAndFork(int output)
 		if (output == STDERR_FILENO)
 			close(STDOUT_FILENO);
 		execve(_path[0], _path, _env);
+		perror("ERROR");
 		cout << INTERNAL_SERVER_ERROR_MSG << endl;
 		exit(0);
 	}

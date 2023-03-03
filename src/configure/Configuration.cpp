@@ -42,9 +42,9 @@ Configuration &Configuration::operator = (Configuration &src)
 
 Configuration::~Configuration()
 {
-	for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
-		delete *i;
-	}
+	// for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+		// delete *i;
+	// }
 }
 
 //----------------------------------Accessors-------------------------------//
