@@ -14,7 +14,7 @@
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(const class Request& request, const class Configuration& config)
+Response::Response(Request& request, const Configuration& config)
 	: _request(request), _config(config), _location()
 {
 	initStatusCodes();

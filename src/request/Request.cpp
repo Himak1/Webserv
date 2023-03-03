@@ -6,11 +6,11 @@
 #include <fstream>
 
 // CONSTRUCTORS
-Request::Request() { }
+Request::Request(Configuration config) : _config(config) { }
 
-Request::Request(const Request &src) { *this = src; }
+Request::Request(Request &src) { *this = src; }
 
-Request &Request::operator = (const Request &src)
+Request &Request::operator = ( Request &src)
 {
 	if (this != &src) {
 		this->_config = src._config;
@@ -32,9 +32,8 @@ Request &Request::operator = (const Request &src)
 Request::~Request() { }
 
 // PUBLIC FUNCTIONS
-void Request::initRequest(const string &request, const Configuration& config)
+void Request::initRequest(const string &request)
 {
-	_config = config;
 	// FILL vars based on server block config_file
 	_status = OK;
 	_is_upload = false;

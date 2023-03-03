@@ -16,12 +16,13 @@ using namespace std;
 class Request
 {
 	public:
-		Request();
+		Request() {};
+		Request(class Configuration config);
 		~Request();
-		Request(const Request& src);
-		Request &operator = (const Request& src);
+		Request(Request& src);
+		Request &operator = (Request& src);
 
-		void							initRequest(const string& request, const Configuration& config);
+		void							initRequest(const string& request);
 		const string					getMethod() const;
 		const string					getURI() const;
 		const string					getHTTPVersion() const;
@@ -36,7 +37,7 @@ class Request
 		int								getStatus() const;
  
 	private:
-		class Configuration&			_config;
+		class Configuration				_config;
 		class Location*					_location;
 		string							_method;
 		string 							_uri;

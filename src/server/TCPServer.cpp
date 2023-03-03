@@ -32,8 +32,7 @@ namespace http
 			// CONSTRUCTORS
 
 TCPServer::TCPServer(std::vector<Configuration*> configList) :
-		_configList(configList),
-		_nbListeningSockets(0)
+		_configList(configList), _nbListeningSockets(0)
 {
 	try {
 		setListeningSockets();
@@ -165,7 +164,10 @@ void TCPServer::receiveRequest(int idx)
 	}
 	string buffer = buff;
 	free (buff);
-	_request.initRequest(buffer, *_configList[_socketInfo[idx].config_idx]);										
+
+	class Request req(*_configList[_socketInfo[idx].config_idx]);
+	_request = req;
+	_request.initRequest(buffer);
 	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	_pollFds[idx].events = POLLOUT;

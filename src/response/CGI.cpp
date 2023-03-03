@@ -15,7 +15,7 @@
 #include <fstream>
 
 // CONSTRUCTOR
-CGI::CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize)
+CGI::CGI(Request& request, Location* location, string filepath, int clientMaxBodySize)
 	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
 	_allocation_has_failed = false;

@@ -14,7 +14,7 @@ using namespace std;
 class Response
 {
 	public:
-		Response(const class Request& request, const class Configuration& config);
+		Response(Request& request, const Configuration& config);
 		~Response();
 		string							getMessage();
 		string							getFilepath();
@@ -24,8 +24,8 @@ class Response
 		string							_extension;
 		int								_status;
 		string							_content;
-		const class Request&			_request;
-		const class Configuration&		_config;
+		Request&						_request;
+		const Configuration&			_config;
 		class Location*					_location;
 		map<int, string>				_status_codes;
 		map<string, string>				_content_types;
