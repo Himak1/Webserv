@@ -26,7 +26,7 @@ CGI::CGI(const class Request& request, class Location* location, string filepath
 
 	if (!_allocation_has_failed) {
 		try {
-			_env = new char*[_request.getEnv().size() + 3];
+			_env = new char*[_request.getEnv().size() + 1];
 		} catch (bad_alloc&) {
 			_allocation_has_failed = true;
 		}
@@ -103,8 +103,8 @@ string	CGI::pipeAndFork(int output)
 
 bool CGI::hasInfiniteLoop(string condition)
 {
-	string code = streamPhpFileDataToString(_filepath);
-	remove(code.begin(), code.end(), ' ');
+	const string code = streamPhpFileDataToString(_filepath);
+	// remove(code.begin(), code.end(), ' ');
 
 	string::size_type whilePos = code.find("while");
 	while (whilePos != string::npos) {
@@ -158,14 +158,7 @@ void	CGI::createEnv()
 	for (it = env_list.begin(); it != env_list.end(); it++)
 		addToEnv((*it).first + "=" + (*it).second, i++);
 
-	if (_location->autoIndexingOn())
-		addToEnv("directory_listing=true", i);
-	else
-		addToEnv("directory_listing=false", i);
-
-	addToEnv("upload_directory=" + _location->getUploadStore(), ++i);
-
-	_env[++i] = NULL;
+	_env[i] = NULL;
 }
 
 void	CGI::addToEnv(string value, int i)

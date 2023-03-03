@@ -12,8 +12,8 @@ struct ErrorPage
 	ErrorPage( const ErrorPage& src );
 	~ErrorPage();
 
-	const int			code;
-	const std::string	page;
+	int			code;
+	std::string	page;
 };
 
 class AConfig

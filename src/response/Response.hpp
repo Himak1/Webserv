@@ -31,13 +31,13 @@ class Response
 		map<string, string>				_content_types;
 		int								_cgi_count;
 	
-		void							setFilePath();
-		bool							tryAndSetExtension(string extension);
-		bool							searchIndexFiles(list<string> index_files);
-		void							setLocation();
+		// void							setFilePath();
+		// bool							tryAndSetExtension(string extension);
+		// bool							searchIndexFiles(list<string> index_files);
+		// void							setLocation();
 		void							initStatusCodes();
 		void							initContentTypes();
-		int								setStatus();
+		// int								setStatus();
 		string							getContent();
 		string 							deleteFile();
 		string 							uploadFile();
@@ -46,8 +46,8 @@ class Response
 		string							setCookie();
 		string 							returnErrorPage();
 		string							createErrorHTML();
-		list<Location*>::const_iterator	findConfigLocation(string target);
-		list<Location*>::const_iterator	searchLocations(string target);
+		// list<Location*>::const_iterator	findConfigLocation(string target);
+		// list<Location*>::const_iterator	searchLocations(string target);
 };
 
 #endif

@@ -165,7 +165,7 @@ void TCPServer::receiveRequest(int idx)
 	}
 	string buffer = buff;
 	free (buff);
-	_request.initRequest(buffer);										
+	_request.initRequest(buffer, *_configList[_socketInfo[idx].config_idx]);										
 	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	_pollFds[idx].events = POLLOUT;
