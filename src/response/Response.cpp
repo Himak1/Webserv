@@ -140,7 +140,7 @@ void	Response::initStatusCodes()
 	_status_codes[404] = "404 Not Found\n";
 	_status_codes[405] = "405 Method Not Allowed\n";
 	_status_codes[413] = "413 Request Entity Too Large\n";
-	_status_codes[415] = "200 OK\n";
+	_status_codes[415] = "415 Unsupported Media Type\n";
 	_status_codes[500] = "500 Internal Server Error\n";
 	_status_codes[501] = "501 Not Implemented\n";
 	_status_codes[502] = "502 Bad Gateway\n";
@@ -189,17 +189,16 @@ int		Response::setStatus()
 	// cout << "is_redirect " <<is_redirect << endl;
 
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
-	cout << _filepath << endl;
-	cout << isExistingFile(_filepath) << endl;
+
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_too_large_entity)		return REQUEST_ENTITY_TOO_LARGE;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
 	if (is_redirect)				return (*_location).getRedirect();
-	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
 	if (_extension == ".php")		return OK;
-	if (isExistingFile(_filepath))	return OK;
-	return NOT_FOUND;		
+	if (!isExistingFile(_filepath))	return NOT_FOUND;
+	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	return OK;
 }
 
 string	Response::getContent()
@@ -218,8 +217,8 @@ string	Response::deleteFile()
 		return "405 Method Not Allowed\n";
 
 	if (remove(_filepath.c_str()) != 0)
-		return "Delete failed: Invalid or non-existing file\n";
-	return "File " + _filepath + " has been deleted\n";
+		return "HTTP/1.1 400 Bad Request\n";
+	return "HTTP/1.1 200 OK\n";
 }
 
 string	Response::uploadFile()

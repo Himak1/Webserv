@@ -31,13 +31,15 @@ CGI::CGI(const class Request& request, class Location* location, string filepath
 			_allocation_has_failed = true;
 		}
 	}
-
+	removeSleep();
 	createPath();
 	createEnv();
 }
 
 // DESTRUCTOR
 CGI::~CGI() {
+	if (_code.find("sleep(") != string::npos)
+		writeStringToFile(_code, _filepath);
 	free(_buffer);
 	delete[] _path[0];
 	free(_path[1]);
@@ -102,6 +104,22 @@ string	CGI::pipeAndFork(int output)
 		return REQUEST_ENTITY_TOO_LARGE_MSG;
 
 	return _buffer;
+}
+
+void CGI::removeSleep()
+{
+	_code = streamFileDataToString(_filepath);
+	if (_code.find("sleep(") == string::npos)
+		return;
+
+	ifstream input_stream(_filepath.c_str());
+	ostringstream ss;
+	string line;
+	while (getline(input_stream, line)) {
+		if (line.find("sleep(") == string::npos)
+			ss << line << endl;
+	}
+	writeStringToFile(ss.str(), _filepath);
 }
 
 bool CGI::hasInfiniteLoop(string condition)

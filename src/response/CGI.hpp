@@ -23,9 +23,11 @@ class CGI
 		char*						_buffer;
 		char*						_path[4];
 		char**						_env;
+		string						_code;
 		bool						_allocation_has_failed;
 
 		string						pipeAndFork(int output);
+		void						removeSleep();
 		bool						hasInfiniteLoop(string condition);
 		void						createPath();
 		void						createEnv();
