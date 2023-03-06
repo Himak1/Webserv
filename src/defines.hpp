@@ -19,7 +19,7 @@
 
 // TCPServer defines
 # define POLL_TIMEOUT 200	 
-# define BUFFERSIZE 420000
+# define BUFFER_SIZE 42
 
 // CGI defines
 # define MAX_BUFFERSIZE_CGI 420000
