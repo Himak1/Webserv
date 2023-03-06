@@ -7,6 +7,7 @@
 
 # include <sys/socket.h>
 # include <sys/types.h>
+# include <netinet/in.h>
 # include <netdb.h>
 # include <poll.h>
 # include <fcntl.h>
@@ -68,10 +69,15 @@ void	TCPServer::setListeningSockets()
 		if (setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1)
 			throw SockOptionsFail();
 
-		setSocketStruct(&listener, (*it)->getPort());
+		setSocketStruct(&listener, (*it)->getPort(), (*it)->getHost());
 
 		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_address_info, sizeof(listener.socket_address_info)) == -1)
+		{
+
+			cerr << strerror(errno) << endl;
 			throw SockBindingFail();
+
+		}
 		if (listen(poll_fd.fd, SOMAXCONN) == -1)
 			throw ListenFail();
 		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
@@ -88,11 +94,44 @@ void	TCPServer::setListeningSockets()
 	}
 }
 
-void	TCPServer::setSocketStruct(t_socket *listener, int port)
+void	TCPServer::setSocketStruct(t_socket *listener, int port, std::string host)
 {
-	listener->socket_address_info.sin_addr.s_addr = INADDR_ANY;
+
+	/*
+	
+	With a few exceptions, you can generally only bind to IP addresses that are assigned 
+	to your local interfaces. You should check that 192.168.1.8 is in that class. It's a 
+	given that 127.0.0.1 will be a local interface (hence why it works), and that INADDR_ANY 
+	will work as well - that's probably the "address" you should use unless you have a real
+	 specific need to limit yourself to one interface.
+	
+	*/
+
+
+	// struct addrinfo 	hints, *res, *p;
+	// int					status;
+	// ft_memset(&hints, 0, sizeof hints);
+	// hints.ai_family = AF_INET;
+	// hints.ai_socktype = SOCK_STREAM;
+
+	// std::string po;
+	// po = to_string(port);
+
+	// if ((status = getaddrinfo(&host[0], &po[0], &hints, &res)) != 0) {
+    //     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+    //     return ;
+    // }
+	// p = res;
+	//  struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+	// listener->socket_address_info = *ipv4;
+
+
+	// listener->socket_address_info.sin_addr.s_addr = INADDR_ANY;			
+	listener->socket_address_info.sin_addr.s_addr = inet_addr (&host[0]);
 	listener->socket_address_info.sin_family = AF_INET;
 	listener->socket_address_info.sin_port = htons(port);
+
+	// freeaddrinfo(res);
 }
 
 void	TCPServer::setFileDescrOptions(int file_descr)

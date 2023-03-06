@@ -42,7 +42,7 @@ private:
 			// SERVER SETUP
 	void						setListeningSockets();
 	void						setFileDescrOptions(int);
-	void						setSocketStruct(t_socket *, int);
+	void						setSocketStruct(t_socket *, int, std::string);
 
 			// SERVER LOOP + EVENTS
 	void 						startPolling();
