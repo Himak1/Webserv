@@ -30,6 +30,7 @@ Request::~Request() { }
 // PUBLIC FUNCTIONS
 void Request::initRequest(const string &request)
 {
+	_post_body_size = 0;
 	_is_upload = false;
 	if (request.find("upload?file=") != string::npos)
 		_is_upload = true;
@@ -45,6 +46,7 @@ string 		 Request::getExtension() const { return _extension; }
 const string Request::getHeader() const { return _headers; }
 map<string, string> Request::getEnv() const { return _env; }
 bool 		 Request::isFileUpload() const { return _is_upload; }
+unsigned int Request::getPostBodySize() const { return _post_body_size; }
 
 // PRIVATE FUNCTIONS
 void Request::parseHTTPInfoAndHeaders(const string& request)
@@ -116,7 +118,9 @@ void Request::parsePost()
 {
 	string	line;
 	if (_method == "POST") {
-		string query = _headers;
+
+		string post_request = safe_substr(_headers, _headers.find("------WebKitFormBoundary"), -1);
+		_post_body_size = post_request.size();
 
 		istringstream ss(safe_substr(_headers, _headers.find("Content-Disposition:"), -1));
 		string previous_line;

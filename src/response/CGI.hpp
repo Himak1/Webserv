@@ -11,7 +11,7 @@ using namespace std;
 class CGI
 {
 	public:
-		CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize);
+		CGI(const class Request& request, class Location* location, string filepath);
 		~CGI();
 		string						ExecuteCGI();
 		char** 						getFormEnv() const;
@@ -20,13 +20,14 @@ class CGI
 		const class Request			_request;
 		const class Location*		_location;
 		string						_filepath;
-		unsigned int				_clientMaxBodySize;
 		char*						_buffer;
 		char*						_path[4];
 		char**						_env;
+		string						_code;
 		bool						_allocation_has_failed;
 
 		string						pipeAndFork(int output);
+		void						removeSleep();
 		bool						hasInfiniteLoop(string condition);
 		void						createPath();
 		void						createEnv();

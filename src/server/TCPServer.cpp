@@ -146,38 +146,35 @@ void	TCPServer::lookupActiveSocket()
 }
 
 			//	SERVER EVENT HANDLING
-void TCPServer::receiveRequest(int idx)
+void 	TCPServer::receiveRequest(int idx)
 {
-	unsigned int buffer_size = _configList[_socketInfo[idx].config_idx]->getClientMaxBodySize();
-	char * buff = (char *)calloc(buffer_size + 1, sizeof(char));
-	if (!buff) {
-		closeConnection(idx);
-		return ;
-	}
+	char buff[BUFFER_SIZE] = {0};
 
-	int bytes_received = read(_pollFds[idx].fd, buff, buffer_size);	
+	int bytes_received = read(_pollFds[idx].fd, buff, BUFFER_SIZE - 1);	
 	if (bytes_received <= 0) {
-		if (bytes_received < 0)
-			std::cerr << "Read error on socket " << idx << std::endl;
-		closeConnection(idx);
-		free (buff);
+		if (bytes_received < 0) 
+			closeConnection(idx);
+		else
+			_pollFds[idx].events = POLLOUT;
 		return ;
 	}
-	string buffer = buff;
-	free (buff);
-	_request.initRequest(buffer);										
-	class Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
-
-	_pollFds[idx].events = POLLOUT;
-	log_receive(_request.getMethod() + " " + _request.getURI() + " " + _request.getHTTPVersion());
+	buff[bytes_received] = 0;
+	_socketInfo[idx].client_request += buff;
+	
+	_pollFds[idx].events = POLLIN;
+	_pollFds[idx].events += POLLOUT;
 }
 
-void TCPServer::sendResponse(int idx)
+void 	TCPServer::sendResponse(int idx)
 {
 	int			bytes_send;
-	class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
 
 	if (serverMsgIsEmpty(idx)) {
+		_request.initRequest(_socketInfo[idx].client_request);
+		log_receive(_request.getMethod() + " " + _request.getURI() + " " + _request.getHTTPVersion());
+
+		class 		Response respons(_request, *_configList[_socketInfo[idx].config_idx]);
+		
 		_socketInfo[idx].server_message = respons.getMessage();
 		log_response(_socketInfo[idx].server_message);
 	}

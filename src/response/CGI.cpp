@@ -15,12 +15,12 @@
 #include <fstream>
 
 // CONSTRUCTOR
-CGI::CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize)
-	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
+CGI::CGI(const class Request& request, class Location* location, string filepath)
+	: _request(request), _location(location), _filepath(filepath)
 {
 	_allocation_has_failed = false;
 
-	_buffer = (char *)calloc(_clientMaxBodySize, sizeof(char));
+	_buffer = (char *)calloc(MAX_BUFFERSIZE_CGI, sizeof(char));
 	if (!_buffer)
 		_allocation_has_failed = true;
 
@@ -31,13 +31,15 @@ CGI::CGI(const class Request& request, class Location* location, string filepath
 			_allocation_has_failed = true;
 		}
 	}
-
+	removeSleep();
 	createPath();
 	createEnv();
 }
 
 // DESTRUCTOR
 CGI::~CGI() {
+	if (_code.find("sleep(") != string::npos)
+		writeStringToFile(_code, _filepath);
 	free(_buffer);
 	delete[] _path[0];
 	free(_path[1]);
@@ -106,8 +108,13 @@ string	CGI::pipeAndFork(int output)
 		return INTERNAL_SERVER_ERROR_MSG;
 	}
 
-	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
-	if (message_size >= static_cast<int>(_clientMaxBodySize))
+	int message_size = read(fd[0], _buffer, MAX_BUFFERSIZE_CGI);
+	if (message_size <= 0) {
+		if (output == STDOUT_FILENO)
+			return INTERNAL_SERVER_ERROR_MSG;
+		return "";
+	}
+	if (message_size >= static_cast<int>(MAX_BUFFERSIZE_CGI))
 		return REQUEST_ENTITY_TOO_LARGE_MSG;
 
 	return _buffer;
@@ -151,6 +158,22 @@ string	CGI::pipeAndFork(int output)
 	// 	return REQUEST_ENTITY_TOO_LARGE_MSG;
 
 	// return _buffer;
+}
+
+void CGI::removeSleep()
+{
+	_code = streamFileDataToString(_filepath);
+	if (_code.find("sleep(") == string::npos)
+		return;
+
+	ifstream input_stream(_filepath.c_str());
+	ostringstream ss;
+	string line;
+	while (getline(input_stream, line)) {
+		if (line.find("sleep(") == string::npos)
+			ss << line << endl;
+	}
+	writeStringToFile(ss.str(), _filepath);
 }
 
 bool CGI::hasInfiniteLoop(string condition)
@@ -234,8 +257,8 @@ void	CGI::addToEnv(string value, int i)
 
 void	CGI::freeEnv()
 {
-	if (_request.getEnv().empty())
-		return ;
+	// if (_request.getEnv().empty())
+	// 	return ;
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;

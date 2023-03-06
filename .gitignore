@@ -1,22 +1,26 @@
 build
 obj
 jonathan.conf
-<<<<<<< HEAD
-<<<<<<< HEAD
-.DS_Store
-.vscode
-webserv
-client.dSYM
-a.out
-
-=======
 webserv
 .DS_Store
->>>>>>> milan
-=======
 .vscode
 *.swp
 .ccls-cache
 webserv
 .DS_Store
->>>>>>> milan
+build
+obj
+.DS_Store
+.vscode
+webserv
+client.dSYM
+a.out
+siege.log
+
+webserv
+.DS_Store
+.vscode
+*.swp
+.ccls-cache
+webserv
+.DS_Store
