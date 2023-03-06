@@ -35,18 +35,6 @@ string 	Response::getFilepath() { return _filepath; }
 
 string 	Response::getMessage()
 {
-	int bytes_received = _request.getHeader().size();
-	if (bytes_received >= static_cast<int>(_config.getClientMaxBodySize())) {
-		_status = REQUEST_ENTITY_TOO_LARGE;
-		_content = getContent();
-		return  "HTTP/1.1 " 
-			+ _status_codes[_status]
-			+ _content_types[".html"]
-			+ "Content-Length: "
-			+ convertToString(_content.size()) + "\n\n"
-			+ _content;
-	}
-
 	if (_request.isFileUpload())
 		return uploadFile();
 	if (_request.getMethod() == "DELETE")
@@ -180,6 +168,13 @@ int		Response::setStatus()
 {
 	string method = _request.getMethod();
 	bool is_accepted_method			= (*_location).isMethodAccepted(method);
+
+	bool is_too_large_entity = false;
+	if ((*_location).getClientMaxBodySize() != 0)
+		is_too_large_entity		= _request.getPostBodySize() > (*_location).getClientMaxBodySize();
+	else if (_config.getClientMaxBodySize() != 0)
+		is_too_large_entity		= _request.getPostBodySize() > _config.getClientMaxBodySize();
+
 	bool is_page_not_found			= _status == NOT_FOUND
 									&& _extension != ".png"
 									&& _extension != ".jpg"
@@ -191,6 +186,7 @@ int		Response::setStatus()
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
 
 	if (is_page_not_found)			return NOT_FOUND;
+	if (is_too_large_entity)		return REQUEST_ENTITY_TOO_LARGE;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
 	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
 	if (is_redirect)				return (*_location).getRedirect();
@@ -224,15 +220,15 @@ string	Response::uploadFile()
 {
 	string method = _request.getMethod();
 	if (!(*_location).isMethodAccepted(method))
-		return "405 Method Not Allowed\n";
+		return "HTTP/1.1 405 Method Not Allowed\n";
 
 	map<string, string> env = _request.getEnv();
 	if (env.find("file") == env.end())
-		return "Upload failed: Invalid or non-existing file\n";
+		return "HTTP/1.1 400 Bad Request\n";
 
 	string input_path = env["file"];
 	if (!isExistingFile(input_path))
-		return "Upload failed: Invalid or non-existing file\n";
+		return "HTTP/1.1 400 Bad Request\n";
 
 	string file_data = streamFileDataToString(input_path);
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
@@ -240,8 +236,8 @@ string	Response::uploadFile()
 	writeStringToFile(file_data, upload_path);
 
 	if (isExistingFile(upload_path))
-		return "File '" + filename + "' succesfully uploaded to '" + upload_path + "'\n";
-	return "Upload failed\n";
+		return "HTTP/1.1 201 Created\n";
+	return "HTTP/1.1 500 Internal Server Error\n";
 }
 
 string	Response::setUploadPath(string filename)
@@ -303,7 +299,7 @@ string Response::setCookie()
 
 string Response::getCGI()
 {
-	class CGI CGI(_request, _location, _filepath, _config.getClientMaxBodySize());
+	class CGI CGI(_request, _location, _filepath);
 	string cgi = CGI.ExecuteCGI();
 	if (cgi.find("<!doctype html>") == string::npos && _cgi_count++ < 10)
 		return getCGI();

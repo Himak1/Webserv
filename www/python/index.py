@@ -11,8 +11,6 @@ read_and_print("www/templates/top.php")
 
 print ('''<div id="middle"><h3 class="">PYTHON</h3>4.2 * 10 =''')
 print (4.2 * 10)
-while True:
-	print ("asdf")
 print ('''</div>''')
 
 read_and_print("www/templates/bottom.php")

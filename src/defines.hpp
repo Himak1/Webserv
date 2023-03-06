@@ -19,8 +19,10 @@
 
 // TCPServer defines
 # define POLL_TIMEOUT 200	 
+# define BUFFERSIZE 420000
 
 // CGI defines
+# define MAX_BUFFERSIZE_CGI 420000
 # define BUFFER_ERROR_SIZE 100
 # define CGI_TIMEOUT 10
 # define INTERNAL_SERVER_ERROR_MSG \

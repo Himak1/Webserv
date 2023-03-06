@@ -148,7 +148,7 @@ void	TCPServer::lookupActiveSocket()
 			//	SERVER EVENT HANDLING
 void TCPServer::receiveRequest(int idx)
 {
-	unsigned int buffer_size = _configList[_socketInfo[idx].config_idx]->getClientMaxBodySize();
+	unsigned int buffer_size = BUFFERSIZE;
 	char * buff = (char *)calloc(buffer_size + 1, sizeof(char));
 	if (!buff) {
 		closeConnection(idx);
