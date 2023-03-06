@@ -11,13 +11,13 @@ using namespace std;
 class CGI
 {
 	public:
-		CGI(Request& request, Location* location, string filepath, int clientMaxBodySize);
+		CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize);
 		~CGI();
 		string						ExecuteCGI();
 		char** 						getFormEnv() const;
 
 	private:
-		class Request				_request;
+		const class Request			_request;
 		const class Location*		_location;
 		string						_filepath;
 		unsigned int				_clientMaxBodySize;

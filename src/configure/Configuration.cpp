@@ -12,7 +12,6 @@
 // ------------------------------------------------------------------------ //
 //							Constructors & Destructor						//
 // ------------------------------------------------------------------------ //
-Configuration::Configuration() {}
 
 Configuration::Configuration( Node* serverNode )
 	: _host("localhost"), _port(80)
@@ -28,23 +27,11 @@ Configuration::Configuration( Node* serverNode )
 	}
 }
 
-Configuration::Configuration(Configuration &src) { *this = src; }
-
-Configuration &Configuration::operator = (Configuration &src)
-{
-	if (this != &src) {
-		this->_host = src._host;
-		this->_port = src._port;
-		this->locations = src.locations;
-	}
-	return (*this);
-}
-
 Configuration::~Configuration()
 {
-	// for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
-		// delete *i;
-	// }
+	for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+		delete *i;
+	}
 }
 
 //----------------------------------Accessors-------------------------------//

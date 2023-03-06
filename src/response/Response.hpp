@@ -14,7 +14,7 @@ using namespace std;
 class Response
 {
 	public:
-		Response(Request& request, const Configuration& config);
+		Response(const class Request& request, const class Configuration& config);
 		~Response();
 		string							getMessage();
 		string							getFilepath();
@@ -24,20 +24,20 @@ class Response
 		string							_extension;
 		int								_status;
 		string							_content;
-		Request&						_request;
-		const Configuration&			_config;
+		const class Request&			_request;
+		const class Configuration&		_config;
 		class Location*					_location;
 		map<int, string>				_status_codes;
 		map<string, string>				_content_types;
 		int								_cgi_count;
 	
-		// void							setFilePath();
-		// bool							tryAndSetExtension(string extension);
-		// bool							searchIndexFiles(list<string> index_files);
-		// void							setLocation();
+		void							setFilePath();
+		bool							tryAndSetExtension(string extension);
+		bool							searchIndexFiles(list<string> index_files);
+		void							setLocation();
 		void							initStatusCodes();
 		void							initContentTypes();
-		// int								setStatus();
+		int								setStatus();
 		string							getContent();
 		string 							deleteFile();
 		string 							uploadFile();
@@ -46,8 +46,8 @@ class Response
 		string							setCookie();
 		string 							returnErrorPage();
 		string							createErrorHTML();
-		// list<Location*>::const_iterator	findConfigLocation(string target);
-		// list<Location*>::const_iterator	searchLocations(string target);
+		list<Location*>::const_iterator	findConfigLocation(string target);
+		list<Location*>::const_iterator	searchLocations(string target);
 };
 
 #endif

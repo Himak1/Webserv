@@ -12,11 +12,7 @@ class Location;
 class Configuration : public AConfig
 {
 	public:
-		Configuration();
 		Configuration( Node* serverNode );
-		Configuration(const Configuration& src);
-		Configuration(Configuration& src);
-		Configuration &operator = (Configuration& src);
 		~Configuration();
 
 		std::string		getHost() const;

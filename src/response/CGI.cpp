@@ -15,7 +15,7 @@
 #include <fstream>
 
 // CONSTRUCTOR
-CGI::CGI(Request& request, Location* location, string filepath, int clientMaxBodySize)
+CGI::CGI(const class Request& request, class Location* location, string filepath, int clientMaxBodySize)
 	: _request(request), _location(location), _filepath(filepath), _clientMaxBodySize(clientMaxBodySize)
 {
 	_allocation_has_failed = false;
@@ -26,7 +26,7 @@ CGI::CGI(Request& request, Location* location, string filepath, int clientMaxBod
 
 	if (!_allocation_has_failed) {
 		try {
-			_env = new char*[_request.getEnv().size() + 1];
+			_env = new char*[_request.getEnv().size() + 3];
 		} catch (bad_alloc&) {
 			_allocation_has_failed = true;
 		}
@@ -59,12 +59,9 @@ string CGI::ExecuteCGI()
 		if (hasInfiniteLoop("(1)"))
 			return BAD_GATEWAY_MSG;
 
-		// string errors = pipeAndFork(STDERR_FILENO);
-		// if (errors.size() > 1) {
-
-		// 	cout << "ERRORS" << errors << endl;
-		// 	return BAD_GATEWAY_MSG;
-		// }
+		string errors = pipeAndFork(STDERR_FILENO);
+		if (errors.size() > 1)
+			return BAD_GATEWAY_MSG;
 	}
 
 	return pipeAndFork(STDOUT_FILENO);
@@ -90,15 +87,12 @@ string	CGI::pipeAndFork(int output)
 		if (output == STDERR_FILENO)
 			close(STDOUT_FILENO);
 		execve(_path[0], _path, _env);
-		perror("ERROR");
 		cout << INTERNAL_SERVER_ERROR_MSG << endl;
 		exit(0);
 	}
 	close(fd[1]);
 
 	int message_size = read(fd[0], _buffer, _clientMaxBodySize);
-	if (message_size <= 0)
-		return INTERNAL_SERVER_ERROR_MSG;
 	if (message_size >= static_cast<int>(_clientMaxBodySize))
 		return REQUEST_ENTITY_TOO_LARGE_MSG;
 
@@ -107,8 +101,8 @@ string	CGI::pipeAndFork(int output)
 
 bool CGI::hasInfiniteLoop(string condition)
 {
-	const string code = streamPhpFileDataToString(_filepath);
-	// remove(code.begin(), code.end(), ' ');
+	string code = streamPhpFileDataToString(_filepath);
+	remove(code.begin(), code.end(), ' ');
 
 	string::size_type whilePos = code.find("while");
 	while (whilePos != string::npos) {
@@ -162,7 +156,14 @@ void	CGI::createEnv()
 	for (it = env_list.begin(); it != env_list.end(); it++)
 		addToEnv((*it).first + "=" + (*it).second, i++);
 
-	_env[i] = NULL;
+	if (_location->autoIndexingOn())
+		addToEnv("directory_listing=true", i);
+	else
+		addToEnv("directory_listing=false", i);
+
+	addToEnv("upload_directory=" + _location->getUploadStore(), ++i);
+
+	_env[++i] = NULL;
 }
 
 void	CGI::addToEnv(string value, int i)

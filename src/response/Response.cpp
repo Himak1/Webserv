@@ -14,19 +14,16 @@
 #include <list>
 
 // CONSTRUCTOR
-Response::Response(Request& request, const Configuration& config)
+Response::Response(const class Request& request, const class Configuration& config)
 	: _request(request), _config(config), _location()
 {
-	initStatusCodes();
-	initContentTypes();
 	_cgi_count = 0;
 	_extension = _request.getExtension();
-	_location = _request.getLocation();
-	_filepath = _request.getFilepath();
-	_status = _request.getStatus();
-	// setLocation();
-	// setFilePath();
-	// _status = setStatus();
+	initStatusCodes();
+	initContentTypes();
+	setLocation();
+	setFilePath();
+	_status = setStatus();
 	_content = getContent();
 }
 
@@ -65,84 +62,84 @@ string 	Response::getMessage()
 }
 
 // PRIVATE FUNCTIONS
-// void	Response::setFilePath()
-// {
-// 	if ((*_location).getAlias() != "") {
-// 		_filepath = (*_location).getAlias();
-// 		_extension = parseExtension(_filepath);
-// 		return;
-// 	}
+void	Response::setFilePath()
+{
+	if ((*_location).getAlias() != "") {
+		_filepath = (*_location).getAlias();
+		_extension = parseExtension(_filepath);
+		return;
+	}
 
-// 	bool is_undefined_extension = _request.getMethod() != "DELETE"
-// 									&& (*_location).getRedirect() == 0
-// 									&& _extension == "";
+	bool is_undefined_extension = _request.getMethod() != "DELETE"
+									&& (*_location).getRedirect() == 0
+									&& _extension == "";
 
-// 	if (is_undefined_extension) {	
-// 		if (tryAndSetExtension(".html")) 				return;
-// 		if (tryAndSetExtension(".htm")) 				return;
-// 		if (tryAndSetExtension(".php")) 				return;
-// 		if (tryAndSetExtension(".py")) 					return;
-// 		if (searchIndexFiles((*_location).indexFiles)) 	return;
-// 		if (searchIndexFiles(_config.indexFiles)) 		return;
-// 	}
-// 	_filepath = _config.getRoot() + _request.getURI();
-// }
+	if (is_undefined_extension) {	
+		if (tryAndSetExtension(".html")) 				return;
+		if (tryAndSetExtension(".htm")) 				return;
+		if (tryAndSetExtension(".php")) 				return;
+		if (tryAndSetExtension(".py")) 					return;
+		if (searchIndexFiles((*_location).indexFiles)) 	return;
+		if (searchIndexFiles(_config.indexFiles)) 		return;
+	}
+	_filepath = _config.getRoot() + _request.getURI();
+}
 
-// bool	Response::tryAndSetExtension(string extension)
-// {
-// 	_filepath = _config.getRoot() + _request.getURI() + extension;
-// 	if (isExistingFile(_filepath)) {
-// 		_extension = extension;
-// 		return true;
-// 	}
-// 	return false;
-// }
+bool	Response::tryAndSetExtension(string extension)
+{
+	_filepath = _config.getRoot() + _request.getURI() + extension;
+	if (isExistingFile(_filepath)) {
+		_extension = extension;
+		return true;
+	}
+	return false;
+}
 
-// bool	Response::searchIndexFiles(list<string> index_files)
-// {
-// 	_status = OK;
-// 	list<string>::iterator it = index_files.begin();
-// 	while (it != index_files.end()) {
-// 		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
-// 		if (isExistingFile(_filepath)) {
-// 			_extension = parseExtension(_filepath);
-// 			return true;
-// 		}
-// 		++it;
-// 	}
-// 	if (it == index_files.end())
-// 		_status = NOT_FOUND;
-// 	return false;
-// }
+bool	Response::searchIndexFiles(list<string> index_files)
+{
+	_status = OK;
+	list<string>::iterator it = index_files.begin();
+	while (it != index_files.end()) {
+		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
+		if (isExistingFile(_filepath)) {
+			_extension = parseExtension(_filepath);
+			return true;
+		}
+		++it;
+	}
+	if (it == index_files.end())
+		_status = NOT_FOUND;
+	return false;
+}
 
-// void	Response::setLocation()
-// {
-// 	string target = _config.getRoot() + _request.getURI();
-// 	list<Location*>::const_iterator it = findConfigLocation(target);
-// 	if (it == _config.locations.end()) {
-// 		_status = INTERNAL_SERVER_ERROR;
-// 	}
-// 	_location = (*it);
-// }
+void	Response::setLocation()
+{
+	string target = _config.getRoot() + _request.getURI();
+	list<Location*>::const_iterator it = findConfigLocation(target);
+	if (it == _config.locations.end()) {
+		_status = INTERNAL_SERVER_ERROR;
+	}
+	_location = (*it);
+}
 
-// list<Location*>::const_iterator Response::findConfigLocation(string target) {
-// 	if (target.rfind("/") == 0)
-// 		return searchLocations("/");
-// 	list<Location*>::const_iterator it = searchLocations(target);
-// 	if (it == _config.locations.end())
-// 		return findConfigLocation(go_one_directory_up(target));
-// 	return it;
-// }
+list<Location*>::const_iterator Response::findConfigLocation(string target) {
+	if (target.rfind("/") == 0)
+		return searchLocations("/");
+	list<Location*>::const_iterator it = searchLocations(target);
+	if (it == _config.locations.end())
+		return findConfigLocation(go_one_directory_up(target));
+	return it;
+}
 
-// list<Location*>::const_iterator Response::searchLocations(string target) {
-// 	list<Location*>::const_iterator it = _config.locations.begin();
-// 	while (it != _config.locations.end()) {
-// 		if ((*it)->getPath() == target)
-// 			return it;
-// 		++it;
-// 	}
-// 	return it;
-// }
+list<Location*>::const_iterator Response::searchLocations(string target) {
+	list<Location*>::const_iterator it = _config.locations.begin();
+	while (it != _config.locations.end()) {
+		if ((*it)->getPath() == target)
+			return it;
+		++it;
+	}
+	return it;
+}
 
 void	Response::initStatusCodes()
 {
@@ -179,29 +176,29 @@ void	Response::initContentTypes()
 	_content_types[".py"] 	= "Content-Type: text/html; charset=utf-8\n";
 }
 
-// int		Response::setStatus()
-// {
-// 	string method = _request.getMethod();
-// 	bool is_accepted_method			= (*_location).isMethodAccepted(method);
-// 	bool is_page_not_found			= _status == NOT_FOUND
-// 									&& _extension != ".png"
-// 									&& _extension != ".jpg"
-// 									&& _extension != ".ico"
-// 									&& _extension != ".css";
-// 	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
-// 	bool is_redirect				= (*_location).getRedirect() != 0;
+int		Response::setStatus()
+{
+	string method = _request.getMethod();
+	bool is_accepted_method			= (*_location).isMethodAccepted(method);
+	bool is_page_not_found			= _status == NOT_FOUND
+									&& _extension != ".png"
+									&& _extension != ".jpg"
+									&& _extension != ".ico"
+									&& _extension != ".css";
+	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
+	bool is_redirect				= (*_location).getRedirect() != 0;
 
-// 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
+	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
 
-// 	if (is_page_not_found)			return NOT_FOUND;
-// 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
-// 	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
-// 	if (is_redirect)				return (*_location).getRedirect();
-// 	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
-// 	if (_extension == ".php")		return OK;
-// 	if (isExistingFile(_filepath))	return OK;
-// 	return NOT_FOUND;		
-// }
+	if (is_page_not_found)			return NOT_FOUND;
+	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
+	if (!is_accepted_method)		return METHOD_NOT_ALLOWED;
+	if (is_redirect)				return (*_location).getRedirect();
+	if (is_unsupported_type)		return UNSUPPORTED_MEDIA_TYPE;
+	if (_extension == ".php")		return OK;
+	if (isExistingFile(_filepath))	return OK;
+	return NOT_FOUND;		
+}
 
 string	Response::getContent()
 {
