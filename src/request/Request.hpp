@@ -27,7 +27,7 @@ class Request
 		const string		getHeader() const;
 		map<string, string>	getEnv() const;
 		map<string, string>	getCookies() const;
-		unsigned int			getPostBodySize() const;
+		unsigned int		getPostBodySize() const;
 		bool				isCGI() const;
 		bool				isFileUpload() const;
  

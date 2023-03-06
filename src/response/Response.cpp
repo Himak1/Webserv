@@ -170,10 +170,13 @@ int		Response::setStatus()
 	bool is_accepted_method			= (*_location).isMethodAccepted(method);
 
 	bool is_too_large_entity = false;
-	if ((*_location).getClientMaxBodySize() != 0)
+	if ((*_location).getClientMaxBodySize() != UINT_MAX)
 		is_too_large_entity		= _request.getPostBodySize() > (*_location).getClientMaxBodySize();
-	else if (_config.getClientMaxBodySize() != 0)
+	else if (_config.getClientMaxBodySize() != UINT_MAX)
 		is_too_large_entity		= _request.getPostBodySize() > _config.getClientMaxBodySize();
+
+	// cout << "(*_location).getClientMaxBodySize() " <<(*_location).getClientMaxBodySize() << endl;
+	// cout << "_config.getClientMaxBodySize() " <<_config.getClientMaxBodySize() << endl;
 
 	bool is_page_not_found			= _status == NOT_FOUND
 									&& _extension != ".png"
@@ -182,9 +185,12 @@ int		Response::setStatus()
 									&& _extension != ".css";
 	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
 	bool is_redirect				= (*_location).getRedirect() != 0;
+	// cout << "(*_location).getRedirect() " << (*_location).getRedirect() << endl;
+	// cout << "is_redirect " <<is_redirect << endl;
 
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
-
+	cout << _filepath << endl;
+	cout << isExistingFile(_filepath) << endl;
 	if (is_page_not_found)			return NOT_FOUND;
 	if (is_too_large_entity)		return REQUEST_ENTITY_TOO_LARGE;
 	if (is_correct_HTTP)			return HTTP_VERSION_NOT_SUPPORTED;
@@ -271,6 +277,11 @@ string Response::returnErrorPage()
 
 string Response::createErrorHTML()
 {
+	// if (!isExistingFile(_filepath)) {
+	// 	_status = NOT_FOUND;
+	// 	return returnErrorPage();
+	// }
+
 	string meta  = "";
 	string url = (*_location).getRedirectURI();
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)
