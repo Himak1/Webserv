@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <climits>
 #include <cctype>
+#include <cerrno>
 #include "AConfig.hpp"
 #include "Node.hpp"
 

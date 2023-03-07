@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <cstdio>
+#include <climits>
 #include <string>
 #include <list>
 
