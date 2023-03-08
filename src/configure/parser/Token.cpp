@@ -9,7 +9,7 @@ Token::Token()
 {
 }
 
-Token::Token( int type, std::string tokenString, int lineNumber )
+Token::Token( int type, string tokenString, int lineNumber )
 	: _tokenType(type), _token(tokenString), _lineNumber(lineNumber)
 {
 }
@@ -40,10 +40,10 @@ Token&	Token::operator=( Token const& rhs )
 	return *this;
 }
 
-std::ostream&	operator<<( std::ostream& o, Token const& i )
+ostream&	operator<<( ostream& o, Token const& i )
 {
 	o	<< "Token: " << i.getToken() << '\n'
-		<< "Type: " << i.getTokenType() << std::endl;
+		<< "Type: " << i.getTokenType() << endl;
 	return o;
 }
 
@@ -57,7 +57,7 @@ int	Token::getTokenType() const
 	return (_tokenType);
 }
 
-std::string	Token::getToken() const
+string	Token::getToken() const
 {
 	return (_token);
 }

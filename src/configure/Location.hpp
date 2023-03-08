@@ -5,6 +5,8 @@
 # include <string>
 # include "AConfig.hpp"
 
+using namespace std;
+
 class Node;
 
 class Location : public AConfig
@@ -13,12 +15,12 @@ class Location : public AConfig
 		Location( Node* locationNode );
 		~Location();
 
-		std::string	getPath() const;
-		std::string	getAlias() const;
-		std::string	getCgiExtension() const;
-		std::string	getCgiPath() const;
-		bool		isMethodAccepted( std::string& httpMethod ) const;
-		bool		autoIndexingOn() const;	
+		string	getPath() const;
+		string	getAlias() const;
+		string	getCgiExtension() const;
+		string	getCgiPath() const;
+		bool	isMethodAccepted( string& httpMethod ) const;
+		bool	autoIndexingOn() const;	
 	private:
 		void	convertLocation( Node* locationNode );
 		void	convertPath( Node* node );
@@ -26,17 +28,17 @@ class Location : public AConfig
 		void	convertAcceptedMethods( Node* node );
 		void	convertAutoIndex( Node* autoIndex );
 
-		std::string	_path;
-		std::string	_alias;
-		std::string	_cgiExtension;
-		std::string	_cgiPath;
-		std::string	_acceptedMethods[4];
-		bool		_autoIndex;
+		string	_path;
+		string	_alias;
+		string	_cgiExtension;
+		string	_cgiPath;
+		string	_acceptedMethods[4];
+		bool	_autoIndex;
 };
 
-std::ostream&	operator<<( std::ostream& o, const Location& location );
+ostream&	operator<<( ostream& o, const Location& location );
 
-class InvalidValueInLocationBlock : public std::exception
+class InvalidValueInLocationBlock : public exception
 {
 	public:
 		const char*	what() const throw() {

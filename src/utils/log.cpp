@@ -31,7 +31,7 @@ void log_receive(const string &message)
 	cout << " > " << message << endl;
 }
 
-void exitWithError(const std::string &errorMessage)
+void exitWithError(const string &errorMessage)
 {
 	printTimestamp();
 	cout << " ERROR    " << errorMessage << endl;

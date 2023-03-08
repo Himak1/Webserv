@@ -20,26 +20,26 @@ Configuration::Configuration( Node* serverNode )
 	try {
 		navigateNode(serverNode);
 	}
-	catch (std::exception& e) {
-		for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+	catch (exception& e) {
+		for (list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
 			delete *i;
 		}
 		throw;
 	}
 	if (locations.empty())
-		throw std::runtime_error("No location block specified");
+		throw runtime_error("No location block specified");
 }
 
 Configuration::~Configuration()
 {
-	for (std::list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
+	for (list<Location*>::iterator i = locations.begin(); i != locations.end(); ++i) {
 		delete *i;
 	}
 }
 
 //----------------------------------Accessors-------------------------------//
 
-std::string 		Configuration::getHost() const
+string 		Configuration::getHost() const
 {
 	return (this->_host);
 }
@@ -56,12 +56,12 @@ unsigned int	Configuration::getPort() const
 
 //----------------------------------External Functions----------------------//
 
-std::ostream&	operator<<( std::ostream& o, const Configuration& config )
+ostream&	operator<<( ostream& o, const Configuration& config )
 {
 	o	<< "host: " << config.getHost() << '\n'
 		<< "port: " << config.getPort() << '\n'
 		<< (AConfig&)config << "\n\n";
-	for (std::list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
+	for (list<Location*>::const_iterator i = config.locations.begin(); i != config.locations.end(); ++i)
 	{
 		o	<< "----location----" << '\n'
 			<< **i << '\n';

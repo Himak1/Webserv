@@ -12,7 +12,7 @@ Location::Location( Node* locationNode )
 	try {
 		convertLocation(locationNode);
 	}
-	catch (std::exception& e) {
+	catch (exception& e) {
 		throw;
 	}
 }
@@ -29,7 +29,7 @@ Location::~Location()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-std::ostream&	operator<<( std::ostream& o, const Location& location )
+ostream&	operator<<( ostream& o, const Location& location )
 {
 	o	<< "path: " << location.getPath() << '\n'
 		<< (AConfig&)location << '\n'
@@ -43,26 +43,26 @@ std::ostream&	operator<<( std::ostream& o, const Location& location )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-std::string	Location::getPath() const
+string	Location::getPath() const
 { return (_path);
 }
 
-std::string	Location::getAlias() const
+string	Location::getAlias() const
 {
 	return (_alias);
 }
 
-std::string	Location::getCgiExtension() const
+string	Location::getCgiExtension() const
 {
 	return (_cgiExtension);
 }
 
-std::string	Location::getCgiPath() const
+string	Location::getCgiPath() const
 {
 	return (_cgiPath);
 }
 
-bool	Location::isMethodAccepted( std::string& httpMethod ) const
+bool	Location::isMethodAccepted( string& httpMethod ) const
 {
 	for (int i = 0; i < 3; i++)
 	{

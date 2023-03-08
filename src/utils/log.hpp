@@ -8,6 +8,6 @@ using namespace std;
 
 void	log_receive(const string &message);
 void	log_response(const string &message);
-void    exitWithError(const std::string &errorMessage);
+void    exitWithError(const string &errorMessage);
 
 #endif

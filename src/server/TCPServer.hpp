@@ -17,23 +17,23 @@ namespace http
 typedef struct s_socket {
 	unsigned int		socket_address_len;
 	struct sockaddr_in	socket_address_info;
-	std::string			server_message;
-	std::string			client_request;
+	string			server_message;
+	string			client_request;
 	unsigned int		config_idx;
 }	t_socket;
 
 class TCPServer
 {
 public:
-	TCPServer(std::vector<Configuration*>);
+	TCPServer(vector<Configuration*>);
 	~TCPServer();
 
 	
 private:
 			// PRIVATE MEMBERS
-	std::vector<Configuration*>	_configList;
-	std::vector<struct pollfd>	_pollFds;			
-	std::vector<t_socket>		_socketInfo;
+	vector<Configuration*>	_configList;
+	vector<struct pollfd>	_pollFds;			
+	vector<t_socket>		_socketInfo;
 	class Request				_request;
 
 	unsigned int				_nbListeningSockets;

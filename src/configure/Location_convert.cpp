@@ -13,23 +13,23 @@ void	Location::convertCgiPass( Node* cgiPass )
 	_cgiExtension = (*i)->getTerminal();
 	_cgiPath = (*++i)->getTerminal();
 	if (_cgiExtension != ".php" && _cgiExtension != ".py")
-		throw std::runtime_error("invalid CGI extension");
+		throw runtime_error("invalid CGI extension");
 	if (stat(_cgiPath.c_str(), &buf) != 0)
-		throw std::runtime_error("invalid cgi path");
+		throw runtime_error("invalid cgi path");
 }
 
 void	Location::convertAcceptedMethods( Node* allowedMethods )
 {
 	NodeList::const_iterator	iter = allowedMethods->getChildrenBegin();
-	std::string					supportedMethods[3] = {"GET", "POST", "DELETE"};
-	std::string*				ptr;
+	string					supportedMethods[3] = {"GET", "POST", "DELETE"};
+	string*				ptr;
 	int							i = 0; 
   
 	while (iter != allowedMethods->getChildrenEnd())
 	{
-		ptr = std::find(supportedMethods, supportedMethods + 3, (*iter)->getTerminal());
+		ptr = find(supportedMethods, supportedMethods + 3, (*iter)->getTerminal());
 		if (ptr == supportedMethods + 3)
-			throw std::runtime_error("unsupported HTTP method in configuration file");
+			throw runtime_error("unsupported HTTP method in configuration file");
 		_acceptedMethods[i] = (*iter)->getTerminal();
 		++iter;
 		i++;
@@ -38,14 +38,14 @@ void	Location::convertAcceptedMethods( Node* allowedMethods )
 
 void	Location::convertAutoIndex( Node* autoIndex )
 {
-	std::string	boolString = (*autoIndex->getChildrenBegin())->getTerminal();
+	string	boolString = (*autoIndex->getChildrenBegin())->getTerminal();
 
 	if (boolString == "on")
 		_autoIndex = true;
 	else if (boolString == "off")
 		_autoIndex = false;
 	else
-		throw std::runtime_error("auto_index is not equal to 'on' or 'off'");
+		throw runtime_error("auto_index is not equal to 'on' or 'off'");
 }
 
 void	Location::convertLocation( Node* location )
@@ -87,10 +87,10 @@ void	Location::convertLocation( Node* location )
 				convertReturn(*i);
 				break;
 			default:
-				throw std::exception();
+				throw exception();
 		}
 		if ((*i)->getNodeType() != N_ERROR_PAGE
 			&& isDuplicate(location, (*i)->getNodeType()))
-			throw std::runtime_error("duplicative directives");
+			throw runtime_error("duplicative directives");
 	}
 }

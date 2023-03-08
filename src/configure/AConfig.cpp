@@ -7,7 +7,7 @@
 
 //	ErrorPage Constructors & Destructors
 
-ErrorPage::ErrorPage( int codeArg, std::string pageArg )
+ErrorPage::ErrorPage( int codeArg, string pageArg )
 	: code(codeArg), page(pageArg)
 {
 }
@@ -34,10 +34,10 @@ AConfig::~AConfig()
 
 //	Overloads	//
 
-std::ostream&	operator<<( std::ostream& o, const AConfig& config )
+ostream&	operator<<( ostream& o, const AConfig& config )
 {
 	o << "index files: ";
-	for (std::list<std::string>::const_iterator i = config.indexFiles.begin(); i != config.indexFiles.end(); ++i)
+	for (list<string>::const_iterator i = config.indexFiles.begin(); i != config.indexFiles.end(); ++i)
 	{
 		o << *i << " ";
 	}
@@ -51,14 +51,14 @@ std::ostream&	operator<<( std::ostream& o, const AConfig& config )
 
 //	Public Methods	//
 
-std::string	AConfig::getRoot() const
+string	AConfig::getRoot() const
 {
 	return (_root);
 }
 
-std::string	AConfig::getErrorPage( int errorCode ) const
+string	AConfig::getErrorPage( int errorCode ) const
 {
-	std::list<ErrorPage>::const_iterator i = _errorPages.begin();
+	list<ErrorPage>::const_iterator i = _errorPages.begin();
 
 	while (i != _errorPages.end())
 	{
@@ -69,7 +69,7 @@ std::string	AConfig::getErrorPage( int errorCode ) const
 	return ("");
 }
 
-std::string	AConfig::getUploadStore() const
+string	AConfig::getUploadStore() const
 {
 	return (_uploadStore);
 }
@@ -83,7 +83,7 @@ int	AConfig::getRedirect() const
 	return (_redirectCode);
 }
 
-std::string	AConfig::getRedirectURI() const
+string	AConfig::getRedirectURI() const
 {
 	return (_redirectURI);
 }
@@ -101,7 +101,7 @@ bool	AConfig::isDuplicate(Node* serverNode, int node_type)
 	return false;
 }
 
-std::string	AConfig::convertNodeToString( Node* node )
+string	AConfig::convertNodeToString( Node* node )
 {
 	NodeList::const_iterator i = node->getChildrenBegin();
 
@@ -111,21 +111,21 @@ std::string	AConfig::convertNodeToString( Node* node )
 unsigned int	AConfig::convertNodeToUInt( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
-	std::string					numberString;
+	string					numberString;
 	unsigned long				output;
 
 	numberString = (*i)->getTerminal();
 	output = strtoul(numberString.c_str(), NULL, 10);
 	
 	if (errno == ERANGE)
-		throw std::runtime_error("unsigned long overflow");
+		throw runtime_error("unsigned long overflow");
 	if (output > UINT_MAX)
-		throw std::runtime_error("unsigned int overflow");
+		throw runtime_error("unsigned int overflow");
 
 	if (output == 0 && numberString != "0")
-		throw std::runtime_error("cannot convert parameter to number");
+		throw runtime_error("cannot convert parameter to number");
 	for (int it = 1; it < static_cast<int>(numberString.size()); it++) {
-		if (!isdigit(numberString[it])) throw std::runtime_error("cannot convert parameter to number");
+		if (!isdigit(numberString[it])) throw runtime_error("cannot convert parameter to number");
 	}
 	return ((unsigned int) output);
 }
@@ -147,9 +147,9 @@ void	AConfig::convertErrorPage( Node* node )
 
 	unsigned int code = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (code == 0 && (*i)->getTerminal()[0] != '0')
-		throw std::runtime_error("cannot convert parameter to number");
+		throw runtime_error("cannot convert parameter to number");
 	++i;
-	std::string	page = (*i)->getTerminal();
+	string	page = (*i)->getTerminal();
 	_errorPages.push_back(ErrorPage(code, page));
 }
 
@@ -164,7 +164,7 @@ void	AConfig::convertClientMaxBodySize( Node* node )
 {
 	_clientMaxBodySize = convertNodeToUInt(node);
 	if (_clientMaxBodySize == 0)
-		throw std::runtime_error("client_max_body_size cannot be set to 0");
+		throw runtime_error("client_max_body_size cannot be set to 0");
 }
 
 void	AConfig::convertReturn( Node* node )
@@ -173,9 +173,9 @@ void	AConfig::convertReturn( Node* node )
 
 	_redirectCode = strtoul((*i)->getTerminal().c_str(), NULL, 10);
 	if (_redirectCode == 0 && (*i)->getTerminal()[0] != '0')
-		throw std::runtime_error("return parameter cannot be converted to number");
+		throw runtime_error("return parameter cannot be converted to number");
 	if (_redirectCode < 199 || _redirectCode > 599)
-		throw std::runtime_error("invalid return code");
+		throw runtime_error("invalid return code");
 	++i;
 	_redirectURI = (*i)->getTerminal();
 }

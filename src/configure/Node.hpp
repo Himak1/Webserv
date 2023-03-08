@@ -6,6 +6,8 @@
 # include <string>
 # include <list>
 
+using namespace std;
+
 enum NodeTypes
 {
 	N_SERVER = 100,
@@ -28,17 +30,17 @@ enum NodeTypes
 };
 
 class Node;
-typedef std::list<Node*> NodeList;
+typedef list<Node*> NodeList;
 
 class Node
 {
 	public:
 		Node( int nodeType );
-		Node( int nodeType, std::string terminal);
+		Node( int nodeType, string terminal);
 		~Node();
 
 		int							getNodeType() const;
-		std::string					getTerminal() const;
+		string					getTerminal() const;
 		NodeList::const_iterator	getChildrenBegin() const;
 		NodeList::const_iterator	getChildrenEnd() const;
 		int							addChild( Node* newNode );
@@ -46,10 +48,10 @@ class Node
 		Node();
 
 		int					_nodeType;
-		std::string			_terminal;
+		string			_terminal;
 		NodeList			_children;
 };
 
-std::ostream&	operator<<( std::ostream& o, Node const& i );
+ostream&	operator<<( ostream& o, Node const& i );
 
 #endif

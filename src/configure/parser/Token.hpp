@@ -6,6 +6,8 @@
 # include <string>
 # include <map>
 
+using namespace std;
+
 enum TokenTypes
 {
 	T_STRING = 0,
@@ -35,27 +37,27 @@ enum TokenTypes
 	T_HOME_DIR
 };
 
-typedef std::map<std::string, int> TokenMap;
+typedef map<string, int> TokenMap;
 
 class Token
 {
 	public:
 		Token();
-		Token( int type, std::string tokenString, int lineNumber );
+		Token( int type, string tokenString, int lineNumber );
 		Token( Token const& src );
 		~Token();
 
 		Token&		operator=( Token const& rhs );
 
 		int			getTokenType() const;
-		std::string	getToken() const;
+		string		getToken() const;
 		int			getLineNumber() const;
 	private:
 		int			_tokenType;
-		std::string	_token;
+		string		_token;
 		int			_lineNumber;
 };
 
-std::ostream&		operator<<( std::ostream& o, Token const& i );
+ostream&		operator<<( ostream& o, Token const& i );
 
 #endif

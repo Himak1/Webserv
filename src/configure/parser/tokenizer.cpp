@@ -6,7 +6,7 @@
 #include "TokenStream.hpp"
 #include "Token.hpp"
 
-void	initMap( std::map<std::string, int>& tokenMap )
+void	initMap( map<string, int>& tokenMap )
 {
 	tokenMap["server"]			= T_SERVER;
 	tokenMap["server_name"]		= T_SERVER_NAME;
@@ -34,7 +34,7 @@ void	initMap( std::map<std::string, int>& tokenMap )
 	tokenMap["~"]				= T_HOME_DIR;
 }
 
-int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
+int	checkTokenType( const TokenMap& tokenMap, const string& token )
 {
 	TokenMap::const_iterator	it;
 
@@ -44,7 +44,7 @@ int	checkTokenType( const TokenMap& tokenMap, const std::string& token )
 	return (it->second);
 }
 
-bool	isEnd(std::string::iterator it)
+bool	isEnd(string::iterator it)
 {
 	if (*it == ' '
 		|| *it == '\t'
@@ -54,13 +54,13 @@ bool	isEnd(std::string::iterator it)
 	return false;
 }
 
-std::list<std::string>	splitLineByDelimiters( std::string line )
+list<string>	splitLineByDelimiters( string line )
 {
-	std::list<std::string>	words;
+	list<string>	words;
 	size_t	start = 0;
 	size_t	ending = 0;
 
-	while ( start != std::string::npos && start != line.size() && line[start] != '#')
+	while ( start != string::npos && start != line.size() && line[start] != '#')
 	{
 		ending = line.find_first_of(" \t\v;#", start);
 		if (ending - start != 0)
@@ -72,7 +72,7 @@ std::list<std::string>	splitLineByDelimiters( std::string line )
 			start = ending;
 			continue ;
 		}
-		if (ending != std::string::npos && line[ending] == '#')
+		if (ending != string::npos && line[ending] == '#')
 			break ;
 		ending = line.find_first_not_of(" \t\v", ending);
 		start = ending;
@@ -80,11 +80,11 @@ std::list<std::string>	splitLineByDelimiters( std::string line )
 	return (words);
 }
 
-std::list<Token>	createTokensFromStrings( std::list<std::string> splitStrings, TokenMap tokenMap, int lineCount )
+list<Token>	createTokensFromStrings( list<string> splitStrings, TokenMap tokenMap, int lineCount )
 {
-	std::list<Token>	tokensFromLine;
+	list<Token>	tokensFromLine;
 
-	for (std::list<std::string>::iterator it = splitStrings.begin(); it != splitStrings.end(); ++it)
+	for (list<string>::iterator it = splitStrings.begin(); it != splitStrings.end(); ++it)
 	{
 		if ((*it)[0] == '#')
 			break ;
@@ -93,27 +93,27 @@ std::list<Token>	createTokensFromStrings( std::list<std::string> splitStrings, T
 	return (tokensFromLine);
 }
 
-std::list<Token>	createTokenList( std::ifstream& file, TokenMap tokenMap )
+list<Token>	createTokenList( ifstream& file, TokenMap tokenMap )
 {
-	std::list<Token>	tokenList;
-	std::string			line;
+	list<Token>	tokenList;
+	string			line;
 	int					lineCount = 1;
 
-	while (std::getline(file, line))
+	while (getline(file, line))
 	{
-		std::list<std::string>	splitStrings = splitLineByDelimiters(line);
-		std::list<Token> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap, lineCount);
+		list<string>	splitStrings = splitLineByDelimiters(line);
+		list<Token> tokensFromLine = createTokensFromStrings(splitStrings, tokenMap, lineCount);
 		tokenList.splice(tokenList.end(), tokensFromLine);
 		lineCount++;
 	}
 	return (tokenList);
 }
 
-TokenStream*	tokenizer( std::ifstream& file )
+TokenStream*	tokenizer( ifstream& file )
 {
 	TokenMap				tokenMap;
 
 	initMap(tokenMap);
-	std::list<Token>	tokenList = createTokenList(file, tokenMap);
+	list<Token>	tokenList = createTokenList(file, tokenMap);
 	return (new TokenStream(tokenList));
 }

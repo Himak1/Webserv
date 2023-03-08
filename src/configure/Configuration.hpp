@@ -6,6 +6,8 @@
 # include <vector>
 # include "AConfig.hpp"
 
+using namespace std;
+
 class Node;
 class Location;
 
@@ -15,18 +17,18 @@ class Configuration : public AConfig
 		Configuration( Node* serverNode );
 		~Configuration();
 
-		std::string		getHost() const;
+		string			getHost() const;
 		unsigned int	getPort() const;
 
-		std::list<Location*>	locations;
+		list<Location*>	locations;
 	private:
 		void			navigateNode( Node* serverNode );
 		void			convertPort( Node* listen );
 
-		std::string				_host; // server_name
-		unsigned int			_port; // listen
+		string			_host; // server_name
+		unsigned int	_port; // listen
 };
 
-std::ostream&	operator<<( std::ostream& o, const Configuration& config );
+ostream&	operator<<( ostream& o, const Configuration& config );
 
 #endif

@@ -3,6 +3,8 @@
 #include "TokenStream.hpp"
 #include "../Node.hpp"
 
+using namespace std;
+
 bool	blockIsOpen( TokenStream& tokensToParse, int& status )
 {
 	if (status == 0)
@@ -53,15 +55,15 @@ bool	accept( TokenStream& tokensToParse, int expectedToken )
 
 void	printIncompleteBlock()
 {
-	std::cout	<< "Syntax Error: incomplete block or statement on last line"
-				<< std::endl;
+	cout	<< "Syntax Error: incomplete block or statement on last line"
+				<< endl;
 }
 
 void	printUnexpectedChar( TokenStream& tokensToParse )
 {
-	std::cout	<< "Syntax Error: unexpected character(s) '"
+	cout	<< "Syntax Error: unexpected character(s) '"
 				<< tokensToParse.getTokenString() << "' on line "
-				<< tokensToParse.getCurrentLine() << std::endl;
+				<< tokensToParse.getCurrentLine() << endl;
 }
 
 bool	expect( TokenStream& tokensToParse, int expectedToken )

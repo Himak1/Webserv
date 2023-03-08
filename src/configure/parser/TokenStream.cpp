@@ -1,6 +1,6 @@
 #include "TokenStream.hpp"
 
-TokenStream::TokenStream( std::list<Token> tokenList )
+TokenStream::TokenStream( list<Token> tokenList )
 	: _tokenList(tokenList), _currentToken(_tokenList.begin())
 {
 }
@@ -10,7 +10,7 @@ TokenStream::~TokenStream()
 	_tokenList.clear();
 }
 
-std::string	TokenStream::getTokenString()
+string	TokenStream::getTokenString()
 {
 	return ((*_currentToken).getToken());
 }

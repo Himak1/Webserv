@@ -8,7 +8,7 @@ void	Configuration::convertPort( Node* listen )
 {
 	_port = convertNodeToUInt(listen);
 	if (_port > 65535)
-		throw std::runtime_error("invalid port number in configuration file");
+		throw runtime_error("invalid port number in configuration file");
 }
 
 void	Configuration::navigateNode( Node* serverNode )
@@ -43,11 +43,11 @@ void	Configuration::navigateNode( Node* serverNode )
 				convertReturn(*i);
 				break;
 			default:
-				throw std::exception();
+				throw exception();
 		}
 		if ((*i)->getNodeType() != N_ERROR_PAGE
 			&& (*i)->getNodeType() != N_LOCATION
 			&& isDuplicate(serverNode, (*i)->getNodeType()))
-			throw std::runtime_error("duplicative directives");
+			throw runtime_error("duplicative directives");
 	}
 }

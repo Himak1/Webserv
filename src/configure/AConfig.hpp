@@ -4,16 +4,18 @@
 # include <string>
 # include <list>
 
+using namespace std;
+
 class Node;
 
 struct ErrorPage
 {
-	ErrorPage( int codeArg, std::string pageArg );
+	ErrorPage( int codeArg, string pageArg );
 	ErrorPage( const ErrorPage& src );
 	~ErrorPage();
 
 	const int			code;
-	const std::string	page;
+	const string	page;
 };
 
 class AConfig
@@ -21,38 +23,38 @@ class AConfig
 	public:
 		~AConfig();
 
-		std::string				getRoot() const;
-		std::string				getErrorPage( int errorCode ) const;
-		std::string				getUploadStore() const;
-		unsigned int			getClientMaxBodySize() const;
-		int						getRedirect() const; // returns 0 if not a redirect
-		std::string				getRedirectURI() const; // returns empty string if not a redirect
+		string			getRoot() const;
+		string			getErrorPage( int errorCode ) const;
+		string			getUploadStore() const;
+		unsigned int	getClientMaxBodySize() const;
+		int				getRedirect() const; // returns 0 if not a redirect
+		string			getRedirectURI() const; // returns empty string if not a redirect
 
-		std::list<std::string>	indexFiles;
+		list<string>	indexFiles;
 	protected:
 		AConfig();
 
-		bool					isDuplicate(Node* serverNode, int node_type);
-		std::string				convertNodeToString( Node* node );
-		std::list<std::string>	convertMultiNodesToStrings( Node* node );
-		unsigned int			convertNodeToUInt( Node* node );
-		void					convertIndexFiles( Node* node );
-		void					convertErrorPage( Node* node );
-		void					convertUploadStore( Node* node );
-		void					convertClientMaxBodySize( Node* node );
-		void					convertReturn( Node* node );
+		bool			isDuplicate(Node* serverNode, int node_type);
+		string			convertNodeToString( Node* node );
+		list<string>	convertMultiNodesToStrings( Node* node );
+		unsigned int	convertNodeToUInt( Node* node );
+		void			convertIndexFiles( Node* node );
+		void			convertErrorPage( Node* node );
+		void			convertUploadStore( Node* node );
+		void			convertClientMaxBodySize( Node* node );
+		void			convertReturn( Node* node );
 	
-		bool					validatePath();
-		bool					validateNumberAndRange( int min, int max );	
+		bool			validatePath();
+		bool			validateNumberAndRange( int min, int max );	
 
-		std::string				_root;
-		std::list<ErrorPage>	_errorPages;
-		std::string				_uploadStore;
-		unsigned int			_clientMaxBodySize;
-		int						_redirectCode;
-		std::string				_redirectURI;
+		string			_root;
+		list<ErrorPage>	_errorPages;
+		string			_uploadStore;
+		unsigned int	_clientMaxBodySize;
+		int				_redirectCode;
+		string			_redirectURI;
 };
 
-std::ostream&	operator<<( std::ostream& o, const AConfig& config );
+ostream&	operator<<( ostream& o, const AConfig& config );
 
 #endif

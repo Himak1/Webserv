@@ -14,7 +14,7 @@ Node::Node( int nodeType )
 {
 }
 
-Node::Node( int nodeType, std::string terminal )
+Node::Node( int nodeType, string terminal )
 	: _nodeType(nodeType), _terminal(terminal)
 {
 }
@@ -25,7 +25,7 @@ Node::Node( int nodeType, std::string terminal )
 
 Node::~Node()
 {
-	std::list<Node*>::iterator	it;
+	list<Node*>::iterator	it;
 	for (it = _children.begin(); it != _children.end(); ++it)
 	{
 		delete *it;
@@ -36,7 +36,7 @@ Node::~Node()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-std::ostream&	operator<<( std::ostream& o, Node const& i )
+ostream&	operator<<( ostream& o, Node const& i )
 {
 	o << i.getNodeType();
 	return o;
@@ -51,7 +51,7 @@ int	Node::getNodeType() const
 	return (_nodeType);
 }
 
-std::string	Node::getTerminal() const
+string	Node::getTerminal() const
 {
 	return (_terminal);
 }
