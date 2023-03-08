@@ -155,7 +155,6 @@ string	Response::uploadFile()
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
 	string upload_path = setUploadPath(filename);
 	writeStringToFile(file_data, upload_path);
-	cout << upload_path << endl;
 	if (isExistingFile(upload_path))
 		return "HTTP/1.1 201 Created\n";
 	return "HTTP/1.1 500 Internal Server Error\n";
