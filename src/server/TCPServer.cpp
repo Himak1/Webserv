@@ -68,7 +68,7 @@ void	TCPServer::setListeningSockets()
 		if (setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1)
 			throw SockOptionsFail();
 
-		setSocketStruct(&listener, (*it)->getPort());
+		setSocketStruct(&listener, (*it)->getPort(), (*it)->getHost());
 
 		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_address_info, sizeof(listener.socket_address_info)) == -1)
 			throw SockBindingFail();
@@ -88,11 +88,24 @@ void	TCPServer::setListeningSockets()
 	}
 }
 
-void	TCPServer::setSocketStruct(t_socket *listener, int port)
+void	TCPServer::setSocketStruct(t_socket *listener, int port, std::string host)
 {
-	listener->socket_address_info.sin_addr.s_addr = INADDR_ANY;
-	listener->socket_address_info.sin_family = AF_INET;
-	listener->socket_address_info.sin_port = htons(port);
+	struct addrinfo 	setup, *result;
+	int					status;
+	ft_memset(&setup, 0, sizeof setup);
+	setup.ai_family = AF_INET;
+	setup.ai_socktype = SOCK_STREAM;
+
+	std::string po;
+	po = to_string(port);					/// mag niet! C+11, justin vragen om port als char* /string
+
+	if ((status = getaddrinfo(&host[0], &po[0], &setup, &result)) != 0) {
+        cerr << gai_strerror(status) << endl;;
+        std::exit(1);
+    }
+	struct sockaddr_in *ipv4 = (struct sockaddr_in *)result->ai_addr;
+	listener->socket_address_info = *ipv4;
+	freeaddrinfo(result);
 }
 
 void	TCPServer::setFileDescrOptions(int file_descr)
