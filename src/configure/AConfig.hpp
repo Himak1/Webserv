@@ -32,6 +32,7 @@ class AConfig
 	protected:
 		AConfig();
 
+		bool					isDuplicate(Node* serverNode, int node_type);
 		std::string				convertNodeToString( Node* node );
 		std::list<std::string>	convertMultiNodesToStrings( Node* node );
 		unsigned int			convertNodeToUInt( Node* node );

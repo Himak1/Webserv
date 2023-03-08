@@ -89,5 +89,8 @@ void	Location::convertLocation( Node* location )
 			default:
 				throw std::exception();
 		}
+		if ((*i)->getNodeType() != N_ERROR_PAGE
+			&& isDuplicate(location, (*i)->getNodeType()))
+			throw std::runtime_error("duplicative directives");
 	}
 }

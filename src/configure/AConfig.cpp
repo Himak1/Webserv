@@ -89,6 +89,17 @@ std::string	AConfig::getRedirectURI() const
 }
 
 //	Protected Methods	//
+bool	AConfig::isDuplicate(Node* serverNode, int node_type)
+{
+	int counter = 0;
+	for (NodeList::const_iterator i = serverNode->getChildrenBegin(); i != serverNode->getChildrenEnd(); ++i) {
+		if ((*i)->getNodeType() == node_type)
+			counter++;
+	}
+	if (counter > 1)
+		return true;
+	return false;
+}
 
 std::string	AConfig::convertNodeToString( Node* node )
 {

@@ -45,5 +45,9 @@ void	Configuration::navigateNode( Node* serverNode )
 			default:
 				throw std::exception();
 		}
+		if ((*i)->getNodeType() != N_ERROR_PAGE
+			&& (*i)->getNodeType() != N_LOCATION
+			&& isDuplicate(serverNode, (*i)->getNodeType()))
+			throw std::runtime_error("duplicative directives");
 	}
 }
