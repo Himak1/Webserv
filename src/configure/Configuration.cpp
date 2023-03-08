@@ -2,6 +2,7 @@
 #include "Configuration.hpp"
 #include "Location.hpp"
 #include "Node.hpp"
+#include "../defines.hpp"
 #include "parser/tokenizer.hpp"
 #include "parser/TokenStream.hpp"
 #include "parser/parser.hpp"
@@ -14,7 +15,7 @@
 // ------------------------------------------------------------------------ //
 
 Configuration::Configuration( Node* serverNode )
-	: _host("localhost"), _port(80)
+	: _host("localhost"), _port(STANDARD_PORT_NO)
 {
 	try {
 		navigateNode(serverNode);
@@ -25,6 +26,8 @@ Configuration::Configuration( Node* serverNode )
 		}
 		throw;
 	}
+	if (locations.empty())
+		throw std::runtime_error("No location block specified");
 }
 
 Configuration::~Configuration()

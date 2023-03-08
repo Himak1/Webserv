@@ -7,23 +7,23 @@
 #include "parser/tokenizer.hpp"
 #include "parser/parser.hpp"
 
-static void	deleteAllElementsInVector( std::vector<Configuration*> vec )
+static void	deleteAllElementsInVector( vector<Configuration*> vec )
 {
-	for (std::vector<Configuration*>::iterator i = vec.begin(); i != vec.end(); ++i)
+	for (vector<Configuration*>::iterator i = vec.begin(); i != vec.end(); ++i)
 	{
 		delete *i;
 	}
 }
 
-static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
+static void	openConfigFile( ifstream& configFile, int argc, char **argv )
 {
 	if (argc >= 2)
 	{
 		configFile.open(argv[1]);
 		if (!configFile)
 		{
-			std::cerr << "ERROR: '" << argv[1] << "' could not be opened" << std::endl;
-			std::exit(1);
+			cerr << "ERROR: '" << argv[1] << "' could not be opened" << endl;
+			exit(1);
 		}
 	}
 	else
@@ -31,15 +31,15 @@ static void	openConfigFile( std::ifstream& configFile, int argc, char **argv )
 		configFile.open("default.conf");
 		if (!configFile)
 		{
-			std::cerr << "ERROR: default configuration file wasn't found" << std::endl;
-			std::exit(1);
+			cerr << "ERROR: default configuration file wasn't found" << endl;
+			exit(1);
 		}
 	}
 }
 
-static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
+static vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 {
-	std::vector<Configuration*>	serverConfigs;
+	vector<Configuration*>	serverConfigs;
 
 	for (NodeList::const_iterator i = ast->getChildrenBegin(); i != ast->getChildrenEnd(); ++i) {
 		serverConfigs.push_back(new Configuration(*i));
@@ -47,33 +47,37 @@ static std::vector<Configuration*>	convertASTtoConfigVector( Node* ast )
 	return (serverConfigs);	
 }
 
-std::vector<Configuration*>	initializeConfigurations( int argc, char **argv )
+vector<Configuration*>	initializeConfigurations( int argc, char **argv )
 {
 	TokenStream*	tokens;
 	Node*			ast;
-	std::ifstream	configFile;
+	ifstream	configFile;
 	bool			exceptionCaught;
 
 	exceptionCaught = false;
 	openConfigFile(configFile, argc, argv);
 	tokens = tokenizer(configFile);
+	if (tokens->isEmpty()) {
+		cerr << "ERROR: Empty config file" << endl;
+		exit(1);
+	}
 	ast = parser(*tokens);
 	if (!ast) {
 		delete tokens;
-		std::exit(1);
+		exit(1);
 	}
-	std::vector<Configuration*>	serverConfigs;
+	vector<Configuration*>	serverConfigs;
 	try {
 		serverConfigs = convertASTtoConfigVector(ast);
 	}
-	catch (std::exception& e) {
-		std::cerr << "ERROR: " << e.what() << '\n';
+	catch (exception& e) {
+		cerr << "ERROR: " << e.what() << '\n';
 		deleteAllElementsInVector(serverConfigs);
 		exceptionCaught = true;
 	}
 	delete ast;
 	delete tokens;
-	if (exceptionCaught) std::exit(1);
+	if (exceptionCaught) exit(1);
 	return (serverConfigs);
 }
 

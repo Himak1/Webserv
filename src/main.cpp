@@ -2,6 +2,7 @@
 #include "configure/configure.hpp"
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 
 void	failed_allocation_handler()
 {

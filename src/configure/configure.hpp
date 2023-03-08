@@ -4,6 +4,8 @@
 # include <vector>
 # include "Configuration.hpp"
 
-std::vector<Configuration*>	initializeConfigurations( int argc, char **argv );
+using namespace std;
+
+vector<Configuration*>	initializeConfigurations( int argc, char **argv );
 
 #endif

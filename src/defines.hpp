@@ -20,6 +20,7 @@
 // TCPServer defines
 # define POLL_TIMEOUT 200	 
 # define BUFFER_SIZE 1100
+# define STANDARD_PORT_NO 4242
 
 // CGI defines
 # define MAX_BUFFERSIZE_CGI 420000
