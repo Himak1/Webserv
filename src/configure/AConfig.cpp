@@ -24,7 +24,7 @@ ErrorPage::~ErrorPage()
 //	AConfig Constructors & Destructors	//
 
 AConfig::AConfig()
-	: _uploadStore("/"), _clientMaxBodySize(UINT_MAX), _redirectCode(0)
+	: _clientMaxBodySize(UINT_MAX), _redirectCode(0)
 {
 }
 

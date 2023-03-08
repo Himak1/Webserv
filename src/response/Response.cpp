@@ -155,7 +155,7 @@ string	Response::uploadFile()
 	string filename = safe_substr(input_path, input_path.rfind("/"), -1);
 	string upload_path = setUploadPath(filename);
 	writeStringToFile(file_data, upload_path);
-
+	cout << upload_path << endl;
 	if (isExistingFile(upload_path))
 		return "HTTP/1.1 201 Created\n";
 	return "HTTP/1.1 500 Internal Server Error\n";
@@ -166,10 +166,17 @@ string	Response::setUploadPath(string filename)
 	string upload_store;
 	if ((*_location).getUploadStore() != "")
  		upload_store = (*_location).getUploadStore();
-	else
+	else if (_config.getUploadStore() != "")
  		upload_store = _config.getUploadStore();
+	else
+		upload_store = "uploads";
+	
+	if (upload_store == "/")
+		upload_store = "uploads";
 
-	mkdir(upload_store.c_str(), 0777);
+	if (upload_store != _config.getRoot())
+		mkdir(upload_store.c_str(), 0777);
+
 	return upload_store + filename;
 }
 

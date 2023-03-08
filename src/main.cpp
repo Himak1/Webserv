@@ -19,6 +19,7 @@ int main(int argc, char **argv)
 	set_new_handler(&failed_allocation_handler);
 	
 	vector<Configuration*>	serverConfigs = initializeConfigurations(argc, argv);
+	// cout << *serverConfigs.front() << endl;
 	TCPServer server(serverConfigs);
 
 	return 0;
