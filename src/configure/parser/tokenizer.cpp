@@ -30,8 +30,6 @@ void	initMap( map<string, int>& tokenMap )
 	tokenMap["}"]				= T_BRACKET_CLOSE;
 	tokenMap[";"]				= T_SEMICOLON;
 	tokenMap["#"]				= T_HASHTAG;
-	tokenMap["$"]				= T_DOLLAR;
-	tokenMap["~"]				= T_HOME_DIR;
 }
 
 int	checkTokenType( const TokenMap& tokenMap, const string& token )
