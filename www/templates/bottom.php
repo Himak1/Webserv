@@ -1,10 +1,4 @@
 		<div id="bottom">
-			<h3 class="">BASIC CHECKS</h3>
-			<div class="column">
-				<a class="item" href="/telnet">telnet</a>
-				<a class="item" href="/curl">curl</a>
-			</div>
-			
 			<h3 class="">PAGES</h3>
 			<div class="column">
 				<a class="item" href="/index.html">index.html</a>
@@ -30,7 +24,7 @@
 			<div class="column">
 				<a class="item" href="/form_get">form (get)</a>
 				<a class="item" href="/form_post">form (post)</a>
-				<a class="item" href="/upload_files">uploaded files</a>
+				<a class="item" href="/curl">curl</a>
 			</div>
 
 			<h3 class="">BONUS</h3>
