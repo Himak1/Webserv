@@ -63,8 +63,7 @@ list<string>	splitLineByDelimiters( string line )
 		ending = line.find_first_of(" \t\v;#", start);
 		if (ending - start != 0)
 			words.push_back(line.substr(start, ending - start));
-		else if (line[start] == ';')
-		{
+		else if (line[start] == ';') {
 			words.push_back(line.substr(start, ending - start + 1));
 			ending++;
 			start = ending;

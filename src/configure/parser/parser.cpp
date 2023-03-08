@@ -52,9 +52,7 @@ Node*	parseIndex( TokenStream& tokensToParse )
 	tokensToParse.moveToNextToken();
 	newNode = new Node(N_INDEX);
 	while (!tokensToParse.isEmpty() && tokensToParse.getTokenType() == T_STRING)
-	{
 		acceptAndCreateTerminal(tokensToParse, newNode);
-	}
 	if (!accept(tokensToParse, T_SEMICOLON))
 		return (deleteNewNode(newNode));
 	return (newNode);
@@ -112,8 +110,7 @@ Node*	parseServer( TokenStream& tokensToParse )
 	newNode = new Node(N_SERVER);
 	while (blockIsOpen(tokensToParse, status))
 	{
-		switch (tokensToParse.getTokenType())
-		{
+		switch (tokensToParse.getTokenType()) {
 			case T_SERVER_NAME:
 				status = newNode->addChild(parseServerName(tokensToParse));
 				break;
@@ -158,8 +155,9 @@ Node*	parser( TokenStream& tokensToParse )
 	Node*	ast;
 
 	ast = new Node(AST);
-	while (tokensToParse.isEmpty() == false && expect(tokensToParse, T_SERVER))
-	{
+	while (tokensToParse.isEmpty() == false) {
+		if (!expect(tokensToParse, T_SERVER))
+			return (deleteNewNode(ast));
 		if (ast->addChild(parseServer(tokensToParse)) == 0)
 			return (deleteNewNode(ast));
 	}

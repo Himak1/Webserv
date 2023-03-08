@@ -9,8 +9,7 @@ bool	blockIsOpen( TokenStream& tokensToParse, int& status )
 {
 	if (status == 0)
 		return (false);
-	if (tokensToParse.isEmpty())
-	{
+	if (tokensToParse.isEmpty()) {
 		status = 0;
 		printIncompleteBlock();
 		return (false);
@@ -22,8 +21,7 @@ bool	blockIsOpen( TokenStream& tokensToParse, int& status )
 
 bool	acceptAndCreateTerminal( TokenStream& tokensToParse, Node* node)
 {
-	if (expect(tokensToParse, T_STRING))
-	{
+	if (expect(tokensToParse, T_STRING)) {
 		node->addChild(new Node(TERMINAL, tokensToParse.getTokenString()));
 		tokensToParse.moveToNextToken();
 		return (true);
@@ -46,9 +44,7 @@ Node*	deleteNewNode( Node* newNode )
 bool	accept( TokenStream& tokensToParse, int expectedToken )
 {
 	if (expect(tokensToParse, expectedToken) == false)
-	{
 		return (false);
-	}
 	tokensToParse.moveToNextToken();
 	return (true);
 }
@@ -68,13 +64,11 @@ void	printUnexpectedChar( TokenStream& tokensToParse )
 
 bool	expect( TokenStream& tokensToParse, int expectedToken )
 {
-	if (tokensToParse.isEmpty())
-	{
+	if (tokensToParse.isEmpty()) {
 		printIncompleteBlock();
 		return (false);
 	}
-	else if (tokensToParse.getTokenType() != expectedToken)
-	{
+	else if (tokensToParse.getTokenType() != expectedToken) {
 		printUnexpectedChar(tokensToParse);
 		return (false);
 	}
