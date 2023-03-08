@@ -15,11 +15,11 @@ namespace http
 {
 
 typedef struct s_socket {
-	unsigned int		socket_address_len;
-	struct sockaddr_in	socket_address_info;
-	string			server_message;
-	string			client_request;
-	unsigned int		config_idx;
+	unsigned int			socket_address_len;
+	struct sockaddr_in		socket_address_info;
+	string					server_message;
+	string					client_request;
+	unsigned int			config_idx;
 }	t_socket;
 
 class TCPServer
@@ -34,24 +34,24 @@ private:
 	vector<Configuration*>	_configList;
 	vector<struct pollfd>	_pollFds;			
 	vector<t_socket>		_socketInfo;
-	class Request				_request;
+	class Request			_request;
 
-	unsigned int				_nbListeningSockets;
-	bool						_isServerRunning;
+	unsigned int			_nbListeningSockets;
+	bool					_isServerRunning;
 
 			// SERVER SETUP
-	void						setListeningSockets();
-	void						setFileDescrOptions(int);
-	void						setSocketStruct(t_socket *, int, string);
+	void					setListeningSockets();
+	void					setFileDescrOptions(int);
+	void					setSocketStruct(t_socket *, int, string);
 
 			// SERVER LOOP + EVENTS
-	void 						startPolling();
-	void						lookupActiveSocket();
- 	void						newConnection(int);
-	void						receiveRequest(int);
-	void						sendResponse(int);
-	void						closeConnection(int);
-	bool						serverMsgIsEmpty(int);
+	void 					startPolling();
+	void					lookupActiveSocket();
+ 	void					newConnection(int);
+	void					receiveRequest(int);
+	void					sendResponse(int);
+	void					closeConnection(int);
+	bool					serverMsgIsEmpty(int);
 
 
 			// PRIVATE EXCEPTIONS

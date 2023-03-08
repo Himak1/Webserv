@@ -15,7 +15,7 @@ struct ErrorPage
 	~ErrorPage();
 
 	const int			code;
-	const string	page;
+	const string		page;
 };
 
 class AConfig

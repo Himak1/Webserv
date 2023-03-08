@@ -40,7 +40,7 @@ class Node
 		~Node();
 
 		int							getNodeType() const;
-		string					getTerminal() const;
+		string						getTerminal() const;
 		NodeList::const_iterator	getChildrenBegin() const;
 		NodeList::const_iterator	getChildrenEnd() const;
 		int							addChild( Node* newNode );

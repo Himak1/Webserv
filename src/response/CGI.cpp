@@ -203,8 +203,6 @@ void	CGI::addToEnv(string value, int i)
 
 void	CGI::freeEnv()
 {
-	// if (_request.getEnv().empty())
-	// 	return ;
 	for (size_t i = 0; _env[i]; i++)
 		delete[] _env[i];
 	delete[] _env;
