@@ -17,20 +17,10 @@
 
 using namespace std;
 
-void logStartupMessage(struct sockaddr_in _socketAddress)
-{
-	ostringstream ss;
-
-	ss	<< "Listening on PORT: "
-		<< ntohs(_socketAddress.sin_port);
-	log_receive(ss.str());
-}
-
 namespace http
 {
 
 			// CONSTRUCTORS
-
 TCPServer::TCPServer(vector<Configuration*> configList) :
 		_configList(configList),
 		_nbListeningSockets(0)
@@ -46,76 +36,9 @@ TCPServer::TCPServer(vector<Configuration*> configList) :
 }
 
 			// DESTRUCTORS
-
 TCPServer::~TCPServer()
 {
 	cout << "Closed server" << endl;
-}
-			
-			// SETUP SERVER
-void	TCPServer::setListeningSockets()
-{
-	struct pollfd	poll_fd;
-	t_socket		listener;
-	int				re_use = 1, i = 0;
-
-	for (vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
-		ft_memset(&listener, 0, sizeof(listener));
-
-		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (poll_fd.fd == -1)
-			throw SockCreateFail();	
-		if (setsockopt(poll_fd.fd, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1)
-			throw SockOptionsFail();
-
-		setSocketStruct(&listener, (*it)->getPort(), (*it)->getHost());
-
-		if (bind(poll_fd.fd, (struct sockaddr*)&listener.socket_address_info, sizeof(listener.socket_address_info)) == -1)
-			throw SockBindingFail();
-		if (listen(poll_fd.fd, SOMAXCONN) == -1)
-			throw ListenFail();
-		if (fcntl(poll_fd.fd, F_SETFL, O_NONBLOCK) == -1)
-			throw SockNoBlock();
-
-		listener.socket_address_len = sizeof(listener.socket_address_info);
-
-		poll_fd.events = POLLIN;
-		_socketInfo.push_back(listener);
-		_pollFds.push_back(poll_fd);
-		_nbListeningSockets++;
-
-		logStartupMessage(_socketInfo[i].socket_address_info);
-	}
-}
-
-void	TCPServer::setSocketStruct(t_socket *listener, int port, string host)
-{
-	struct addrinfo 	setup, *result;
-	int					status;
-	ft_memset(&setup, 0, sizeof setup);
-	setup.ai_family = AF_INET;
-	setup.ai_socktype = SOCK_STREAM;
-
-	string po = convertToString(port);
-	if ((status = getaddrinfo(&host[0], &po[0], &setup, &result)) != 0) {
-        cerr << gai_strerror(status) << endl;;
-        exit(1);
-    }
-	struct sockaddr_in *ipv4 = (struct sockaddr_in *)result->ai_addr;
-	listener->socket_address_info = *ipv4;
-	freeaddrinfo(result);
-}
-
-void	TCPServer::setFileDescrOptions(int file_descr)
-{
-	int	re_use = 1;
-
-	if (fcntl(file_descr, F_SETFL, O_NONBLOCK) == -1)
-		throw SockNoBlock();
-	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEADDR, &re_use, sizeof(re_use)) == -1) 
-		throw SockOptionsFail();			
-	if (setsockopt(file_descr, SOL_SOCKET, SO_REUSEPORT, &re_use, sizeof(re_use)) == -1) 
-		throw SockOptionsFail();
 }
 
 			// SERVER LOOP
@@ -131,6 +54,7 @@ void	TCPServer::startPolling()
 	}	
 }
 
+			//	SERVER EVENT HANDLING
 void	TCPServer::lookupActiveSocket()
 {
 	unsigned int i;
@@ -156,7 +80,6 @@ void	TCPServer::lookupActiveSocket()
 	}	
 }
 
-			//	SERVER EVENT HANDLING
 void 	TCPServer::receiveRequest(int idx)
 {
 	char buff[BUFFER_SIZE] = {0};
@@ -203,7 +126,7 @@ void 	TCPServer::sendResponse(int idx)
 		_pollFds[idx].events = POLLOUT;
 }
 
-void TCPServer::newConnection(int idx)
+void 	TCPServer::newConnection(int idx)
 {
 	struct pollfd	new_pollfd;
 	t_socket		new_socket;
@@ -230,12 +153,4 @@ void	TCPServer::closeConnection(int idx)
 	_socketInfo.erase(_socketInfo.begin() + idx);
 }
 
-bool	TCPServer::serverMsgIsEmpty(int idx)
-{
-	if (_socketInfo[idx].server_message.empty())
-		return true;
-	else
-		return false;	
-}
-
-} // namespace http
+} // namespace 
