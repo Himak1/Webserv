@@ -54,7 +54,7 @@ string 	Response::getMessage()
 void	Response::setFilePath()
 {
 	if ((*_location).getAlias() != "") {
-		_filepath = (*_location).getAlias();
+		_filepath = _config.getRoot() + (*_location).getAlias();
 		_extension = parseExtension(_filepath);
 		return;
 	}
@@ -277,11 +277,6 @@ string Response::returnErrorPage()
 
 string Response::createErrorHTML()
 {
-	// if (!isExistingFile(_filepath)) {
-	// 	_status = NOT_FOUND;
-	// 	return returnErrorPage();
-	// }
-
 	string meta  = "";
 	string url = (*_location).getRedirectURI();
 	if (_status == MOVED_PERMANENTLY || _status == FOUND)

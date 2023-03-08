@@ -19,7 +19,7 @@ using namespace std;
 
 void logStartupMessage(struct sockaddr_in _socketAddress)
 {
-	std::ostringstream ss;
+	ostringstream ss;
 
 	ss	<< "Listening on PORT: "
 		<< ntohs(_socketAddress.sin_port);
@@ -31,15 +31,15 @@ namespace http
 
 			// CONSTRUCTORS
 
-TCPServer::TCPServer(std::vector<Configuration*> configList) :
+TCPServer::TCPServer(vector<Configuration*> configList) :
 		_configList(configList),
 		_nbListeningSockets(0)
 {
 	try {
 		setListeningSockets();
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-		std::exit(EXIT_FAILURE);
+	} catch (exception& e) {
+		cout << e.what() << endl;
+		exit(EXIT_FAILURE);
 	}	
 	_isServerRunning = true;
 	startPolling();
@@ -49,7 +49,7 @@ TCPServer::TCPServer(std::vector<Configuration*> configList) :
 
 TCPServer::~TCPServer()
 {
-	std::cout << "Closed server" << std::endl;
+	cout << "Closed server" << endl;
 }
 			
 			// SETUP SERVER
@@ -59,7 +59,7 @@ void	TCPServer::setListeningSockets()
 	t_socket		listener;
 	int				re_use = 1, i = 0;
 
-	for (std::vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
+	for (vector<Configuration*>::iterator it = _configList.begin(); it != _configList.end(); it++, i++) {
 		ft_memset(&listener, 0, sizeof(listener));
 
 		poll_fd.fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -88,7 +88,7 @@ void	TCPServer::setListeningSockets()
 	}
 }
 
-void	TCPServer::setSocketStruct(t_socket *listener, int port, std::string host)
+void	TCPServer::setSocketStruct(t_socket *listener, int port, string host)
 {
 	struct addrinfo 	setup, *result;
 	int					status;
@@ -96,12 +96,10 @@ void	TCPServer::setSocketStruct(t_socket *listener, int port, std::string host)
 	setup.ai_family = AF_INET;
 	setup.ai_socktype = SOCK_STREAM;
 
-	std::string po;
-	po = to_string(port);					/// mag niet! C+11, justin vragen om port als char* /string
-
+	string po = convertToString(port);
 	if ((status = getaddrinfo(&host[0], &po[0], &setup, &result)) != 0) {
         cerr << gai_strerror(status) << endl;;
-        std::exit(1);
+        exit(1);
     }
 	struct sockaddr_in *ipv4 = (struct sockaddr_in *)result->ai_addr;
 	listener->socket_address_info = *ipv4;
@@ -143,8 +141,8 @@ void	TCPServer::lookupActiveSocket()
 		else {
 			try {
 				newConnection(i);	
-			} catch (std::exception& e) {
-				std::cout << e.what() << std::endl;
+			} catch (exception& e) {
+				cout << e.what() << endl;
 			}	
 		}
 	}
@@ -194,7 +192,7 @@ void 	TCPServer::sendResponse(int idx)
 	
 	bytes_send = write(_pollFds[idx].fd, _socketInfo[idx].server_message.c_str(), _socketInfo[idx].server_message.size());
 	if (bytes_send < 0)
-		std::cerr << "Send error on socket " << idx << std::endl;
+		cerr << "Send error on socket " << idx << endl;
 	if (bytes_send <= 0)
 		closeConnection(idx);
 
