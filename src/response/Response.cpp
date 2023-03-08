@@ -51,56 +51,6 @@ string 	Response::getMessage()
 }
 
 // PRIVATE FUNCTIONS
-void	Response::setFilePath()
-{
-	if ((*_location).getAlias() != "") {
-		_filepath = _config.getRoot() + (*_location).getAlias();
-		_extension = parseExtension(_filepath);
-		return;
-	}
-
-	bool is_undefined_extension = _request.getMethod() != "DELETE"
-									&& (*_location).getRedirect() == 0
-									&& _extension == "";
-
-	if (is_undefined_extension) {	
-		if (tryAndSetExtension(".html")) 				return;
-		if (tryAndSetExtension(".htm")) 				return;
-		if (tryAndSetExtension(".php")) 				return;
-		if (tryAndSetExtension(".py")) 					return;
-		if (searchIndexFiles((*_location).indexFiles)) 	return;
-		if (searchIndexFiles(_config.indexFiles)) 		return;
-	}
-	_filepath = _config.getRoot() + _request.getURI();
-}
-
-bool	Response::tryAndSetExtension(string extension)
-{
-	_filepath = _config.getRoot() + _request.getURI() + extension;
-	if (isExistingFile(_filepath)) {
-		_extension = extension;
-		return true;
-	}
-	return false;
-}
-
-bool	Response::searchIndexFiles(list<string> index_files)
-{
-	_status = OK;
-	list<string>::iterator it = index_files.begin();
-	while (it != index_files.end()) {
-		_filepath = _config.getRoot() + _request.getURI() + "/" + *it;
-		if (isExistingFile(_filepath)) {
-			_extension = parseExtension(_filepath);
-			return true;
-		}
-		++it;
-	}
-	if (it == index_files.end())
-		_status = NOT_FOUND;
-	return false;
-}
-
 void	Response::setLocation()
 {
 	string target = _config.getRoot() + _request.getURI();
@@ -176,9 +126,6 @@ int		Response::setStatus()
 	else if (_config.getClientMaxBodySize() != UINT_MAX)
 		is_too_large_entity		= _request.getPostBodySize() > _config.getClientMaxBodySize();
 
-	// cout << "(*_location).getClientMaxBodySize() " <<(*_location).getClientMaxBodySize() << endl;
-	// cout << "_config.getClientMaxBodySize() " <<_config.getClientMaxBodySize() << endl;
-
 	bool is_page_not_found			= _status == NOT_FOUND
 									&& _extension != ".png"
 									&& _extension != ".jpg"
@@ -186,9 +133,6 @@ int		Response::setStatus()
 									&& _extension != ".css";
 	bool is_correct_HTTP			= _request.getHTTPVersion() != "HTTP/1.1";
 	bool is_redirect				= (*_location).getRedirect() != 0;
-	// cout << "(*_location).getRedirect() " << (*_location).getRedirect() << endl;
-	// cout << "is_redirect " <<is_redirect << endl;
-
 	bool is_unsupported_type		= _content_types.find(_extension) == _content_types.end();
 
 	if (is_page_not_found)			return NOT_FOUND;

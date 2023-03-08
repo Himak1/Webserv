@@ -112,22 +112,22 @@ unsigned int	AConfig::convertNodeToUInt( Node* node )
 {
 	NodeList::const_iterator	i = node->getChildrenBegin();
 	std::string					numberString;
-	unsigned long				output;															// jonathan
+	unsigned long				output;
 
 	numberString = (*i)->getTerminal();
 	output = strtoul(numberString.c_str(), NULL, 10);
 	
-	if (errno == ERANGE) 																		// jonathan
-		throw std::runtime_error("client_max_body_size: unsigned long overflow");				// jonathan
-	if (output > UINT_MAX)																		// jonathan
-		throw std::runtime_error("client_max_body_size: unsigned int overflow");				// jonathan
+	if (errno == ERANGE)
+		throw std::runtime_error("unsigned long overflow");
+	if (output > UINT_MAX)
+		throw std::runtime_error("unsigned int overflow");
 
 	if (output == 0 && numberString != "0")
 		throw std::runtime_error("cannot convert parameter to number");
 	for (int it = 1; it < static_cast<int>(numberString.size()); it++) {
 		if (!isdigit(numberString[it])) throw std::runtime_error("cannot convert parameter to number");
 	}
-	return ((unsigned int) output);																// jonathan
+	return ((unsigned int) output);
 }
 
 void	AConfig::convertIndexFiles( Node* node )
